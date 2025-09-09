@@ -1,0 +1,6 @@
+vcpkg
+vcpkg_installed
+cmake-build-debug
+
+.idea
+.vscode

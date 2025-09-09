@@ -11,6 +11,8 @@ find_package(glad CONFIG REQUIRED)
 
 add_executable(main
     main.cpp
+    managers/shader_manager.cpp
+    managers/shader_manager.h
 )
 
 target_link_libraries(main PRIVATE

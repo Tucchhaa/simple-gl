@@ -13,6 +13,8 @@ add_executable(main
     main.cpp
     managers/shader_manager.cpp
     managers/shader_manager.h
+    entities/shader_program.cpp
+    entities/shader_program.h
 )
 
 target_link_libraries(main PRIVATE

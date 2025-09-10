@@ -7,17 +7,9 @@
 
 #include <glad/glad.h>
 
+#include "../entities/shader_program.h"
+
 namespace SimpleGL {
-
-struct ShaderProgram {
-    int ID;
-
-    std::string label;
-
-    ShaderProgram(const int id, std::string lbl):
-        ID(id),
-        label(std::move(lbl)) {}
-};
 
 class ShaderManager {
 public:

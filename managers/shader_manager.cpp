@@ -75,7 +75,7 @@ std::shared_ptr<ShaderProgram> ShaderManager::createShaderProgram(
 
 void ShaderManager::dispose() {
     for (const auto& shaderProgram : this->m_shaderPrograms) {
-        glDeleteProgram(shaderProgram->ID);
+        glDeleteProgram(shaderProgram->Id);
     }
 
     this->m_shaderPrograms.clear();

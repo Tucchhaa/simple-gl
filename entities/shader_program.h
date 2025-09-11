@@ -13,6 +13,9 @@ struct ShaderParam {
     int location;
     int size;
     GLenum type;
+
+    ShaderParam(int location, int size, GLenum type)
+        : location(location), size(size), type(type) {}
 };
 
 class ShaderProgram {
@@ -25,6 +28,8 @@ public:
 
     void use();
 
+    void log() const;
+
     int getAttribLocation(const std::string& name);
 
     void setTexture(const std::string& name, unsigned int textureId);
@@ -33,9 +38,9 @@ public:
     void setUniform(const std::string& name, int x);
 
 private:
-    std::unordered_map<std::string, ShaderParam> m_uniformsMap;
+    std::unordered_map<std::string, std::shared_ptr<ShaderParam>> m_uniformsMap;
 
-    std::unordered_map<std::string, ShaderParam> m_attribsMap;
+    std::unordered_map<std::string, std::shared_ptr<ShaderParam>> m_attribsMap;
 
     int m_boundTexturesCount;
 
@@ -44,6 +49,10 @@ private:
     void processUniforms();
 
     void processAttribs();
+
+    std::shared_ptr<ShaderParam> getUniform(const std::string& name);
+
+    std::shared_ptr<ShaderParam> getAttrib(const std::string& name);
 
     static int getTextureUnitLocation(int uniformLocation) ;
 };

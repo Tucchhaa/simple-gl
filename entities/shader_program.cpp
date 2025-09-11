@@ -19,8 +19,28 @@ void ShaderProgram::use() {
     m_boundTexturesCount = 0;
 }
 
+void ShaderProgram::log() const {
+    std::cout << "Structure of shader program \"" + label + "\":\n";
+
+    for (const auto& element : m_uniformsMap) {
+        std::cout
+            << "UNIFORM: "
+            << "name: " << element.first << ", "
+            << "location: " << element.second->location
+            << "\n";
+    }
+
+    for (const auto& element : m_attribsMap) {
+        std::cout
+            << "ATTRIB: "
+            << "name: " << element.first << ", "
+            << "location: " << element.second->location
+            << "\n";
+    }
+}
+
 int ShaderProgram::getAttribLocation(const std::string &name) {
-    return this->m_attribsMap[name].location;
+    return getAttrib(name)->location;
 }
 
 void ShaderProgram::setTexture(const std::string& name, unsigned int textureId) {
@@ -35,11 +55,11 @@ void ShaderProgram::setTexture(const std::string& name, unsigned int textureId) 
 }
 
 void ShaderProgram::setUniform(const std::string &name, float x, float y, float z, float w) {
-    glUniform4f(this->m_uniformsMap[name].location, x, y, z, w);
+    glUniform4f(getUniform(name)->location, x, y, z, w);
 }
 
 void ShaderProgram::setUniform(const std::string &name, int x) {
-    glUniform1i(this->m_uniformsMap[name].location, x);
+    glUniform1i(getUniform(name)->location, x);
 }
 
 void ShaderProgram::processProgram() {
@@ -62,7 +82,7 @@ void ShaderProgram::processUniforms() {
         const int location = glGetUniformLocation(this->Id, nameBuffer);
 
         const std::string name(nameBuffer, nameLength);
-        const ShaderParam resource = { location, size, type };
+        const auto resource = std::make_shared<ShaderParam>(location, size, type);
 
         this->m_uniformsMap[name] = resource;
     }
@@ -83,10 +103,49 @@ void ShaderProgram::processAttribs() {
         const int location = glGetAttribLocation(this->Id, nameBuffer);
 
         const std::string name(nameBuffer, nameLength);
-        const ShaderParam resource = { location, size, type };
+        const auto resource = std::make_shared<ShaderParam>(location, size, type);
 
         this->m_attribsMap[name] = resource;
     }
+}
+
+std::shared_ptr<ShaderParam> ShaderProgram::getUniform(const std::string &name) {
+    const auto iterator = m_uniformsMap.find(name);
+
+    if (iterator == m_uniformsMap.end()) {
+        std::ostringstream msg;
+
+        msg
+            << "SHADER PROGRAM: "
+            << "\"" << label << "\": "
+            << "Uniform with name \"" << name << "\" does not exist\n";
+
+        log();
+
+        throw std::runtime_error(msg.str());
+    }
+
+    return iterator->second;
+}
+
+
+std::shared_ptr<ShaderParam> ShaderProgram::getAttrib(const std::string &name) {
+    const auto iterator = m_attribsMap.find(name);
+
+    if (iterator == m_attribsMap.end()) {
+        std::ostringstream msg;
+
+        msg
+            << "SHADER PROGRAM: "
+            << "\"" << label << "\": "
+            << "Attribute with name \"" << name << "\" does not exist\n";
+
+        log();
+
+        throw std::runtime_error(msg.str());
+    }
+
+    return iterator->second;
 }
 
 int ShaderProgram::getTextureUnitLocation(int uniformLocation) {

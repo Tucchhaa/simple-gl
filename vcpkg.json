@@ -4,6 +4,7 @@
   "dependencies": [
     "glad",
     "glfw3",
-    "stb"
+    "stb",
+    "glm"
   ]
 }

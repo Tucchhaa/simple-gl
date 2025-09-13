@@ -18,6 +18,8 @@ add_executable(main
     managers/shader_manager.h
     entities/window.cpp
     entities/window.h
+    entities/input.cpp
+    entities/input.h
     entities/shader_program.cpp
     entities/shader_program.h
     helpers/errors.cpp

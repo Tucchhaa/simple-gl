@@ -18,12 +18,12 @@ WindowManager::~WindowManager() {
     glfwTerminate();
 }
 
-std::shared_ptr<Window> WindowManager::createWindow(const std::string& title, int width, int height) {
-    GLFWwindow* glfwWindow = glfwCreateWindow(width, height, title.c_str(), nullptr, nullptr);
+std::shared_ptr<Window> WindowManager::createWindow(const std::string& label, int screenWidth, int height) {
+    GLFWwindow* glfwWindow = glfwCreateWindow(screenWidth, height, label.c_str(), nullptr, nullptr);
 
     if (glfwWindow == nullptr) {
         glfwTerminate();
-        throw createGLFWWindowFailed(title);
+        throw createGLFWWindowFailed(label);
     }
 
     glfwMakeContextCurrent(glfwWindow);
@@ -31,14 +31,21 @@ std::shared_ptr<Window> WindowManager::createWindow(const std::string& title, in
     if (!gladLoadGLLoader(reinterpret_cast<GLADloadproc>(glfwGetProcAddress)))
     {
         glfwTerminate();
-        throw GLADLoadFailed(title);
+        throw GLADLoadFailed(label);
     }
 
-    auto window = std::make_shared<Window>(glfwWindow);
+    auto* window_ptr = new Window(label, glfwWindow);
+    std::shared_ptr<Window> window(window_ptr);
 
-    this->m_windowsMap[title] = window;
+    this->m_windowsMap[label] = window;
 
     return window;
+}
+
+void WindowManager::destroyWindow(std::shared_ptr<Window>& window) {
+    glfwDestroyWindow(window->m_glfwWindow);
+    m_windowsMap.erase(window->label);
+    window.reset();
 }
 
 void WindowManager::init() {

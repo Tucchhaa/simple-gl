@@ -6,9 +6,9 @@
 
 namespace SimpleGL {
 
-std::runtime_error createGLFWWindowFailed(const std::string& title);
+std::runtime_error createGLFWWindowFailed(const std::string& label);
 
-std::runtime_error GLADLoadFailed(const std::string& title);
+std::runtime_error GLADLoadFailed(const std::string& label);
 
 std::runtime_error createShaderProgramFailed(const std::string& label);
 

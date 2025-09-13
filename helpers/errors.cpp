@@ -4,23 +4,23 @@
 
 namespace SimpleGL {
 
-std::runtime_error createGLFWWindowFailed(const std::string &title) {
+std::runtime_error createGLFWWindowFailed(const std::string &label) {
     std::ostringstream msg;
 
     msg
         << "WINDOW: "
-        << "\"" << title << "\": "
+        << "\"" << label << "\": "
         << "error occurred when creating window\n";
 
     return std::runtime_error(msg.str());
 }
 
-std::runtime_error GLADLoadFailed(const std::string &title) {
+std::runtime_error GLADLoadFailed(const std::string &label) {
     std::ostringstream msg;
 
     msg
         << "WINDOW: "
-        << "\"" << title << "\": "
+        << "\"" << label << "\": "
         << "error occurred when loading glad\n";
 
     return std::runtime_error(msg.str());

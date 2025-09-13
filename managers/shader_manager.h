@@ -5,8 +5,6 @@
 #include <filesystem>
 #include <memory>
 
-#include <glad/glad.h>
-
 #include "../entities/shader_program.h"
 
 namespace SimpleGL {

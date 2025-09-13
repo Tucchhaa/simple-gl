@@ -12,8 +12,12 @@ find_package(glm CONFIG REQUIRED)
 
 add_executable(main
     main.cpp
+    managers/window_manager.cpp
+    managers/window_manager.h
     managers/shader_manager.cpp
     managers/shader_manager.h
+    entities/window.cpp
+    entities/window.h
     entities/shader_program.cpp
     entities/shader_program.h
 )

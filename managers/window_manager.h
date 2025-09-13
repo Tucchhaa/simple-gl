@@ -14,7 +14,9 @@ public:
 
     ~WindowManager();
 
-    std::shared_ptr<Window> createWindow(const std::string& title, int width, int height);
+    std::shared_ptr<Window> createWindow(const std::string& label, int screenWidth, int height);
+
+    void destroyWindow(std::shared_ptr<Window>& window);
 
 private:
     std::unordered_map<std::string, std::shared_ptr<Window>> m_windowsMap{};

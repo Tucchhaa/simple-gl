@@ -8,6 +8,8 @@ TODO: This code contains memory leaks on error paths
 #include <sstream>
 #include <iostream>
 
+#include "../helpers/errors.h"
+
 namespace SimpleGL {
 
 ShaderManager::~ShaderManager() {
@@ -23,14 +25,7 @@ std::shared_ptr<ShaderProgram> ShaderManager::createShaderProgram(
     const unsigned int shaderProgramID = glCreateProgram();
 
     if (shaderProgramID == 0) {
-        std::ostringstream msg;
-
-        msg
-            << "SHADER MANAGER: "
-            << "Shader program \"" << label << "\": "
-            << "Failed to create shader program\n";
-
-        throw std::runtime_error(msg.str());
+        throw createShaderProgramFailed(label);
     }
 
     const auto vertexShaderFilepath = this->m_resourcesDirPath / vertexShaderFile;
@@ -51,16 +46,7 @@ std::shared_ptr<ShaderProgram> ShaderManager::createShaderProgram(
         char log[512];
         glGetProgramInfoLog(shaderProgramID, 512, nullptr, log);
 
-        std::ostringstream msg;
-
-        msg
-            << "SHADER MANAGER: "
-            << "Shader program \"" << label << "\": "
-            << "Shader linking error: "
-            << log
-            << "\n";
-
-        throw std::runtime_error(msg.str());
+        throw shaderProgramLinkingFailed(label, log);
     }
 
     glDeleteShader(vertexShaderID);
@@ -89,16 +75,7 @@ unsigned int ShaderManager::createShader(
     const unsigned int shaderID = glCreateShader(shaderType);
 
     if (shaderID == 0) {
-        std::ostringstream msg;
-
-        msg
-            << "SHADER MANAGER: "
-            << "Shader program \"" << label << "\": "
-            << "Failed to create shader of type "
-            << shaderType
-            << "\n";
-
-        throw std::runtime_error(msg.str());
+        throw createShaderFailed(label, shaderType);
     }
 
     const std::string vertexShaderCode = readShaderFile(shaderPath);
@@ -136,16 +113,7 @@ void ShaderManager::compileShader(
         char log[512];
         glGetShaderInfoLog(shaderID, 512, nullptr, log);
 
-        std::ostringstream msg;
-
-        msg
-            << "SHADER MANAGER: "
-            << "Shader program \"" << label << "\": "
-            << "Shader compilation error: "
-            << log
-            << "\n";
-
-        throw std::runtime_error(msg.str());
+        throw shaderCompilationFailed(label, log);
     }
 }
 

@@ -2,6 +2,8 @@
 
 #include <sstream>
 
+#include "../helpers/errors.h"
+
 namespace SimpleGL {
 
 WindowManager::WindowManager() {
@@ -21,15 +23,7 @@ std::shared_ptr<Window> WindowManager::createWindow(const std::string& title, in
 
     if (glfwWindow == nullptr) {
         glfwTerminate();
-
-        std::ostringstream msg;
-
-        msg
-            << "WINDOW: "
-            << "\"" << title << "\": "
-            << "error occurred when creating window\n";
-
-        throw std::runtime_error(msg.str());
+        throw createGLFWWindowFailed(title);
     }
 
     glfwMakeContextCurrent(glfwWindow);
@@ -37,15 +31,7 @@ std::shared_ptr<Window> WindowManager::createWindow(const std::string& title, in
     if (!gladLoadGLLoader(reinterpret_cast<GLADloadproc>(glfwGetProcAddress)))
     {
         glfwTerminate();
-
-        std::ostringstream msg;
-
-        msg
-            << "WINDOW: "
-            << "\"" << title << "\": "
-            << "error occurred when loading glad\n";
-
-        throw std::runtime_error(msg.str());
+        throw GLADLoadFailed(title);
     }
 
     auto window = std::make_shared<Window>(glfwWindow);

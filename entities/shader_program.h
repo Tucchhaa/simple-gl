@@ -4,6 +4,7 @@
 #include <string>
 
 #include <glad/glad.h>
+#include <glm/glm.hpp>
 
 namespace SimpleGL
 {
@@ -20,9 +21,9 @@ struct ShaderParam {
 
 class ShaderProgram {
 public:
-    int Id;
+    const int Id;
 
-    std::string label;
+    const std::string label;
 
     ShaderProgram(int id, std::string lbl);
 
@@ -36,6 +37,7 @@ public:
 
     void setUniform(const std::string& name, float x, float y, float z, float w);
     void setUniform(const std::string& name, int x);
+    void setUniform(const std::string &name, const glm::mat4& matrix);
 
 private:
     std::unordered_map<std::string, std::shared_ptr<ShaderParam>> m_uniformsMap;

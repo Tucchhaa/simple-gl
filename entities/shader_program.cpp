@@ -1,6 +1,11 @@
 #include "shader_program.h"
+
 #include <iostream>
 #include <sstream>
+
+#include <glm/gtc/type_ptr.hpp>
+
+#include "../helpers/errors.h"
 
 namespace SimpleGL {
 
@@ -62,6 +67,10 @@ void ShaderProgram::setUniform(const std::string &name, int x) {
     glUniform1i(getUniform(name)->location, x);
 }
 
+void ShaderProgram::setUniform(const std::string &name, const glm::mat4 &matrix) {
+    glUniformMatrix4fv(getUniform(name)->location, 1, false, glm::value_ptr(matrix));
+}
+
 void ShaderProgram::processProgram() {
     this->processUniforms();
     this->processAttribs();
@@ -113,16 +122,7 @@ std::shared_ptr<ShaderParam> ShaderProgram::getUniform(const std::string &name) 
     const auto iterator = m_uniformsMap.find(name);
 
     if (iterator == m_uniformsMap.end()) {
-        std::ostringstream msg;
-
-        msg
-            << "SHADER PROGRAM: "
-            << "\"" << label << "\": "
-            << "Uniform with name \"" << name << "\" does not exist\n";
-
-        log();
-
-        throw std::runtime_error(msg.str());
+        throw shaderUniformGetterFailed(label, name);
     }
 
     return iterator->second;
@@ -133,16 +133,8 @@ std::shared_ptr<ShaderParam> ShaderProgram::getAttrib(const std::string &name) {
     const auto iterator = m_attribsMap.find(name);
 
     if (iterator == m_attribsMap.end()) {
-        std::ostringstream msg;
-
-        msg
-            << "SHADER PROGRAM: "
-            << "\"" << label << "\": "
-            << "Attribute with name \"" << name << "\" does not exist\n";
-
         log();
-
-        throw std::runtime_error(msg.str());
+        throw shaderAttribGetterFailed(label, name);
     }
 
     return iterator->second;

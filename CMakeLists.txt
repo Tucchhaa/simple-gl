@@ -20,6 +20,8 @@ add_executable(main
     entities/window.h
     entities/shader_program.cpp
     entities/shader_program.h
+    helpers/errors.cpp
+    helpers/errors.h
 )
 
 target_link_libraries(main PRIVATE

@@ -1,24 +1,29 @@
 #include "window.h"
 
+#include <memory>
 #include <string>
 #include <utility>
 
 namespace SimpleGL {
 
-Window::Window(std::string  label, GLFWwindow *glfwWindow):
-    label(std::move(label)),
-    m_glfwWindow(glfwWindow)
-{
-    auto* input_ptr = new Input(this, glfwWindow);
-    m_input = std::shared_ptr<Input>(input_ptr);
+std::shared_ptr<Window> Window::create(const std::string &label, GLFWwindow *glfwWindow) {
+    auto instance = std::shared_ptr<Window>(new Window(label, glfwWindow));
+
+    instance->m_input = Input::create(instance);
 
     int frameWidth, frameHeight;
     glfwGetFramebufferSize(glfwWindow, &frameWidth, &frameHeight);
-    m_frameWidth = frameWidth;
-    m_frameHeight = frameHeight;
+    instance->m_frameWidth = frameWidth;
+    instance->m_frameHeight = frameHeight;
 
-    glfwSetWindowUserPointer(glfwWindow, this);
-    setCallbacks();
+    glfwSetWindowUserPointer(glfwWindow, instance.get());
+    instance->setCallbacks();
+
+    return instance;
+}
+
+Window::~Window() {
+    glfwDestroyWindow(m_glfwWindow);
 }
 
 void Window::setCallbacks() const {

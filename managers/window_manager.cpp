@@ -6,8 +6,12 @@
 
 namespace SimpleGL {
 
-WindowManager::WindowManager() {
+std::shared_ptr<WindowManager> WindowManager::create() {
     init();
+
+    auto instance = std::shared_ptr<WindowManager>(new WindowManager());
+
+    return instance;
 }
 
 WindowManager::~WindowManager() {
@@ -34,8 +38,7 @@ std::shared_ptr<Window> WindowManager::createWindow(const std::string& label, in
         throw GLADLoadFailed(label);
     }
 
-    auto* window_ptr = new Window(label, glfwWindow);
-    std::shared_ptr<Window> window(window_ptr);
+    auto window = Window::create(label, glfwWindow);
 
     this->m_windowsMap[label] = window;
 
@@ -43,17 +46,21 @@ std::shared_ptr<Window> WindowManager::createWindow(const std::string& label, in
 }
 
 void WindowManager::destroyWindow(std::shared_ptr<Window>& window) {
-    glfwDestroyWindow(window->m_glfwWindow);
     m_windowsMap.erase(window->label);
     window.reset();
 }
 
 void WindowManager::init() {
-    glfwInit();
-    glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 4);
-    glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 1);
-    glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
-    glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE);
+    static bool isInited = false;
+
+    if (!isInited) {
+        isInited = true;
+        glfwInit();
+        glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 4);
+        glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 1);
+        glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
+        glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE);
+    }
 }
 
 }

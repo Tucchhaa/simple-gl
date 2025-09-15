@@ -1,6 +1,7 @@
 #pragma once
 
 #include <string>
+#include <utility>
 #include <vector>
 #include <filesystem>
 #include <memory>
@@ -11,8 +12,7 @@ namespace SimpleGL {
 
 class ShaderManager {
 public:
-    explicit ShaderManager(std::filesystem::path resourcesDirPath):
-        m_resourcesDirPath(std::move(resourcesDirPath)) {}
+    static std::shared_ptr<ShaderManager> create(const std::filesystem::path& resourcesDirPath);
 
     ~ShaderManager();
 
@@ -28,6 +28,9 @@ private:
     const std::filesystem::path m_resourcesDirPath;
 
     std::vector<std::shared_ptr<ShaderProgram>> m_shaderPrograms;
+
+    explicit ShaderManager(std::filesystem::path resourcesDirPath):
+        m_resourcesDirPath(std::move(resourcesDirPath)) {}
 
     static unsigned int createShader(
         const std::string& label,

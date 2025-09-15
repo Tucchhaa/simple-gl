@@ -2,6 +2,7 @@
 
 #include <memory>
 #include <string>
+#include <utility>
 
 #include <glad/glad.h>
 #include <GLFW/glfw3.h>
@@ -11,10 +12,14 @@
 namespace SimpleGL {
 
 class Window {
-    friend class WindowManager;
-
 public:
     const std::string label;
+
+    static std::shared_ptr<Window> create(const std::string &label, GLFWwindow* glfwWindow);
+
+    ~Window();
+
+    GLFWwindow* glfwWindow() const { return m_glfwWindow; }
 
     void makeCurrent() const;
 
@@ -43,14 +48,15 @@ public:
     static float time() { return static_cast<float>(glfwGetTime()); }
 
 private:
-    GLFWwindow* m_glfwWindow;
+    GLFWwindow* m_glfwWindow = nullptr;
+
     std::shared_ptr<Input> m_input;
 
-    int m_frameWidth;
-    int m_frameHeight;
+    int m_frameWidth = 0;
+    int m_frameHeight = 0;
     bool m_isCursorPositionFixed = false;
 
-    explicit Window(std::string  label, GLFWwindow* glfwWindow);
+    Window(std::string label, GLFWwindow* glfwWindow): label(std::move(label)), m_glfwWindow(glfwWindow) {}
 
     void setCallbacks() const;
 };

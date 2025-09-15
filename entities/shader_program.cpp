@@ -4,22 +4,22 @@
 #include <sstream>
 
 #include <glm/gtc/type_ptr.hpp>
+#include <utility>
 
 #include "../helpers/errors.h"
 
 namespace SimpleGL {
 
-ShaderProgram::ShaderProgram(const int id, std::string lbl):
-    Id(id),
-    label(std::move(lbl)
-) {
-    m_boundTexturesCount = 0;
+std::shared_ptr<ShaderProgram> ShaderProgram::create(unsigned int id, std::string label) {
+    auto instance = std::shared_ptr<ShaderProgram>(new ShaderProgram(id, std::move(label)));
 
-    this->processProgram();
+    instance->processProgram();
+
+    return instance;
 }
 
 void ShaderProgram::use() {
-    glUseProgram(this->Id);
+    glUseProgram(id);
 
     m_boundTexturesCount = 0;
 }
@@ -78,7 +78,7 @@ void ShaderProgram::processProgram() {
 
 void ShaderProgram::processUniforms() {
     int uniformsCount = 0;
-    glGetProgramiv(this->Id, GL_ACTIVE_UNIFORMS, &uniformsCount);
+    glGetProgramiv(id, GL_ACTIVE_UNIFORMS, &uniformsCount);
 
     for (int i=0; i < uniformsCount; i++) {
         constexpr GLsizei nameBufferSize = 256;
@@ -87,8 +87,8 @@ void ShaderProgram::processUniforms() {
         GLenum type;
         char nameBuffer[nameBufferSize];
 
-        glGetActiveUniform(this->Id, i, nameBufferSize, &nameLength, &size, &type, nameBuffer);
-        const int location = glGetUniformLocation(this->Id, nameBuffer);
+        glGetActiveUniform(id, i, nameBufferSize, &nameLength, &size, &type, nameBuffer);
+        const int location = glGetUniformLocation(id, nameBuffer);
 
         const std::string name(nameBuffer, nameLength);
         const auto resource = std::make_shared<ShaderParam>(location, size, type);
@@ -99,7 +99,7 @@ void ShaderProgram::processUniforms() {
 
 void ShaderProgram::processAttribs() {
     int attribsCount = 0;
-    glGetProgramiv(this->Id, GL_ACTIVE_ATTRIBUTES, &attribsCount);
+    glGetProgramiv(id, GL_ACTIVE_ATTRIBUTES, &attribsCount);
 
     for (int i=0; i < attribsCount; i++) {
         constexpr GLsizei nameBufferSize = 256;
@@ -108,8 +108,8 @@ void ShaderProgram::processAttribs() {
         GLenum type;
         char nameBuffer[nameBufferSize];
 
-        glGetActiveAttrib(this->Id, i, nameBufferSize, &nameLength, &size, &type, nameBuffer);
-        const int location = glGetAttribLocation(this->Id, nameBuffer);
+        glGetActiveAttrib(id, i, nameBufferSize, &nameLength, &size, &type, nameBuffer);
+        const int location = glGetAttribLocation(id, nameBuffer);
 
         const std::string name(nameBuffer, nameLength);
         const auto resource = std::make_shared<ShaderParam>(location, size, type);

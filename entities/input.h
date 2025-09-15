@@ -1,17 +1,19 @@
 #pragma once
 
-#include <glad/glad.h>
+#include <memory>
+
 #include <glm/glm.hpp>
-#include <GLFW/glfw3.h>
 
 namespace SimpleGL {
 
 class Window;
 
 class Input {
-    friend class Window;
-
 public:
+    static std::shared_ptr<Input> create(const std::weak_ptr<Window>& window);
+
+    void process();
+
     glm::vec2 axisVec2() const;
 
     glm::vec2 mouseDelta() const;
@@ -23,9 +25,7 @@ public:
     float getDeltaTime() const { return m_deltaTime; }
 
 private:
-    /// No need to delete these pointers. They are disposed in corresponding Window
-    Window* m_window;
-    GLFWwindow* m_glfwWindow;
+    std::weak_ptr<Window> m_window;
 
     float m_lastFrameTime = 0;
     float m_deltaTime = 0;
@@ -38,9 +38,7 @@ private:
     double m_mouseX = 0;
     double m_mouseY = 0;
 
-    Input(Window* window, GLFWwindow* glfwWindow);
-
-    void process();
+    explicit Input(const std::weak_ptr<Window> &window): m_window(window) {};
 
     void reset();
 
@@ -49,6 +47,8 @@ private:
     void updateDeltaTime();
 
     void setCursorPositionToCenter() const;
+
+    std::shared_ptr<Window> window() const { return m_window.lock(); }
 };
 
 }

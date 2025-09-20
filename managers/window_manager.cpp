@@ -40,6 +40,10 @@ std::shared_ptr<Window> WindowManager::createWindow(const std::string& label, in
 
     auto window = Window::create(label, glfwWindow);
 
+    if (m_mainWindow == nullptr) {
+        m_mainWindow = window;
+    }
+
     this->m_windowsMap[label] = window;
 
     return window;

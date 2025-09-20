@@ -22,7 +22,7 @@ public:
 
     bool isMouseButtonPressed(int button) const;
 
-    float getDeltaTime() const { return m_deltaTime; }
+    float deltaTime() const { return m_deltaTime; }
 
 private:
     std::weak_ptr<Window> m_window;

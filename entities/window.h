@@ -27,7 +27,7 @@ public:
 
     void afterFrameRendered() const;
 
-    std::shared_ptr<Input> input() { return m_input; }
+    std::shared_ptr<Input>& input() { return m_input; }
 
     void close() const;
 

@@ -12,6 +12,8 @@ find_package(glm CONFIG REQUIRED)
 
 add_executable(main
     main.cpp
+    managers/engine.cpp
+    managers/engine.h
     managers/window_manager.cpp
     managers/window_manager.h
     managers/shader_manager.cpp
@@ -22,6 +24,16 @@ add_executable(main
     entities/input.h
     entities/shader_program.cpp
     entities/shader_program.h
+    entities/node.cpp
+    entities/node.h
+    entities/components/component.cpp
+    entities/components/component.h
+    entities/components/transform.cpp
+    entities/components/transform.h
+    entities/components/camera.cpp
+    entities/components/camera.h
+    entities/components/free_controller.cpp
+    entities/components/free_controller.h
     helpers/errors.cpp
     helpers/errors.h
 )

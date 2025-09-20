@@ -8,7 +8,7 @@
 
 namespace SimpleGL {
 
-class WindowManager : std::enable_shared_from_this<WindowManager> {
+class WindowManager : public std::enable_shared_from_this<WindowManager> {
 public:
     static std::shared_ptr<WindowManager> create();
 
@@ -18,7 +18,11 @@ public:
 
     void destroyWindow(std::shared_ptr<Window>& window);
 
+    std::shared_ptr<Window>& mainWindow() { return m_mainWindow; }
+
 private:
+    std::shared_ptr<Window> m_mainWindow;
+
     std::unordered_map<std::string, std::shared_ptr<Window>> m_windowsMap{};
 
     WindowManager() = default;

@@ -14,8 +14,9 @@ std::shared_ptr<Input> Input::create(const std::weak_ptr<Window>& window) {
 
 void Input::process() {
     updateCursorPosition();
+    updateDeltaTime();
 
-    if(window()->isFocused()) {
+    if(!window()->isFocused()) {
         reset();
         return;
     }

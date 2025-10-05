@@ -15,9 +15,9 @@ class Node : public std::enable_shared_from_this<Node> {
 public:
     friend Component;
 
-    const std::string name;
+    std::string name;
 
-    static std::shared_ptr<Node> create(const std::string& name);
+    static std::shared_ptr<Node> create(const std::string& name = "Node");
 
     template <typename T>
     std::shared_ptr<T> getComponent() {

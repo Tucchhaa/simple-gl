@@ -8,18 +8,23 @@ TODO: This code contains memory leaks on error paths
 #include <sstream>
 #include <iostream>
 
+#include "engine.h"
 #include "../helpers/errors.h"
 
 namespace SimpleGL {
 
-std::shared_ptr<ShaderManager> ShaderManager::create(const std::filesystem::path& resourcesDirPath) {
-    auto instance = std::shared_ptr<ShaderManager>(new ShaderManager(resourcesDirPath));
+std::shared_ptr<ShaderManager> ShaderManager::create() {
+    auto instance = std::shared_ptr<ShaderManager>(new ShaderManager());
 
     return instance;
 }
 
 ShaderManager::~ShaderManager() {
-    this->dispose();
+    for (const auto& shaderProgram : this->m_shaderPrograms) {
+        glDeleteProgram(shaderProgram->id);
+    }
+
+    this->m_shaderPrograms.clear();
 }
 
 std::shared_ptr<ShaderProgram> ShaderManager::createShaderProgram(
@@ -34,10 +39,10 @@ std::shared_ptr<ShaderProgram> ShaderManager::createShaderProgram(
         throw createShaderProgramFailed(label);
     }
 
-    const auto vertexShaderFilepath = this->m_resourcesDirPath / vertexShaderFile;
+    const auto vertexShaderFilepath = Engine::instance().getResourcePath(vertexShaderFile);
     const auto vertexShaderID = createShader(label, vertexShaderFilepath, GL_VERTEX_SHADER);
 
-    const auto fragmentShaderFilepath = this->m_resourcesDirPath / fragmentShaderFile;
+    const auto fragmentShaderFilepath = Engine::instance().getResourcePath(fragmentShaderFile);
     const auto fragmentShaderID = createShader(label, fragmentShaderFilepath, GL_FRAGMENT_SHADER);
 
     glAttachShader(shaderProgramID, vertexShaderID);
@@ -63,14 +68,6 @@ std::shared_ptr<ShaderProgram> ShaderManager::createShaderProgram(
     this->m_shaderPrograms.push_back(shaderProgram);
 
     return shaderProgram;
-}
-
-void ShaderManager::dispose() {
-    for (const auto& shaderProgram : this->m_shaderPrograms) {
-        glDeleteProgram(shaderProgram->id);
-    }
-
-    this->m_shaderPrograms.clear();
 }
 
 unsigned int ShaderManager::createShader(

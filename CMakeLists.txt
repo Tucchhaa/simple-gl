@@ -9,6 +9,7 @@ project(main)
 find_package(glfw3 CONFIG REQUIRED)
 find_package(glad CONFIG REQUIRED)
 find_package(glm CONFIG REQUIRED)
+find_package(assimp CONFIG REQUIRED)
 
 add_executable(main
     main.cpp
@@ -18,6 +19,8 @@ add_executable(main
     managers/window_manager.h
     managers/shader_manager.cpp
     managers/shader_manager.h
+    managers/mesh_manager.cpp
+    managers/mesh_manager.h
     entities/window.cpp
     entities/window.h
     entities/input.cpp
@@ -26,6 +29,8 @@ add_executable(main
     entities/shader_program.h
     entities/node.cpp
     entities/node.h
+    entities/mesh_data.cpp
+    entities/mesh_data.h
     entities/components/component.cpp
     entities/components/component.h
     entities/components/transform.cpp
@@ -34,6 +39,8 @@ add_executable(main
     entities/components/camera.h
     entities/components/free_controller.cpp
     entities/components/free_controller.h
+    entities/components/mesh.cpp
+    entities/components/mesh.h
     helpers/errors.cpp
     helpers/errors.h
 )
@@ -42,6 +49,7 @@ target_link_libraries(main PRIVATE
     glfw
     glad::glad
     glm::glm
+    assimp::assimp
 )
 
 

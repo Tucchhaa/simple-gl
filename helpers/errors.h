@@ -22,4 +22,8 @@ std::runtime_error shaderUniformGetterFailed(const std::string& label, const std
 
 std::runtime_error shaderAttribGetterFailed(const std::string& label, const std::string& name);
 
+std::runtime_error meshLoadingFailed(const std::string& resource, const std::string& error);
+
+std::runtime_error meshShaderNotSet(const std::string& meshName);
+
 }

@@ -12,7 +12,7 @@ namespace SimpleGL {
 
 class ShaderManager {
 public:
-    static std::shared_ptr<ShaderManager> create(const std::filesystem::path& resourcesDirPath);
+    static std::shared_ptr<ShaderManager> create();
 
     ~ShaderManager();
 
@@ -22,15 +22,10 @@ public:
         const std::string& label
     );
 
-    void dispose();
-
 private:
-    const std::filesystem::path m_resourcesDirPath;
-
     std::vector<std::shared_ptr<ShaderProgram>> m_shaderPrograms;
 
-    explicit ShaderManager(std::filesystem::path resourcesDirPath):
-        m_resourcesDirPath(std::move(resourcesDirPath)) {}
+    ShaderManager() = default;
 
     static unsigned int createShader(
         const std::string& label,

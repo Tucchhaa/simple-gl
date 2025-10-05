@@ -98,4 +98,25 @@ std::runtime_error shaderAttribGetterFailed(const std::string &label, const std:
     return std::runtime_error(msg.str());
 }
 
+std::runtime_error meshLoadingFailed(const std::string &resource, const std::string &error) {
+    std::ostringstream msg;
+
+    msg
+        << "MESH MANAGER: "
+        << "\"" << resource << "\": "
+        << "Loading failed: " << error << "\n";
+
+    return std::runtime_error(msg.str());
+}
+
+std::runtime_error meshShaderNotSet(const std::string &meshName) {
+    std::ostringstream msg;
+
+    msg
+        << "MESH COMPONENT: "
+        << "\"" << meshName << "\": "
+        << "Render failed: ShaderProgram is nullptr\n";
+
+    return std::runtime_error(msg.str());
+}
 }

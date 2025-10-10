@@ -10,6 +10,8 @@ namespace SimpleGL {
 
 class Transform : public Component {
 public:
+    static std::shared_ptr<Transform> getGlobal();
+
     Transform(const std::weak_ptr<Node> &node, const std::string &name): Component(node, name) {}
 
     static std::shared_ptr<Transform> create(const std::shared_ptr<Node> &node, const std::string& name = "Tranform") {
@@ -35,7 +37,7 @@ public:
     glm::vec3 direction() const { return m_direction; }
     glm::mat4 transformMatrix() const { return m_transformMatrix; }
 
-    void translate(const glm::vec3& vector, const std::shared_ptr<Transform>& transform = nullptr);
+    void translate(const glm::vec3& vector);
 
     void rotate(const glm::quat& rotation, const std::shared_ptr<Transform>& transform = nullptr);
 

@@ -46,8 +46,6 @@ private:
 
     void updateDeltaTime();
 
-    void setCursorPositionToCenter() const;
-
     std::shared_ptr<Window> window() const { return m_window.lock(); }
 };
 

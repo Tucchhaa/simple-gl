@@ -1,6 +1,12 @@
 #include "transform.h"
 
+#include "../../managers/engine.h"
+
 namespace SimpleGL {
+
+std::shared_ptr<Transform> Transform::getGlobal() {
+    return Engine::instance().rootNode()->transform();
+}
 
 void Transform::setPosition(float x, float y, float z) { m_position = glm::vec3(x, y, z); }
 void Transform::setPosition(const glm::vec3 position) { m_position = position; }
@@ -10,9 +16,8 @@ void Transform::setScale(float s) { m_scale = glm::vec3(s); }
 void Transform::setScale(float x, float y, float z) { m_scale = glm::vec3(x, y, z); }
 void Transform::setScale(const glm::vec3 scale) { m_scale = scale; }
 
-void Transform::translate(const glm::vec3& vector, const std::shared_ptr<Transform>& transform) {
-    const glm::vec3 displacement = m_orientation * vector;
-    m_position += displacement;
+void Transform::translate(const glm::vec3& vector) {
+    m_position += m_orientation * vector;
 }
 
 void Transform::rotate(const glm::quat& rotation, const std::shared_ptr<Transform>& transform) {

@@ -22,8 +22,8 @@ WindowManager::~WindowManager() {
     glfwTerminate();
 }
 
-std::shared_ptr<Window> WindowManager::createWindow(const std::string& label, int screenWidth, int height) {
-    GLFWwindow* glfwWindow = glfwCreateWindow(screenWidth, height, label.c_str(), nullptr, nullptr);
+std::shared_ptr<Window> WindowManager::createWindow(const std::string& label, int screenWidth, int screenHeight) {
+    GLFWwindow* glfwWindow = glfwCreateWindow(screenWidth, screenHeight, label.c_str(), nullptr, nullptr);
 
     if (glfwWindow == nullptr) {
         glfwTerminate();

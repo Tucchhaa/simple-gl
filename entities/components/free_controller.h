@@ -6,7 +6,9 @@ namespace SimpleGL {
 
 class FreeController : public Component {
 public:
-    float speed = 3.0f;
+    const float speed = 3.0f;
+
+    const float rotationSpeed = 2.0f;
 
     FreeController(const std::weak_ptr<Node> &node, const std::string &name): Component(node, name) {}
 
@@ -14,7 +16,10 @@ public:
         return base_create<FreeController>(node, name);
     }
 
-    void handleInput() const;
+    void handleInput();
+
+private:
+    bool m_canRotate = false;
 };
 
 }

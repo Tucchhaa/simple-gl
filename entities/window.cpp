@@ -2,7 +2,6 @@
 
 #include <memory>
 #include <string>
-#include <utility>
 
 namespace SimpleGL {
 
@@ -12,9 +11,15 @@ std::shared_ptr<Window> Window::create(const std::string &label, GLFWwindow *glf
     instance->m_input = Input::create(instance);
 
     int frameWidth, frameHeight;
+    float xScale, yScale;
+
     glfwGetFramebufferSize(glfwWindow, &frameWidth, &frameHeight);
+    glfwGetWindowContentScale(glfwWindow, &xScale, &yScale);
+
     instance->m_frameWidth = frameWidth;
     instance->m_frameHeight = frameHeight;
+    instance->m_screenWidth = static_cast<int>(static_cast<float>(frameWidth) / xScale);
+    instance->m_screenHeight = static_cast<int>(static_cast<float>(frameHeight) / xScale);
 
     glfwSetWindowUserPointer(glfwWindow, instance.get());
     instance->setCallbacks();
@@ -34,6 +39,13 @@ void Window::setCallbacks() const {
         glViewport(0, 0, frameWidth, frameHeight);
     };
     glfwSetFramebufferSizeCallback(m_glfwWindow, resizeCallback);
+}
+
+void Window::setCursorPositionToCenter() const {
+    const float screenWidth = static_cast<float>(m_screenWidth);
+    const float screenHeight = static_cast<float>(m_screenHeight);
+
+    glfwSetCursorPos(glfwWindow(), screenWidth / 2.f, screenHeight / 2.f);
 }
 
 void Window::makeCurrent() const {

@@ -1,7 +1,5 @@
 #include "input.h"
 
-#include <utility>
-
 #include "window.h"
 
 namespace SimpleGL {
@@ -26,8 +24,8 @@ void Input::process() {
     m_xPositivePressed = isKeyPressed(GLFW_KEY_D);
     m_xNegativePressed = isKeyPressed(GLFW_KEY_A);
 
-    if (window()->isCursorPositionFixed()) {
-        setCursorPositionToCenter();
+    if (window()->isCursorPositionFixed) {
+        window()->setCursorPositionToCenter();
     }
 }
 
@@ -47,8 +45,11 @@ glm::vec2 Input::axisVec2() const {
 }
 
 glm::vec2 Input::mouseDelta() const {
-    auto xMouseDelta = static_cast<float>(m_mouseX - window()->frameWidth() / 2.0);
-    auto yMouseDelta = static_cast<float>(m_mouseY - window()->frameHeight() / 2.0);
+    const float screenWidth = static_cast<float>(window()->screenWidth());
+    const float screenHeight = static_cast<float>(window()->screenHeight());
+
+    auto xMouseDelta = (m_mouseX - screenWidth / 2.0f) / screenWidth;
+    auto yMouseDelta = (m_mouseY - screenHeight / 2.0f) / screenHeight;
 
     return { xMouseDelta, yMouseDelta };
 }
@@ -70,13 +71,6 @@ void Input::updateCursorPosition() {
 void Input::updateDeltaTime() {
     m_deltaTime = Window::time() - m_lastFrameTime;
     m_lastFrameTime = Window::time();
-}
-
-void Input::setCursorPositionToCenter() const {
-    const auto xPosition = window()->frameWidth() / 2;
-    const auto yPosition = window()->frameHeight() / 2;
-
-    glfwSetCursorPos(window()->glfwWindow(), xPosition, yPosition);
 }
 
 }

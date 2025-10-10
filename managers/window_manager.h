@@ -14,7 +14,7 @@ public:
 
     ~WindowManager();
 
-    std::shared_ptr<Window> createWindow(const std::string& label, int screenWidth, int height);
+    std::shared_ptr<Window> createWindow(const std::string& label, int screenWidth, int screenHeight);
 
     void destroyWindow(std::shared_ptr<Window>& window);
 

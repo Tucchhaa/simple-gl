@@ -44,8 +44,15 @@ void ShaderProgram::log() const {
     }
 }
 
-int ShaderProgram::getAttribLocation(const std::string &name) {
-    return getAttrib(name)->location;
+int ShaderProgram::getAttribLocation(const std::string &name, bool required) {
+    const int result = getAttrib(name)->location;
+
+    if (result == -1 && required) {
+        log();
+        throw shaderAttribGetterFailed(label, name);
+    }
+
+    return result;
 }
 
 void ShaderProgram::setTexture(const std::string& name, unsigned int textureId) {
@@ -61,6 +68,10 @@ void ShaderProgram::setTexture(const std::string& name, unsigned int textureId) 
 
 void ShaderProgram::setUniform(const std::string &name, float x, float y, float z, float w) {
     glUniform4f(getUniform(name)->location, x, y, z, w);
+}
+
+void ShaderProgram::setUniform(const std::string &name, float x, float y, float z) {
+    glUniform3f(getUniform(name)->location, x, y, z);
 }
 
 void ShaderProgram::setUniform(const std::string &name, int x) {
@@ -133,8 +144,7 @@ std::shared_ptr<ShaderParam> ShaderProgram::getAttrib(const std::string &name) {
     const auto iterator = m_attribsMap.find(name);
 
     if (iterator == m_attribsMap.end()) {
-        log();
-        throw shaderAttribGetterFailed(label, name);
+        return std::make_shared<ShaderParam>(-1, -1, -1);
     }
 
     return iterator->second;

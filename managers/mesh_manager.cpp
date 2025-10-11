@@ -63,5 +63,4 @@ std::shared_ptr<Node> MeshManager::createNode(const std::string &name, const std
     return node;
 }
 
-
 }

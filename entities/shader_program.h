@@ -31,11 +31,12 @@ public:
 
     void log() const;
 
-    int getAttribLocation(const std::string& name);
+    int getAttribLocation(const std::string& name, bool required = true);
 
     void setTexture(const std::string& name, unsigned int textureId);
 
     void setUniform(const std::string& name, float x, float y, float z, float w);
+    void setUniform(const std::string& name, float x, float y, float z);
     void setUniform(const std::string& name, int x);
     void setUniform(const std::string &name, const glm::mat4& matrix);
 

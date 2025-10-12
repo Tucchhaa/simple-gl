@@ -44,14 +44,8 @@ void ShaderProgram::log() const {
     }
 }
 
-int ShaderProgram::getAttribLocation(const std::string &name, bool required) {
+int ShaderProgram::getAttribLocation(const std::string &name) {
     const int result = getAttrib(name)->location;
-
-    if (result == -1 && required) {
-        log();
-        throw shaderAttribGetterFailed(label, name);
-    }
-
     return result;
 }
 
@@ -70,16 +64,38 @@ void ShaderProgram::setUniform(const std::string &name, float x, float y, float 
     glUniform4f(getUniform(name)->location, x, y, z, w);
 }
 
+void ShaderProgram::setUniform(const std::string &name, const glm::vec4 vector) {
+    setUniform(name, vector.x, vector.y, vector.z, vector.w);
+}
+
 void ShaderProgram::setUniform(const std::string &name, float x, float y, float z) {
     glUniform3f(getUniform(name)->location, x, y, z);
+}
+
+void ShaderProgram::setUniform(const std::string &name, const glm::vec3 vector) {
+    setUniform(name, vector.x, vector.y, vector.z);
 }
 
 void ShaderProgram::setUniform(const std::string &name, int x) {
     glUniform1i(getUniform(name)->location, x);
 }
 
+void ShaderProgram::setUniform(const std::string &name, float x) {
+    glUniform1f(getUniform(name)->location, x);
+}
+
 void ShaderProgram::setUniform(const std::string &name, const glm::mat4 &matrix) {
     glUniformMatrix4fv(getUniform(name)->location, 1, false, glm::value_ptr(matrix));
+}
+
+bool ShaderProgram::uniformExists(const std::string &name) {
+    const auto iterator = m_uniformsMap.find(name);
+    return iterator != m_uniformsMap.end();
+}
+
+bool ShaderProgram::attribExists(const std::string &name) {
+    const auto iterator = m_attribsMap.find(name);
+    return iterator != m_attribsMap.end();
 }
 
 void ShaderProgram::processProgram() {
@@ -144,7 +160,8 @@ std::shared_ptr<ShaderParam> ShaderProgram::getAttrib(const std::string &name) {
     const auto iterator = m_attribsMap.find(name);
 
     if (iterator == m_attribsMap.end()) {
-        return std::make_shared<ShaderParam>(-1, -1, -1);
+        log();
+        throw shaderAttribGetterFailed(label, name);
     }
 
     return iterator->second;

@@ -21,18 +21,18 @@ struct MeshData {
     const std::vector<float>& vertices() { return m_vertices; }
     int verticesSize() const { return sizeof(float) * m_vertices.size(); }
 
-    const std::vector<int>& indices() { return m_indices; }
+    const std::vector<unsigned int>& indices() { return m_indices; }
     int indicesSize() const { return sizeof(float) * m_indices.size(); }
 
-    int VBO() const { return m_VBO; }
-    int EBO() const { return m_EBO; }
+    unsigned int VBO() const { return m_VBO; }
+    unsigned int EBO() const { return m_EBO; }
 
     const std::vector<std::shared_ptr<MeshData>>& subMeshes() { return m_subMeshes; }
 
 private:
     std::vector<float> m_vertices;
 
-    std::vector<int> m_indices;
+    std::vector<unsigned int> m_indices;
 
     std::vector<std::shared_ptr<MeshData>> m_subMeshes{};
 
@@ -44,7 +44,7 @@ private:
 
     static void fillMeshData(const aiMesh* mesh, const std::shared_ptr<MeshData>& meshData);
 
-    static int calculateVertexSize(const aiMesh* mesh);
+    static unsigned int calculateVertexSize(const aiMesh* mesh);
 
     static void createBuffers(const std::shared_ptr<MeshData>& meshData);
 };

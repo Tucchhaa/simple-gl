@@ -31,14 +31,20 @@ public:
 
     void log() const;
 
-    int getAttribLocation(const std::string& name, bool required = true);
+    int getAttribLocation(const std::string& name);
 
     void setTexture(const std::string& name, unsigned int textureId);
 
     void setUniform(const std::string& name, float x, float y, float z, float w);
+    void setUniform(const std::string& name, glm::vec4 vector);
     void setUniform(const std::string& name, float x, float y, float z);
+    void setUniform(const std::string& name, glm::vec3 vector);
     void setUniform(const std::string& name, int x);
+    void setUniform(const std::string& name, float x);
     void setUniform(const std::string &name, const glm::mat4& matrix);
+
+    bool uniformExists(const std::string& name);
+    bool attribExists(const std::string& name);
 
 private:
     std::unordered_map<std::string, std::shared_ptr<ShaderParam>> m_uniformsMap;

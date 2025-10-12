@@ -53,7 +53,11 @@ private:
 
     std::function<void(const std::shared_ptr<ShaderProgram>& shaderProgram)> m_beforeDrawCallback;
 
-    unsigned int createVAO() const;
+    unsigned int m_attribOffset = 0;
+
+    unsigned int createVAO();
+
+    void enableVertexAttrib(const std::string& name, bool required, int size);
 };
 
 

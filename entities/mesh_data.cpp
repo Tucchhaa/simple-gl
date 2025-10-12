@@ -61,18 +61,24 @@ void MeshData::fillMeshData(const aiMesh *mesh, const std::shared_ptr<MeshData> 
     }
 
     const bool hasTextureCoords = mesh->HasTextureCoords(0);
+    const bool hasNormals = mesh->HasNormals();
 
-    const int vertexSize = calculateVertexSize(mesh);
-    const int numIndicesPerFace = mesh->mFaces[0].mNumIndices;
+    // TODO: support this cases
+    if (!hasTextureCoords || !hasNormals) {
+        throw std::runtime_error("Mesh does not have normals or texture coords. This case is not supported yet.");
+    }
 
-    const int verticesSize = vertexSize * mesh->mNumVertices;
-    const int indicesSize = mesh->mNumFaces * numIndicesPerFace;
+    const unsigned int vertexSize = calculateVertexSize(mesh);
+    const unsigned int numIndicesPerFace = mesh->mFaces[0].mNumIndices;
+
+    const unsigned int verticesSize = vertexSize * mesh->mNumVertices;
+    const unsigned int indicesSize = mesh->mNumFaces * numIndicesPerFace;
 
     meshData->m_vertices.resize(verticesSize);
     meshData->m_indices.resize(indicesSize);
 
     for (int i=0; i < mesh->mNumVertices; i++) {
-        const int offset = i * vertexSize;
+        const unsigned int offset = i * vertexSize;
 
         meshData->m_vertices.at(offset + 0) = mesh->mVertices[i].x;
         meshData->m_vertices.at(offset + 1) = mesh->mVertices[i].y;
@@ -82,11 +88,17 @@ void MeshData::fillMeshData(const aiMesh *mesh, const std::shared_ptr<MeshData> 
             meshData->m_vertices.at(offset + 3) = mesh->mTextureCoords[0][i].x;
             meshData->m_vertices.at(offset + 4) = mesh->mTextureCoords[0][i].y;
         }
+
+        if (hasNormals) {
+            meshData->m_vertices.at(offset + 5) = mesh->mNormals[i].x;
+            meshData->m_vertices.at(offset + 6) = mesh->mNormals[i].y;
+            meshData->m_vertices.at(offset + 7) = mesh->mNormals[i].z;
+        }
     }
 
     for (int i = 0; i < mesh->mNumFaces; i++) {
         for (int j = 0; j < numIndicesPerFace; j++) {
-            const int offset = i * numIndicesPerFace + j;
+            const unsigned int offset = i * numIndicesPerFace + j;
             meshData->m_indices[offset] = mesh->mFaces[i].mIndices[j];
         }
     }
@@ -94,8 +106,8 @@ void MeshData::fillMeshData(const aiMesh *mesh, const std::shared_ptr<MeshData> 
     createBuffers(meshData);
 }
 
-int MeshData::calculateVertexSize(const aiMesh *mesh) {
-    int result = 0;
+unsigned int MeshData::calculateVertexSize(const aiMesh *mesh) {
+    unsigned int result = 0;
 
     if (mesh->HasPositions()) {
         constexpr int positionComponent = 3;
@@ -105,6 +117,11 @@ int MeshData::calculateVertexSize(const aiMesh *mesh) {
     if (mesh->HasTextureCoords(0)) {
         constexpr int textureComponent = 2;
         result += textureComponent;
+    }
+
+    if (mesh->HasNormals()) {
+        constexpr int normalComponent = 3;
+        result += normalComponent;
     }
 
     return result;

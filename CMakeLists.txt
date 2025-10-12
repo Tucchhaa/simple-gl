@@ -41,6 +41,8 @@ add_executable(main
     entities/components/free_controller.h
     entities/components/mesh.cpp
     entities/components/mesh.h
+    entities/components/light.cpp
+    entities/components/light.h
     helpers/errors.cpp
     helpers/errors.h
 )

@@ -10,8 +10,8 @@ std::shared_ptr<Transform> Transform::getGlobal() {
 
 void Transform::setPosition(float x, float y, float z) { m_position = glm::vec3(x, y, z); }
 void Transform::setPosition(const glm::vec3 position) { m_position = position; }
-void Transform::setRotation(float w, float x, float y, float z) { m_orientation = glm::quat(w, x, y, z); }
-void Transform::setRotation(const glm::quat rotation) { m_orientation = rotation; }
+void Transform::setOrientation(float w, float x, float y, float z) { m_orientation = glm::quat(w, x, y, z); }
+void Transform::setOrientation(const glm::quat orientation) { m_orientation = orientation; }
 void Transform::setScale(float s) { m_scale = glm::vec3(s); }
 void Transform::setScale(float x, float y, float z) { m_scale = glm::vec3(x, y, z); }
 void Transform::setScale(const glm::vec3 scale) { m_scale = scale; }

@@ -46,14 +46,12 @@ public:
 
 private:
     unsigned int m_VAO = 0;
+    unsigned int m_attribOffset = 0;
 
     std::shared_ptr<MeshData> m_meshData;
-
     std::shared_ptr<ShaderProgram> m_shaderProgram;
 
     std::function<void(const std::shared_ptr<ShaderProgram>& shaderProgram)> m_beforeDrawCallback;
-
-    unsigned int m_attribOffset = 0;
 
     unsigned int createVAO();
 

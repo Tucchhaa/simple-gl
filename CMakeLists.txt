@@ -21,6 +21,8 @@ add_executable(main
     managers/shader_manager.h
     managers/mesh_manager.cpp
     managers/mesh_manager.h
+    managers/texture_manager.cpp
+    managers/texture_manager.h
     entities/window.cpp
     entities/window.h
     entities/input.cpp
@@ -31,6 +33,8 @@ add_executable(main
     entities/node.h
     entities/mesh_data.cpp
     entities/mesh_data.h
+    entities/texture.cpp
+    entities/texture.h
     entities/components/component.cpp
     entities/components/component.h
     entities/components/transform.cpp

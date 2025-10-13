@@ -17,16 +17,18 @@ std::shared_ptr<MeshData> MeshData::createFromScene(const aiScene *scene) {
 }
 
 std::shared_ptr<MeshData> MeshData::parseScene(const aiScene *scene) {
-    auto meshData = MeshData::create();
+    auto meshData = create();
 
     std::queue<std::pair<aiNode*, std::shared_ptr<MeshData>>> q;
     q.emplace(scene->mRootNode, meshData);
+
 
     while (!q.empty()) {
         const aiNode* currentAiNode = q.front().first;
         const auto currentMeshData = q.front().second;
 
         q.pop();
+        currentMeshData->m_name = currentAiNode->mName.C_Str();
 
         if (currentAiNode->mNumMeshes == 1) {
             const aiMesh* mesh = scene->mMeshes[currentAiNode->mMeshes[0]];
@@ -36,7 +38,7 @@ std::shared_ptr<MeshData> MeshData::parseScene(const aiScene *scene) {
             for (int i=0; i < currentAiNode->mNumMeshes; i++) {
                 const aiMesh* mesh = scene->mMeshes[currentAiNode->mMeshes[i]];
 
-                auto subMeshData = MeshData::create();
+                auto subMeshData = create();
                 currentMeshData->m_subMeshes.push_back(subMeshData);
 
                 fillMeshData(mesh, subMeshData);
@@ -45,7 +47,7 @@ std::shared_ptr<MeshData> MeshData::parseScene(const aiScene *scene) {
 
         for (int i=0; i < currentAiNode->mNumChildren; i++) {
             auto* node = currentAiNode->mChildren[i];
-            auto subMeshData = MeshData::create();
+            auto subMeshData = create();
 
             currentMeshData->m_subMeshes.push_back(subMeshData);
             q.emplace(node, subMeshData);

@@ -8,6 +8,7 @@ namespace SimpleGL {
 class WindowManager;
 class ShaderManager;
 class MeshManager;
+class TextureManager;
 class Window;
 class Input;
 class Node;
@@ -19,6 +20,7 @@ public:
     std::shared_ptr<WindowManager>& windowManager() { return m_windowManager; }
     std::shared_ptr<ShaderManager>& shaderManager() { return m_shaderManager; }
     std::shared_ptr<MeshManager>& meshManager() { return m_meshManager; }
+    std::shared_ptr<TextureManager>& textureManager() { return m_textureManager; }
     std::shared_ptr<Node>& rootNode() { return m_rootNode; }
 
     std::shared_ptr<Window>& mainWindow() const;
@@ -38,6 +40,7 @@ private:
     std::shared_ptr<WindowManager> m_windowManager;
     std::shared_ptr<ShaderManager> m_shaderManager;
     std::shared_ptr<MeshManager> m_meshManager;
+    std::shared_ptr<TextureManager> m_textureManager;
     std::shared_ptr<Node> m_rootNode;
 
     Engine();

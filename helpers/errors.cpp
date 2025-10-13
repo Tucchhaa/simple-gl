@@ -119,4 +119,16 @@ std::runtime_error meshShaderNotSet(const std::string &meshName) {
 
     return std::runtime_error(msg.str());
 }
+
+std::runtime_error unsupportedImageFormat(const std::string &resource) {
+    std::ostringstream msg;
+
+    msg
+        << "Texture: "
+        << "\"" << resource << "\": "
+        << "Unsupported image format\n";
+
+    return std::runtime_error(msg.str());
+}
+
 }

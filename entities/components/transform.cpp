@@ -36,7 +36,7 @@ void Transform::recalculate() {
 
     m_absolutePosition = parentTransform->m_absolutePosition + m_position;
     m_absoluteScale = parentTransform->m_absoluteScale * m_scale;
-    m_absoluteOrientation = parentTransform->m_absoluteOrientation * m_orientation;
+    m_absoluteOrientation = glm::normalize(parentTransform->m_absoluteOrientation * m_orientation);
 
     m_transformMatrix = calculateTransformMatrix();
     m_direction = m_absoluteOrientation * glm::vec3(0, 0, 1);

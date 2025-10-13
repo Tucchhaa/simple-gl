@@ -2,7 +2,7 @@
 
 uniform mat4 transform;
 uniform mat4 view;
-//uniform mat3 normalMatrix;
+uniform mat3 normalMatrix;
 uniform mat4 projection;
 
 in vec3 vPosition;

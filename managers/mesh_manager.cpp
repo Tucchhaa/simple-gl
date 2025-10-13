@@ -8,8 +8,7 @@
 #include <assimp/postprocess.h>
 
 namespace SimpleGL {
-
-std::shared_ptr<Node> MeshManager::loadMesh(const std::filesystem::path &path, const std::string &name) {
+std::shared_ptr<Node> MeshManager::getMesh(const std::filesystem::path &path, const std::string &name) {
     const auto resourcePath = Engine::instance().getResourcePath(path);
 
     if (auto cachedMesh = m_meshes.find(resourcePath); cachedMesh != m_meshes.end()) {

@@ -16,10 +16,11 @@ struct MeshData {
 
     static std::shared_ptr<MeshData> createFromScene(const aiScene* scene);
 
-    bool hasVertices() const { return !m_vertices.empty(); }
+    const std::string& name() { return m_name; }
 
     const std::vector<float>& vertices() { return m_vertices; }
     int verticesSize() const { return sizeof(float) * m_vertices.size(); }
+    bool hasVertices() const { return !m_vertices.empty(); }
 
     const std::vector<unsigned int>& indices() { return m_indices; }
     int indicesSize() const { return sizeof(float) * m_indices.size(); }
@@ -30,14 +31,14 @@ struct MeshData {
     const std::vector<std::shared_ptr<MeshData>>& subMeshes() { return m_subMeshes; }
 
 private:
-    std::vector<float> m_vertices;
+    std::string m_name;
 
+    std::vector<float> m_vertices;
     std::vector<unsigned int> m_indices;
 
     std::vector<std::shared_ptr<MeshData>> m_subMeshes{};
 
     unsigned int m_VBO = 0;
-
     unsigned int m_EBO = 0;
 
     static std::shared_ptr<MeshData> parseScene(const aiScene* scene);

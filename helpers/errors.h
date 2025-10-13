@@ -26,4 +26,6 @@ std::runtime_error meshLoadingFailed(const std::string& resource, const std::str
 
 std::runtime_error meshShaderNotSet(const std::string& meshName);
 
+std::runtime_error unsupportedImageFormat(const std::string& resource);
+
 }

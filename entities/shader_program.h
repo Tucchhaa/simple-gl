@@ -7,6 +7,8 @@
 #include <glm/glm.hpp>
 #include <utility>
 
+#include "texture.h"
+
 namespace SimpleGL
 {
 
@@ -33,7 +35,7 @@ public:
 
     int getAttribLocation(const std::string& name);
 
-    void setTexture(const std::string& name, unsigned int textureId);
+    void setTexture(const std::string& name, const std::shared_ptr<Texture>& texture);
 
     void setUniform(const std::string& name, float x, float y, float z, float w);
     void setUniform(const std::string& name, glm::vec4 vector);

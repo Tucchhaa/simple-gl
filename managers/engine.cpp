@@ -3,6 +3,7 @@
 #include "shader_manager.h"
 #include "window_manager.h"
 #include "mesh_manager.h"
+#include "texture_manager.h"
 #include "../entities/node.h"
 
 namespace SimpleGL {
@@ -19,6 +20,7 @@ Engine::Engine() {
     m_windowManager = WindowManager::create();
     m_shaderManager = ShaderManager::create();
     m_meshManager = MeshManager::create();
+    m_textureManager = TextureManager::create();
     m_rootNode = Node::create("ROOT");
 }
 

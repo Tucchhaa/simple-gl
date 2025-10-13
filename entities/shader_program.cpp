@@ -49,11 +49,12 @@ int ShaderProgram::getAttribLocation(const std::string &name) {
     return result;
 }
 
-void ShaderProgram::setTexture(const std::string& name, unsigned int textureId) {
+void ShaderProgram::setTexture(const std::string& name, const std::shared_ptr<Texture>& texture) {
     const int textureUnit = getTextureUnitLocation(m_boundTexturesCount);
 
     glActiveTexture(textureUnit);
-    glBindTexture(GL_TEXTURE_2D, textureId);
+    glBindTexture(GL_TEXTURE_2D, texture->textureId());
+    glBindSampler(m_boundTexturesCount, texture->samplerId());
 
     this->setUniform(name, m_boundTexturesCount);
 

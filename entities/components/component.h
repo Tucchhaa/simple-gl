@@ -9,8 +9,9 @@ namespace SimpleGL {
 
 class Transform;
 
-class Component {
+class Component : public std::enable_shared_from_this<Component> {
 public:
+    const int id;
     const std::string name;
 
     virtual ~Component() = default;
@@ -24,12 +25,21 @@ protected:
 
         node->addComponent(std::static_pointer_cast<Component>(instance));
 
+        std::static_pointer_cast<Component>(instance)->initialize();
+
         return instance;
     }
 
-    Component(const std::weak_ptr<Node> &node, std::string name): m_node(node), name(std::move(name)) {}
+    static int componentsCount;
+
+    Component(const std::weak_ptr<Node> &node, std::string name):
+        m_node(node),
+        name(std::move(name)),
+        id(componentsCount++) { }
 
     std::weak_ptr<Node> m_node;
+
+    virtual void initialize() {}
 };
 
 }

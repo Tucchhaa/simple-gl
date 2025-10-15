@@ -21,7 +21,6 @@ Engine::Engine() {
     m_shaderManager = ShaderManager::create();
     m_meshManager = MeshManager::create();
     m_textureManager = TextureManager::create();
-    m_rootNode = Node::create("ROOT");
 }
 
 Engine::~Engine() {

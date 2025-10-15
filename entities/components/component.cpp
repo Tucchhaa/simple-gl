@@ -2,6 +2,6 @@
 
 namespace SimpleGL {
 
-
+int Component::componentsCount = 0;
 
 }

@@ -25,6 +25,10 @@ std::shared_ptr<Texture> TextureManager::getTexture(const std::string &path) {
         &channelsNum, 0
     );
 
+    if (data == nullptr) {
+        throw unableToLoadImage(resourcePath);
+    }
+
     const auto format = getFormat(channelsNum);
 
     if (format == 0) {

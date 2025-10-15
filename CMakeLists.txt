@@ -29,6 +29,8 @@ add_executable(main
     entities/input.h
     entities/shader_program.cpp
     entities/shader_program.h
+    entities/scene.cpp
+    entities/scene.h
     entities/node.cpp
     entities/node.h
     entities/mesh_data.cpp

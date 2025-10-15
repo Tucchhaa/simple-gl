@@ -11,6 +11,7 @@
 
 namespace SimpleGL
 {
+class Camera;
 
 /// Describes uniforms and attributes
 struct ShaderParam {
@@ -29,7 +30,7 @@ public:
 
     static std::shared_ptr<ShaderProgram> create(unsigned int id, std::string label);
 
-    void use();
+    void use(const std::shared_ptr<Camera> &camera);
 
     void log() const;
 
@@ -49,6 +50,8 @@ public:
     bool attribExists(const std::string& name);
 
 private:
+    static unsigned int activeShaderProgramId;
+
     std::unordered_map<std::string, std::shared_ptr<ShaderParam>> m_uniformsMap;
     std::unordered_map<std::string, std::shared_ptr<ShaderParam>> m_attribsMap;
     int m_boundTexturesCount = 0;
@@ -65,7 +68,11 @@ private:
 
     std::shared_ptr<ShaderParam> getAttrib(const std::string& name);
 
-    static int getTextureUnitLocation(int uniformLocation) ;
+    static int getTextureUnitLocation(int uniformLocation);
+
+    void setViewPositionUniform(const std::shared_ptr<Camera> &camera);
+    void setDirectLightsUniform();
+    void setPointLightsUniform();
 };
 
 }

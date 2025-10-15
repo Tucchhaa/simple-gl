@@ -13,6 +13,7 @@ unsigned int Texture::createTexture(unsigned char *data, int width, int height, 
         width, height, 0,
         format, GL_UNSIGNED_BYTE, data
     );
+
     glGenerateMipmap(GL_TEXTURE_2D);
 
     return textureId;

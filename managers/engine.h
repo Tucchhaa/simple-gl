@@ -11,6 +11,7 @@ class MeshManager;
 class TextureManager;
 class Window;
 class Input;
+class Scene;
 class Node;
 
 class Engine {
@@ -21,9 +22,11 @@ public:
     std::shared_ptr<ShaderManager>& shaderManager() { return m_shaderManager; }
     std::shared_ptr<MeshManager>& meshManager() { return m_meshManager; }
     std::shared_ptr<TextureManager>& textureManager() { return m_textureManager; }
-    std::shared_ptr<Node>& rootNode() { return m_rootNode; }
 
     std::shared_ptr<Window>& mainWindow() const;
+    std::shared_ptr<Scene>& scene() { return m_scene; }
+
+    void setScene(const std::shared_ptr<Scene>& scene) { m_scene = scene; }
 
     Engine(const Engine&) = delete;
     Engine& operator=(const Engine&) = delete;
@@ -41,7 +44,8 @@ private:
     std::shared_ptr<ShaderManager> m_shaderManager;
     std::shared_ptr<MeshManager> m_meshManager;
     std::shared_ptr<TextureManager> m_textureManager;
-    std::shared_ptr<Node> m_rootNode;
+
+    std::shared_ptr<Scene> m_scene;
 
     Engine();
     ~Engine();

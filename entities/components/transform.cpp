@@ -1,11 +1,12 @@
 #include "transform.h"
 
+#include "../scene.h"
 #include "../../managers/engine.h"
 
 namespace SimpleGL {
 
 std::shared_ptr<Transform> Transform::getGlobal() {
-    return Engine::instance().rootNode()->transform();
+    return Engine::instance().scene()->rootNode()->transform();
 }
 
 void Transform::setPosition(float x, float y, float z) { m_position = glm::vec3(x, y, z); }

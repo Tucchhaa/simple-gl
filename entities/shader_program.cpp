@@ -6,9 +6,16 @@
 #include <glm/gtc/type_ptr.hpp>
 #include <utility>
 
+#include "scene.h"
 #include "../helpers/errors.h"
+#include "../managers/engine.h"
+#include "components/camera.h"
+#include "components/light.h"
+#include "components/transform.h"
 
 namespace SimpleGL {
+
+unsigned int ShaderProgram::activeShaderProgramId = 0;
 
 std::shared_ptr<ShaderProgram> ShaderProgram::create(unsigned int id, std::string label) {
     auto instance = std::shared_ptr<ShaderProgram>(new ShaderProgram(id, std::move(label)));
@@ -18,8 +25,15 @@ std::shared_ptr<ShaderProgram> ShaderProgram::create(unsigned int id, std::strin
     return instance;
 }
 
-void ShaderProgram::use() {
-    glUseProgram(id);
+void ShaderProgram::use(const std::shared_ptr<Camera> &camera) {
+    if (activeShaderProgramId != id) {
+        activeShaderProgramId = id;
+        glUseProgram(id);
+
+        setViewPositionUniform(camera);
+        setDirectLightsUniform();
+        setPointLightsUniform();
+    }
 
     m_boundTexturesCount = 0;
 }
@@ -170,6 +184,49 @@ std::shared_ptr<ShaderParam> ShaderProgram::getAttrib(const std::string &name) {
 
 int ShaderProgram::getTextureUnitLocation(int uniformLocation) {
     return GL_TEXTURE0 + uniformLocation;
+}
+
+void ShaderProgram::setViewPositionUniform(const std::shared_ptr<Camera> &camera) {
+    if (uniformExists("viewPosition")) {
+        setUniform("viewPosition", camera->transform()->position());
+    }
+}
+
+void ShaderProgram::setDirectLightsUniform() {
+    const auto scene = Engine::instance().scene();
+
+    if (uniformExists("directLightsNum")) {
+        for (int i = 0; i < scene->directLights().size(); i++) {
+            const auto light = scene->directLights()[i];
+            auto index_str = std::to_string(i);
+
+            setUniform("directLights[" + index_str + "].direction", light->transform()->direction());
+            setUniform("directLights[" + index_str + "].ambient", light->ambient);
+            setUniform("directLights[" + index_str + "].diffuse", light->diffuse);
+            setUniform("directLights[" + index_str + "].specular", light->specular);
+        }
+
+        setUniform("directLightsNum", static_cast<int>(scene->directLights().size()));
+    }
+}
+
+void ShaderProgram::setPointLightsUniform() {
+    const auto scene = Engine::instance().scene();
+
+    if (uniformExists("pointLightsNum")) {
+        for (int i = 0; i < scene->pointLights().size(); i++) {
+            const auto light = scene->pointLights()[i];
+            auto index_str = std::to_string(i);
+
+            setUniform("pointLights[" + index_str + "].position", light->transform()->position());
+            setUniform("pointLights[" + index_str + "].distance", light->distance);
+            setUniform("pointLights[" + index_str + "].ambient", light->ambient);
+            setUniform("pointLights[" + index_str + "].diffuse", light->diffuse);
+            setUniform("pointLights[" + index_str + "].specular", light->specular);
+        }
+
+        setUniform("pointLightsNum", static_cast<int>(scene->pointLights().size()));
+    }
 }
 
 }

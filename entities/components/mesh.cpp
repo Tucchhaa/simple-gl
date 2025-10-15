@@ -10,15 +10,11 @@ void MeshComponent::draw(const std::shared_ptr<Camera> &camera) const {
         throw meshShaderNotSet(name);
     }
 
-    m_shaderProgram->use();
+    m_shaderProgram->use(camera);
 
     m_shaderProgram->setUniform("transform", transform()->transformMatrix());
     m_shaderProgram->setUniform("view", camera->viewMatrix());
     m_shaderProgram->setUniform("projection", camera->projectionMatrix());
-
-    if (m_shaderProgram->uniformExists("viewPosition")) {
-        m_shaderProgram->setUniform("viewPosition", camera->transform()->position());
-    }
 
     m_beforeDrawCallback(m_shaderProgram);
 

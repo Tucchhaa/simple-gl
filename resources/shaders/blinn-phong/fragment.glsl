@@ -22,10 +22,14 @@ struct LightComponents {
     vec3 specular;
 };
 
-#define DIRECT_LIGHTS_NUM 1
-#define POINT_LIGHTS_NUM 1
-uniform DirectLight directLights[DIRECT_LIGHTS_NUM];
-uniform PointLight pointLights[POINT_LIGHTS_NUM];
+#define MAX_DIRECT_LIGHTS_NUM 3
+#define MAX_POINT_LIGHTS_NUM 10
+
+uniform DirectLight directLights[MAX_DIRECT_LIGHTS_NUM];
+uniform PointLight pointLights[MAX_POINT_LIGHTS_NUM];
+
+uniform int directLightsNum;
+uniform int pointLightsNum;
 
 uniform sampler2D diffuseTexture;
 uniform sampler2D specularTexture;
@@ -58,14 +62,14 @@ LightComponents calcLighting() {
     vec3 normal = normalize(fNormal);
     vec3 viewDir = normalize(viewPosition - fPosition);
 
-    for(int i = 0; i < DIRECT_LIGHTS_NUM; i++) {
+    for(int i = 0; i < directLightsNum; i++) {
         LightComponents directLightResult = calcDirectLight(directLights[i], normal, viewDir);
 
         result.diffuse += directLightResult.diffuse;
         result.specular += directLightResult.specular;
     }
 
-    for(int i = 0;i < POINT_LIGHTS_NUM; i++) {
+    for(int i = 0;i < pointLightsNum; i++) {
         LightComponents pointLightResult = calcPointLight(pointLights[i], normal, viewDir);
 
         result.diffuse += pointLightResult.diffuse;

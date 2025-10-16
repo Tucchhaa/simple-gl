@@ -38,6 +38,8 @@ public:
 
     void setTexture(const std::string& name, const std::shared_ptr<Texture>& texture);
 
+    void setCubeMap(const std::string& name, const std::shared_ptr<Texture>& texture);
+
     void setUniform(const std::string& name, float x, float y, float z, float w);
     void setUniform(const std::string& name, glm::vec4 vector);
     void setUniform(const std::string& name, float x, float y, float z);

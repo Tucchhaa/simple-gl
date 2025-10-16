@@ -142,4 +142,15 @@ std::runtime_error unsupportedImageFormat(const std::string &resource) {
     return std::runtime_error(msg.str());
 }
 
+std::runtime_error inconsistentTextureArrayMetadata(const std::string &name) {
+    std::ostringstream msg;
+
+    msg
+        << "CubeMap Texture: "
+        << "\"" << name << "\": "
+        << "Images should same height, width and format\n";
+
+    return std::runtime_error(msg.str());
+}
+
 }

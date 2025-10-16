@@ -81,10 +81,10 @@ LightComponents calcLighting() {
 
 LightComponents calcDirectLight(DirectLight light, vec3 normal, vec3 viewDir) {
     vec3 lightDir = -light.direction;
-    vec3 reflectDir = reflect(-lightDir, normal);
+    vec3 halfwayDir = normalize(lightDir + viewDir);
 
     float diffuse = max(dot(normal, lightDir), 0.0);
-    float specular = pow(max(dot(viewDir, reflectDir), 0.0), 1);
+    float specular = pow(max(dot(viewDir, halfwayDir), 0.0), 1);
 
     vec3 diffuseLight  = light.diffuse * diffuse + light.ambient;
     vec3 specularLight = light.specular * specular;
@@ -94,10 +94,10 @@ LightComponents calcDirectLight(DirectLight light, vec3 normal, vec3 viewDir) {
 
 LightComponents calcPointLight(PointLight light, vec3 normal, vec3 viewDir) {
     vec3 lightDir = normalize(light.position - fPosition);
-    vec3 reflectDir = -reflect(lightDir, normal);
+    vec3 halfwayDir = normalize(lightDir + viewDir);
 
     float diffuse = max(dot(normal, lightDir), 0.0);
-    float specular = pow(max(dot(viewDir, reflectDir), 0.0), 1);
+    float specular = pow(max(dot(viewDir, halfwayDir), 0.0), 1);
 
     float distance = length(light.position - fPosition);
     float attenuation = max(1 - distance / light.distance, 0.0);

@@ -13,6 +13,8 @@ void MeshComponent::draw(const std::shared_ptr<Camera> &camera) const {
     m_shaderProgram->use(camera);
 
     m_shaderProgram->setUniform("transform", transform()->transformMatrix());
+
+    /// TODO: set this uniforms inside shader program
     m_shaderProgram->setUniform("view", camera->viewMatrix());
     m_shaderProgram->setUniform("projection", camera->projectionMatrix());
 

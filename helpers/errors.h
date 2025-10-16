@@ -30,4 +30,6 @@ std::runtime_error unableToLoadImage(const std::string& resource);
 
 std::runtime_error unsupportedImageFormat(const std::string& resource);
 
+std::runtime_error inconsistentTextureArrayMetadata(const std::string& name);
+
 }

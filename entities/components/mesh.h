@@ -1,16 +1,14 @@
 #pragma once
 
 #include <memory>
-#include <glad/glad.h>
 
-#include "camera.h"
 #include "component.h"
-#include "transform.h"
-#include "../mesh_data.h"
-#include "../shader_program.h"
-#include "../../helpers/errors.h"
 
 namespace SimpleGL {
+
+class Camera;
+class ShaderProgram;
+struct MeshData;
 
 class MeshComponent : public Component {
 public:

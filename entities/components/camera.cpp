@@ -2,7 +2,7 @@
 
 #include "transform.h"
 #include "../../managers/engine.h"
-#include "../../managers/window_manager.h"
+#include "../../entities/window.h"
 
 namespace SimpleGL {
 

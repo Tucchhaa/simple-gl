@@ -2,6 +2,7 @@
 
 #include <sstream>
 
+#include "../entities/window.h"
 #include "../helpers/errors.h"
 
 namespace SimpleGL {

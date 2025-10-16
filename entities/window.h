@@ -7,9 +7,9 @@
 #include <glad/glad.h>
 #include <GLFW/glfw3.h>
 
-#include "input.h"
-
 namespace SimpleGL {
+
+class Input;
 
 class Window {
 public:

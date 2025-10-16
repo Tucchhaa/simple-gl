@@ -4,9 +4,9 @@
 #include <unordered_map>
 #include <string>
 
-#include "../entities/window.h"
-
 namespace SimpleGL {
+
+class Window;
 
 class WindowManager : public std::enable_shared_from_this<WindowManager> {
 public:

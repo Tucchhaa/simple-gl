@@ -7,12 +7,12 @@
 #include <utility>
 
 #include "scene.h"
-#include "../helpers/errors.h"
-#include "../managers/engine.h"
-#include "../entities/texture.h"
 #include "components/camera.h"
 #include "components/light.h"
 #include "components/transform.h"
+#include "../helpers/errors.h"
+#include "../managers/engine.h"
+#include "../entities/texture.h"
 
 namespace SimpleGL {
 

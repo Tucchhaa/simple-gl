@@ -1,6 +1,13 @@
 #include "mesh.h"
 
+#include "camera.h"
+#include "transform.h"
+#include "../mesh_data.h"
+#include "../shader_program.h"
+#include "../../helpers/errors.h"
+
 namespace SimpleGL {
+
 MeshComponent::~MeshComponent() {
     glDeleteVertexArrays(1, &m_VAO);
 }

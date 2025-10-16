@@ -31,7 +31,7 @@ void ShaderProgram::use(const std::shared_ptr<Camera> &camera) {
         activeShaderProgramId = id;
         glUseProgram(id);
 
-        setViewPositionUniform(camera);
+        setCameraUniforms(camera);
         setDirectLightsUniform();
         setPointLightsUniform();
     }
@@ -188,7 +188,10 @@ int ShaderProgram::getTextureUnitLocation(int uniformLocation) {
     return GL_TEXTURE0 + uniformLocation;
 }
 
-void ShaderProgram::setViewPositionUniform(const std::shared_ptr<Camera> &camera) {
+void ShaderProgram::setCameraUniforms(const std::shared_ptr<Camera> &camera) {
+    setUniform("view", camera->viewMatrix());
+    setUniform("projection", camera->projectionMatrix());
+
     if (uniformExists("viewPosition")) {
         setUniform("viewPosition", camera->transform()->position());
     }

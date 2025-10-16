@@ -30,8 +30,7 @@ public:
     );
 
 private:
-    /// TODO: need to remove element once Texture is deleted
-    std::unordered_map<std::string, std::shared_ptr<Texture>> m_textures;
+    std::unordered_map<std::string, std::weak_ptr<Texture>> m_textures;
 
     std::shared_ptr<Texture> _getTexture(
         const std::string& key,

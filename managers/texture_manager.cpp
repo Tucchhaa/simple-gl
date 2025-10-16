@@ -9,36 +9,91 @@
 
 namespace SimpleGL {
 
-std::shared_ptr<Texture> TextureManager::getTexture(const std::string &path) {
-    const auto resourcePath = Engine::instance().getResourcePath(path);
+std::shared_ptr<Texture> TextureManager::getTexture(const std::string &path, bool flip) {
+    return _getTexture(path, { path }, flip);
+}
 
-    if (const auto cachedTexture = m_textures.find(resourcePath); cachedTexture != m_textures.end()) {
+std::shared_ptr<Texture> TextureManager::getCubeMapTexture(
+    const std::string& name,
+    const std::string &positiveXPath,
+    const std::string &negativeXPath,
+    const std::string &positiveYPath,
+    const std::string &negativeYPath,
+    const std::string &positiveZPath,
+    const std::string &negativeZPath,
+    bool flip
+) {
+    return _getTexture(name, {
+        positiveXPath, negativeXPath,
+        positiveYPath, negativeYPath,
+        positiveZPath, negativeZPath
+    }, flip);
+}
+
+std::shared_ptr<Texture> TextureManager::_getTexture(
+    const std::string& key,
+    const std::vector<std::string>& paths,
+    bool flip
+) {
+    if (const auto cachedTexture = m_textures.find(key); cachedTexture != m_textures.end()) {
         return cachedTexture->second;
     }
 
-    stbi_set_flip_vertically_on_load(true);
+    stbi_set_flip_vertically_on_load(flip);
 
-    int width, height, channelsNum;
-    unsigned char *data = stbi_load(
-        resourcePath.c_str(),
-        &width, &height,
-        &channelsNum, 0
-    );
+    std::vector<unsigned char*> data;
+    int width = 0, height = 0;
+    GLenum format = 0;
+    bool isFirstTexture = true;
 
-    if (data == nullptr) {
-        throw unableToLoadImage(resourcePath);
+    for (const auto& path : paths) {
+        const auto resourcePath = Engine::instance().getResourcePath(path);
+
+        int _width, _height, channelsNum;
+
+        unsigned char *_data = stbi_load(
+            resourcePath.c_str(),
+            &_width, &_height,
+            &channelsNum, 0
+        );
+
+        if (_data == nullptr) {
+            throw unableToLoadImage(resourcePath);
+        }
+
+        const auto _format = getFormat(channelsNum);
+
+        if (_format == 0) {
+            throw unsupportedImageFormat(resourcePath);
+        }
+
+        if (isFirstTexture) {
+            width = _width;
+            height = _height;
+            format = _format;
+        } else {
+            if (width != _width || height != _height || format != _format) {
+                throw inconsistentTextureArrayMetadata(key);
+            }
+        }
+
+        data.push_back(_data);
+        isFirstTexture = false;
     }
 
-    const auto format = getFormat(channelsNum);
-
-    if (format == 0) {
-        throw unsupportedImageFormat(resourcePath);
+    std::shared_ptr<Texture> texture;
+    if (data.size() == 1) {
+        texture = Texture::create(data[0], width, height, format);
+    }
+    else if (data.size() == 6) {
+        texture = Texture::create(data, width, height, format);
     }
 
-    auto texture = Texture::create(data, width, height, format);
+    for (auto dataItem: data) {
+        stbi_image_free(dataItem);
+    }
 
-    m_textures[path] = texture;
-    stbi_image_free(data);
+    m_textures[key] = texture;
 
     return texture;
 }

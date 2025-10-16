@@ -37,6 +37,7 @@ std::shared_ptr<Node> MeshManager::getMesh(const std::filesystem::path &path, co
 }
 
 std::shared_ptr<Node> MeshManager::createNode(const std::string &name, const std::shared_ptr<MeshData> &meshData) {
+    /// TODO uses assimp's node names instead
     auto node = Node::create(name);
 
     std::queue<std::pair<std::shared_ptr<Node>, std::shared_ptr<MeshData>>> q;

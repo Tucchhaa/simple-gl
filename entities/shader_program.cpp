@@ -9,6 +9,7 @@
 #include "scene.h"
 #include "../helpers/errors.h"
 #include "../managers/engine.h"
+#include "../entities/texture.h"
 #include "components/camera.h"
 #include "components/light.h"
 #include "components/transform.h"
@@ -65,9 +66,10 @@ int ShaderProgram::getAttribLocation(const std::string &name) {
 
 void ShaderProgram::setTexture(const std::string& name, const std::shared_ptr<Texture>& texture) {
     const int textureUnit = getTextureUnitLocation(m_boundTexturesCount);
+    const GLenum target = texture->type == Default ? GL_TEXTURE_2D : GL_TEXTURE_CUBE_MAP;
 
     glActiveTexture(textureUnit);
-    glBindTexture(GL_TEXTURE_2D, texture->textureId());
+    glBindTexture(target, texture->textureId());
     glBindSampler(m_boundTexturesCount, texture->samplerId());
 
     this->setUniform(name, m_boundTexturesCount);

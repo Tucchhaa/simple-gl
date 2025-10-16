@@ -8,11 +8,16 @@
 #include <assimp/postprocess.h>
 
 namespace SimpleGL {
-std::shared_ptr<Node> MeshManager::getMesh(const std::filesystem::path &path, const std::string &name) {
+
+std::shared_ptr<Node> MeshManager::getMesh(const std::filesystem::path &path) {
     const auto resourcePath = Engine::instance().getResourcePath(path);
 
-    if (auto cachedMesh = m_meshes.find(resourcePath); cachedMesh != m_meshes.end()) {
-        return createNode(name, cachedMesh->second);
+    if (const auto it = m_meshes.find(resourcePath); it != m_meshes.end()) {
+        if (const auto mesh = it->second.lock()) {
+            return createNode(mesh);
+        }
+
+        m_meshes.erase(it);
     }
 
     Assimp::Importer importer;
@@ -33,20 +38,20 @@ std::shared_ptr<Node> MeshManager::getMesh(const std::filesystem::path &path, co
 
     m_meshes[resourcePath] = meshData;
 
-    return createNode(name, meshData);
+    return createNode(meshData);
 }
 
-std::shared_ptr<Node> MeshManager::createNode(const std::string &name, const std::shared_ptr<MeshData> &meshData) {
-    /// TODO uses assimp's node names instead
-    auto node = Node::create(name);
+std::shared_ptr<Node> MeshManager::createNode(const std::shared_ptr<MeshData>& meshData) {
+    auto node = Node::create();
 
     std::queue<std::pair<std::shared_ptr<Node>, std::shared_ptr<MeshData>>> q;
     q.emplace(node, meshData);
 
     while (!q.empty()) {
-        auto currentNode = q.front().first;
-        auto currentMeshData = q.front().second;
+        auto [currentNode, currentMeshData] = q.front();
+
         q.pop();
+        currentNode->name = currentMeshData->name();
 
         if (currentMeshData->hasVertices()) {
             MeshComponent::create(currentNode, currentMeshData);

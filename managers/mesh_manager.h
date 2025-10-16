@@ -16,12 +16,12 @@ public:
         return std::make_shared<MeshManager>();
     }
 
-    std::shared_ptr<Node> getMesh(const std::filesystem::path& path, const std::string& name);
+    std::shared_ptr<Node> getMesh(const std::filesystem::path& path);
 
 private:
-    std::unordered_map<std::string, std::shared_ptr<MeshData>> m_meshes;
+    std::unordered_map<std::string, std::weak_ptr<MeshData>> m_meshes;
 
-    static std::shared_ptr<Node> createNode(const std::string &name, const std::shared_ptr<MeshData>& meshData);
+    static std::shared_ptr<Node> createNode(const std::shared_ptr<MeshData>& meshData);
 };
 
 }

@@ -35,8 +35,12 @@ std::shared_ptr<Texture> TextureManager::_getTexture(
     const std::vector<std::string>& paths,
     bool flip
 ) {
-    if (const auto cachedTexture = m_textures.find(key); cachedTexture != m_textures.end()) {
-        return cachedTexture->second;
+    if (const auto it = m_textures.find(key); it != m_textures.end()) {
+        if (const auto texture = it->second.lock()) {
+            return texture;
+        }
+
+        m_textures.erase(it);
     }
 
     stbi_set_flip_vertically_on_load(flip);

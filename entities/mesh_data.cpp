@@ -22,10 +22,8 @@ std::shared_ptr<MeshData> MeshData::parseScene(const aiScene *scene) {
     std::queue<std::pair<aiNode*, std::shared_ptr<MeshData>>> q;
     q.emplace(scene->mRootNode, meshData);
 
-
     while (!q.empty()) {
-        const aiNode* currentAiNode = q.front().first;
-        const auto currentMeshData = q.front().second;
+        const auto [currentAiNode, currentMeshData] = q.front();
 
         q.pop();
         currentMeshData->m_name = currentAiNode->mName.C_Str();

@@ -72,7 +72,7 @@ private:
 
     static int getTextureUnitLocation(int uniformLocation);
 
-    void setViewPositionUniform(const std::shared_ptr<Camera> &camera);
+    void setCameraUniforms(const std::shared_ptr<Camera> &camera);
     void setDirectLightsUniform();
     void setPointLightsUniform();
 };

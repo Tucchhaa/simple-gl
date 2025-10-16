@@ -9,6 +9,7 @@ TODO: This code contains memory leaks on error paths
 #include <iostream>
 
 #include "engine.h"
+#include "../entities/shader_program.h"
 #include "../helpers/errors.h"
 
 namespace SimpleGL {

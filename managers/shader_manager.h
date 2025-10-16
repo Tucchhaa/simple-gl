@@ -1,14 +1,15 @@
 #pragma once
 
 #include <string>
-#include <utility>
 #include <vector>
 #include <filesystem>
 #include <memory>
 
-#include "../entities/shader_program.h"
+#include <glad/glad.h>
 
 namespace SimpleGL {
+
+class ShaderProgram;
 
 class ShaderManager {
 public:

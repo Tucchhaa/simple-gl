@@ -2,10 +2,11 @@
   "name": "glengine2",
   "version": "1.0.0",
   "dependencies": [
+    "assimp",
     "glad",
     "glfw3",
     "glm",
     "stb",
-    "assimp"
+    "bullet3"
   ]
 }

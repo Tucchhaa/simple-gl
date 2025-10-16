@@ -3,6 +3,8 @@
 #include <memory>
 #include <string>
 
+#include "input.h"
+
 namespace SimpleGL {
 
 std::shared_ptr<Window> Window::create(const std::string &label, GLFWwindow *glfwWindow) {

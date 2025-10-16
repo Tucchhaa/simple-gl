@@ -5,10 +5,11 @@
 #include <unordered_map>
 #include <filesystem>
 
-#include "../entities/components/component.h"
-#include "../entities/mesh_data.h"
-
 namespace SimpleGL {
+
+class Node;
+class Component;
+struct MeshData;
 
 class MeshManager {
 public:

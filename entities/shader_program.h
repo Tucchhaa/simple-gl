@@ -7,10 +7,9 @@
 #include <glm/glm.hpp>
 #include <utility>
 
-#include "texture.h"
-
 namespace SimpleGL
 {
+class Texture;
 class Camera;
 
 /// Describes uniforms and attributes

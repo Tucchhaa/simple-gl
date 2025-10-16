@@ -1,11 +1,15 @@
 #include "mesh_manager.h"
 
 #include <queue>
+
+#include <assimp/Importer.hpp>
+#include <assimp/postprocess.h>
+#include <assimp/scene.h>
+
 #include "engine.h"
 #include "../entities/components/mesh.h"
+#include "../entities/mesh_data.h"
 #include "../helpers/errors.h"
-
-#include <assimp/postprocess.h>
 
 namespace SimpleGL {
 

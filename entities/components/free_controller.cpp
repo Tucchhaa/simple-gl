@@ -6,6 +6,7 @@
 #include "transform.h"
 #include "../window.h"
 #include "../../managers/engine.h"
+#include "../../entities/input.h"
 
 namespace SimpleGL {
 

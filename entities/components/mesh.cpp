@@ -12,30 +12,40 @@ MeshComponent::~MeshComponent() {
     glDeleteVertexArrays(1, &m_VAO);
 }
 
-void MeshComponent::draw(const std::shared_ptr<Camera> &camera) const {
+void MeshComponent::setShader(const std::shared_ptr<ShaderProgram> &shaderProgram) {
+    m_shaderProgram = shaderProgram;
+
+    glBindVertexArray(m_VAO);
+    enableVertexAttrib("vPosition", true, 3);
+    enableVertexAttrib("vTextureCoord", false, 2);
+    enableVertexAttrib("vNormal", false, 3);
+    glBindVertexArray(0);
+}
+
+void MeshComponent::draw(const std::shared_ptr<Camera>& camera) const {
     if (m_shaderProgram == nullptr) {
         throw meshShaderNotSet(name);
     }
 
     m_shaderProgram->use(camera);
-    m_shaderProgram->setUniform("transform", transform()->transformMatrix());
+
+    if (m_shaderProgram->uniformExists("transform")) {
+        m_shaderProgram->setUniform("transform", transform()->transformMatrix());
+    }
+
     m_beforeDrawCallback(m_shaderProgram);
 
     glBindVertexArray(m_VAO);
     glDrawElements(GL_TRIANGLES, m_meshData->indices().size(), GL_UNSIGNED_INT, 0);
 }
 
-unsigned int MeshComponent::createVAO() {
+unsigned int MeshComponent::createVAO() const {
     unsigned int VAO;
     glGenVertexArrays(1, &VAO);
     glBindVertexArray(VAO);
 
     glBindBuffer(GL_ARRAY_BUFFER, m_meshData->VBO());
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, m_meshData->EBO());
-
-    enableVertexAttrib("vPosition", true, 3);
-    enableVertexAttrib("vTextureCoord", false, 2);
-    enableVertexAttrib("vNormal", false, 3);
 
     glBindVertexArray(0);
 

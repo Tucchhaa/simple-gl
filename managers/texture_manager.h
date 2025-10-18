@@ -30,6 +30,7 @@ public:
     );
 
 private:
+    // TODO: stale pointers may be collected in these map continuously, need some mechanism to remove stale pointers
     std::unordered_map<std::string, std::weak_ptr<Texture>> m_textures;
 
     std::shared_ptr<Texture> _getTexture(

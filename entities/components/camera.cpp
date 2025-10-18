@@ -6,11 +6,11 @@
 
 namespace SimpleGL {
 
-void Camera::recalculate() {
+void Camera::recalculateViewMatrix() {
     m_viewMatrix = glm::mat4(1.0f);
 
     m_viewMatrix = m_viewMatrix * glm::mat4_cast(glm::conjugate(transform()->absoluteOrientation()));
-    m_viewMatrix = translate(m_viewMatrix, -transform()->absolutePosition());
+    m_viewMatrix = glm::translate(m_viewMatrix, -transform()->absolutePosition());
 }
 
 glm::mat4 Camera::calculateProjectionMatrix(float fov, float near, float far) {

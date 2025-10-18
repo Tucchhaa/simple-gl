@@ -24,8 +24,10 @@ public:
 
     void setPosition(float x, float y, float z);
     void setPosition(glm::vec3 position);
+
     void setOrientation(float w, float x, float y, float z);
     void setOrientation(glm::quat orientation);
+
     void setScale(float s);
     void setScale(float x, float y, float z);
     void setScale(glm::vec3 scale);
@@ -53,6 +55,11 @@ private:
 
     glm::mat4 m_transformMatrix = glm::mat4(1.0f);
     glm::vec3 m_direction = glm::vec3(0, 0, 1);
+
+    bool m_dirty = false;
+    bool m_subtreeDirty = false;
+
+    void markAsDirty();
 
     glm::mat4 calculateTransformMatrix() const;
 };

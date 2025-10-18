@@ -153,4 +153,15 @@ std::runtime_error inconsistentTextureArrayMetadata(const std::string &name) {
     return std::runtime_error(msg.str());
 }
 
+std::runtime_error incompleteFrameBuffer(const std::string &name) {
+    std::ostringstream msg;
+
+    msg
+        << "Frame Buffer: "
+        << "\"" << name << "\": "
+        << "is incomplete\n";
+
+    return std::runtime_error(msg.str());
+}
+
 }

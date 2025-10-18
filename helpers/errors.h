@@ -32,4 +32,6 @@ std::runtime_error unsupportedImageFormat(const std::string& resource);
 
 std::runtime_error inconsistentTextureArrayMetadata(const std::string& name);
 
+std::runtime_error incompleteFrameBuffer(const std::string& name);
+
 }

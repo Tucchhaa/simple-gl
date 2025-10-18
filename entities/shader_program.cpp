@@ -65,12 +65,17 @@ int ShaderProgram::getAttribLocation(const std::string &name) {
 }
 
 void ShaderProgram::setTexture(const std::string& name, const std::shared_ptr<Texture>& texture) {
+    const GLenum target = texture->type() == Default ? GL_TEXTURE_2D : GL_TEXTURE_CUBE_MAP;
+
+    setTexture(name, texture->textureId(), texture->samplerId(), target);
+}
+
+void ShaderProgram::setTexture(const std::string &name, unsigned int textureId, unsigned int samplerId, GLenum target) {
     const int textureUnit = getTextureUnitLocation(m_boundTexturesCount);
-    const GLenum target = texture->type == Default ? GL_TEXTURE_2D : GL_TEXTURE_CUBE_MAP;
 
     glActiveTexture(textureUnit);
-    glBindTexture(target, texture->textureId());
-    glBindSampler(m_boundTexturesCount, texture->samplerId());
+    glBindTexture(target, textureId);
+    glBindSampler(m_boundTexturesCount, samplerId);
 
     this->setUniform(name, m_boundTexturesCount);
 
@@ -189,8 +194,10 @@ int ShaderProgram::getTextureUnitLocation(int uniformLocation) {
 }
 
 void ShaderProgram::setCameraUniforms(const std::shared_ptr<Camera> &camera) {
-    setUniform("view", camera->viewMatrix());
-    setUniform("projection", camera->projectionMatrix());
+    if (camera) {
+        setUniform("view", camera->viewMatrix());
+        setUniform("projection", camera->projectionMatrix());
+    }
 
     if (uniformExists("viewPosition")) {
         setUniform("viewPosition", camera->transform()->position());

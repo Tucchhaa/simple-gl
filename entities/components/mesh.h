@@ -25,22 +25,22 @@ public:
         const std::string& name = "Mesh"
     ) {
         auto instance = base_create<MeshComponent>(node, name);
+
         instance->m_meshData = meshData;
+        instance->m_VAO = instance->createVAO();
+
         return instance;
     }
 
     unsigned int VAO() const { return m_VAO; }
 
-    void setShader(const std::shared_ptr<ShaderProgram> &shaderProgram) {
-        m_shaderProgram = shaderProgram;
-        m_VAO = createVAO();
-    }
+    void setShader(const std::shared_ptr<ShaderProgram> &shaderProgram);
 
     void setBeforeDrawCallback(const std::function<void(const std::shared_ptr<ShaderProgram>& shaderProgram)> &beforeDrawCallback) {
         m_beforeDrawCallback = beforeDrawCallback;
     }
 
-    void draw(const std::shared_ptr<Camera>& camera) const;
+    void draw(const std::shared_ptr<Camera>& camera = nullptr) const;
 
 private:
     unsigned int m_VAO = 0;
@@ -51,7 +51,7 @@ private:
 
     std::function<void(const std::shared_ptr<ShaderProgram>& shaderProgram)> m_beforeDrawCallback;
 
-    unsigned int createVAO();
+    unsigned int createVAO() const;
 
     void enableVertexAttrib(const std::string& name, bool required, int size);
 };

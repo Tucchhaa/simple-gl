@@ -1,25 +1,26 @@
 #include <iostream>
 #include <sstream>
 
-#include "entities/input.h"
-#include "entities/scene.h"
-#include "entities/shader_program.h"
-#include "entities/window.h"
 #include "managers/engine.h"
-
-#include "entities/components/camera.h"
-#include "entities/components/free_controller.h"
-#include "entities/components/light.h"
-#include "entities/components/mesh.h"
-#include "entities/components/transform.h"
 #include "managers/mesh_manager.h"
 #include "managers/shader_manager.h"
 #include "managers/texture_manager.h"
 #include "managers/window_manager.h"
 
-using namespace SimpleGL;
+#include "entities/input.h"
+#include "entities/mesh_data.h"
+#include "entities/scene.h"
+#include "entities/shader_program.h"
+#include "entities/window.h"
+#include "entities/components/camera.h"
+#include "entities/components/free_controller.h"
+#include "entities/components/light.h"
+#include "entities/components/mesh.h"
+#include "entities/components/transform.h"
 
-unsigned int loadTexture(const std::string& path);
+#include "render-pipeline/screenFrameBuffer.h"
+
+using namespace SimpleGL;
 
 int main() {
     auto window = Engine::instance().windowManager()->createWindow("main", 800, 600);
@@ -49,6 +50,12 @@ int main() {
         "shaders/skybox/vertex.glsl",
         "shaders/skybox/fragment.glsl",
         "Skybox Shader"
+    );
+
+    auto frameShaderProgram = Engine::instance().shaderManager()->createShaderProgram(
+        "shaders/frame/vertex.glsl",
+        "shaders/frame/fragment.glsl",
+        "frame shader"
     );
 
     // create scene
@@ -139,6 +146,11 @@ int main() {
         shaderProgram->setTexture("specularTexture", specularTexture);
     });
 
+    // create screen frame buffer
+    const auto screenFrameBuffer = ScreenFrameBuffer::create(window);
+    screenFrameBuffer->setShader(frameShaderProgram);
+
+    // rendering pipeline
     window->makeCurrent();
 
     while(window->isOpen())
@@ -156,17 +168,32 @@ int main() {
         camera->recalculateViewMatrix();
 
         // draw
+        glBindFramebuffer(GL_FRAMEBUFFER, screenFrameBuffer->FBO());
+
         glClearColor(0.1f, 0.15f, 0.15f, 1.0f);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
         glEnable(GL_DEPTH_TEST);
+        glEnable(GL_CULL_FACE);
+        glCullFace(GL_BACK);
 
         cubeMesh->draw(camera);
         lightSourceCubeMesh->draw(camera);
 
+        glCullFace(GL_FRONT);
         glDepthFunc(GL_LEQUAL);
         skyboxCubeMesh->draw(camera);
         glDepthFunc(GL_LESS);
+
+        // draw a quad on the screen
+        glBindFramebuffer(GL_FRAMEBUFFER, 0);
+        glClearColor(1.0f, 1.0f, 1.0f, 1.0f);
+        glClear(GL_COLOR_BUFFER_BIT);
+
+        glDisable(GL_DEPTH_TEST);
+        glDisable(GL_CULL_FACE);
+
+        screenFrameBuffer->renderFrame();
 
         window->afterFrameRendered();
 

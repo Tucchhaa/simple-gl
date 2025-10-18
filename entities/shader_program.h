@@ -29,15 +29,14 @@ public:
 
     static std::shared_ptr<ShaderProgram> create(unsigned int id, std::string label);
 
-    void use(const std::shared_ptr<Camera> &camera);
+    void use(const std::shared_ptr<Camera> &camera = nullptr);
 
     void log() const;
 
     int getAttribLocation(const std::string& name);
 
     void setTexture(const std::string& name, const std::shared_ptr<Texture>& texture);
-
-    void setCubeMap(const std::string& name, const std::shared_ptr<Texture>& texture);
+    void setTexture(const std::string& name, unsigned int textureId, unsigned int samplerId = 0, GLenum target = GL_TEXTURE_2D);
 
     void setUniform(const std::string& name, float x, float y, float z, float w);
     void setUniform(const std::string& name, glm::vec4 vector);

@@ -18,6 +18,8 @@ public:
 
     const std::shared_ptr<Transform>& transform() const { return m_node.lock()->transform(); }
 
+    std::shared_ptr<Node> node() const { return m_node.lock(); }
+
 protected:
     template <typename T>
     static std::shared_ptr<T> base_create(const std::shared_ptr<Node> &node, const std::string& name = "") {
@@ -37,9 +39,10 @@ protected:
         name(std::move(name)),
         id(componentsCount++) { }
 
-    std::weak_ptr<Node> m_node;
-
     virtual void initialize() {}
+
+private:
+    std::weak_ptr<Node> m_node;
 };
 
 }

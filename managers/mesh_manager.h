@@ -20,6 +20,7 @@ public:
     std::shared_ptr<Node> getMesh(const std::filesystem::path& path);
 
 private:
+    // TODO: stale pointers may be collected in these map continuously, need some mechanism to remove stale pointers
     std::unordered_map<std::string, std::weak_ptr<MeshData>> m_meshes;
 
     static std::shared_ptr<Node> createNode(const std::shared_ptr<MeshData>& meshData);

@@ -104,8 +104,6 @@ int main() {
     lightSourceCubeNode->transform()->setScale(0.1f);
     lightSourceCubeNode->transform()->setPosition(5, 1, 0);
     lightSourceCubeNode->transform()->setOrientation(glm::quat(glm::radians(glm::vec3(45, -45, 0))));
-    lightSourceCubeNode->transform()->recalculate();
-    lightSourceCubeNode->children().at(0)->transform()->recalculate();
 
     const auto lightSourceCubeMesh = lightSourceCubeNode->children().at(0)->getComponent<MeshComponent>();
     lightSourceCubeMesh->setShader(solidColorShaderProgram);
@@ -147,20 +145,15 @@ int main() {
     {
         window->beforeFrameRendered();
 
+        freeController->handleInput();
+
         auto rotation = glm::angleAxis(Window::time() * glm::radians(45.0f), glm::normalize(glm::vec3(0, 1, 1)));
         cubeNode->transform()->setOrientation(rotation);
 
-        cubeNode->transform()->recalculate();
-        cubeNode->children().at(0)->transform()->recalculate();
-
-        freeController->handleInput();
-
-        cameraNode->transform()->recalculate();
-        camera->recalculate();
-
         skyboxNode->transform()->setPosition(cameraNode->transform()->position());
-        skyboxNode->transform()->recalculate();
-        skyboxNode->children().at(0)->transform()->recalculate();
+
+        rootNode->transform()->recalculate();
+        camera->recalculateViewMatrix();
 
         // draw
         glClearColor(0.1f, 0.15f, 0.15f, 1.0f);

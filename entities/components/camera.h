@@ -19,7 +19,7 @@ public:
     ) {
         auto instance = base_create<Camera>(node, name);
 
-        instance->m_projectionMatrix = calculateProjectionMatrix(fov, near, far);
+        instance->recalculateProjectionMatrix(fov, near, far);
 
         return instance;
     }
@@ -29,11 +29,12 @@ public:
     const glm::mat4& projectionMatrix() const { return m_projectionMatrix; }
 
     void recalculateViewMatrix();
+
+    void recalculateProjectionMatrix(float fov, float near, float far);
+
 private:
     glm::mat4 m_viewMatrix = glm::mat4(1);
     glm::mat4 m_projectionMatrix = glm::mat4(1);
-
-    static glm::mat4 calculateProjectionMatrix(float fov, float near, float far);
 };
 
 }

@@ -50,8 +50,8 @@ add_executable(main
     entities/components/mesh.h
     entities/components/light.cpp
     entities/components/light.h
-    render-pipeline/screenFrameBuffer.cpp
-    render-pipeline/screenFrameBuffer.h
+    render-pipeline/screen_frame_buffer.cpp
+    render-pipeline/screen_frame_buffer.h
     helpers/errors.cpp
     helpers/errors.h
 )

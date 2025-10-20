@@ -1,4 +1,4 @@
-#include "screenFrameBuffer.h"
+#include "screen_frame_buffer.h"
 
 #include <glad/glad.h>
 

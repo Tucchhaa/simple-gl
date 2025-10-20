@@ -13,10 +13,10 @@ void Camera::recalculateViewMatrix() {
     m_viewMatrix = glm::translate(m_viewMatrix, -transform()->absolutePosition());
 }
 
-glm::mat4 Camera::calculateProjectionMatrix(float fov, float near, float far) {
+void Camera::recalculateProjectionMatrix(float fov, float near, float far) {
     const float aspect = Engine::instance().mainWindow()->aspectRatio();
 
-    return glm::perspective(fov, aspect, near, far);
+    m_projectionMatrix = glm::perspective(fov, aspect, near, far);
 }
 
 }

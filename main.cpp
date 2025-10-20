@@ -18,7 +18,7 @@
 #include "entities/components/mesh.h"
 #include "entities/components/transform.h"
 
-#include "render-pipeline/screenFrameBuffer.h"
+#include "render-pipeline/screen_frame_buffer.h"
 
 using namespace SimpleGL;
 
@@ -54,7 +54,7 @@ int main() {
 
     auto frameShaderProgram = Engine::instance().shaderManager()->createShaderProgram(
         "shaders/frame/vertex.glsl",
-        "shaders/frame/fragment.glsl",
+        "shaders/frame/basic-fragment.glsl",
         "frame shader"
     );
 

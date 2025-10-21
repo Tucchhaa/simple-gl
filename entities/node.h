@@ -4,6 +4,8 @@
 #include <typeindex>
 #include <unordered_map>
 #include <utility>
+#include <memory>
+#include <vector>
 
 namespace SimpleGL {
 

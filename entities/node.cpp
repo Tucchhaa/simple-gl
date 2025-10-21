@@ -2,6 +2,7 @@
 
 #include "components/component.h"
 #include "components/transform.h"
+#include <vector>
 
 namespace SimpleGL {
 

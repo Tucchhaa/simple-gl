@@ -6,6 +6,7 @@
 #include <glad/glad.h>
 #include <glm/glm.hpp>
 #include <utility>
+#include <memory>
 
 namespace SimpleGL
 {

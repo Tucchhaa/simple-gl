@@ -2,6 +2,7 @@
 
 #include "components/component.h"
 #include "components/transform.h"
+#include <algorithm>
 #include <vector>
 
 namespace SimpleGL {
@@ -40,6 +41,25 @@ std::shared_ptr<Node> Node::getChild(const std::string& childName) const {
     }
 
     return nullptr;
+}
+
+std::vector<std::shared_ptr<Component>> Node::components() const {
+    std::vector<std::shared_ptr<Component>> result;
+    result.reserve(m_components.size());
+
+    for (const auto& entry : m_components) {
+        result.push_back(entry.second);
+    }
+
+    std::sort(
+        result.begin(),
+        result.end(),
+        [](const std::shared_ptr<Component>& lhs, const std::shared_ptr<Component>& rhs) {
+            return lhs->name < rhs->name;
+        }
+    );
+
+    return result;
 }
 
 }

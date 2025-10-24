@@ -54,6 +54,10 @@ add_executable(main
     render-pipeline/screen_frame_buffer.h
     helpers/errors.cpp
     helpers/errors.h
+    helpers/logger.cpp
+    helpers/logger.h
+    tests/test.cpp
+    tests/test.h
 )
 
 target_link_libraries(main PRIVATE
@@ -63,8 +67,6 @@ target_link_libraries(main PRIVATE
     assimp::assimp
     ${BULLET_LIBRARIES}
 )
-
-
 
 
 

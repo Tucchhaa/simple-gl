@@ -19,10 +19,13 @@
 #include "entities/components/transform.h"
 
 #include "render-pipeline/screen_frame_buffer.h"
+#include "tests/test.h"
 
 using namespace SimpleGL;
 
 int main() {
+    runLoggerSmokeTest();
+
     auto window = Engine::instance().windowManager()->createWindow("main", 800, 600);
 
     window->setTitle("Learn OpenGL");

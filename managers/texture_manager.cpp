@@ -6,6 +6,7 @@
 #include "engine.h"
 #include "../entities/texture.h"
 #include "../helpers/errors.h"
+#include <vector>
 
 namespace SimpleGL {
 

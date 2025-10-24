@@ -1,0 +1,3 @@
+/home/franciscobrizuela/Documents/codes1/simple-gl/build/CMakeFiles/main.dir
+/home/franciscobrizuela/Documents/codes1/simple-gl/build/CMakeFiles/edit_cache.dir
+/home/franciscobrizuela/Documents/codes1/simple-gl/build/CMakeFiles/rebuild_cache.dir

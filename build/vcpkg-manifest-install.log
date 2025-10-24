@@ -1,0 +1,79 @@
+Detecting compiler hash for triplet x64-linux...
+Compiler found: /usr/bin/c++
+The following packages are already installed:
+    assimp:x64-linux@6.0.2#1 -- git+https://github.com/microsoft/vcpkg@c5281ba1740ef8aeff54f666fbe1c60c0deac076
+    bullet3:x64-linux@3.25#3 -- git+https://github.com/microsoft/vcpkg@8924ba3500ee3fb1124f3b827b86e0d456b90dd7
+  * draco:x64-linux@1.5.7 -- git+https://github.com/microsoft/vcpkg@06799add74da6e9e4634e4c7f27b82b1149a8bb6
+  * egl-registry:x64-linux@2024-01-25 -- git+https://github.com/microsoft/vcpkg@d883db43133dd223c4ffdbef4193943f6784d43a
+    glad[core,loader]:x64-linux@0.1.36 -- git+https://github.com/microsoft/vcpkg@fa93b14c1581057e1d14650f5f15c9b0757dd548
+    glfw3:x64-linux@3.4#1 -- git+https://github.com/microsoft/vcpkg@d4bbd4f27c2ca619f57778985120cddcedadb1cc
+    glm:x64-linux@1.0.1#3 -- git+https://github.com/microsoft/vcpkg@f8b09027afe97c717e95bd81d1d4f37c057d1c78
+  * jhasse-poly2tri:x64-linux@2023-12-27#2 -- git+https://github.com/microsoft/vcpkg@d94a24dde4173f85d1aaeb16b3eecc71b100b5be
+  * kubazip:x64-linux@0.3.5 -- git+https://github.com/microsoft/vcpkg@f6a191f1346675cf2a6683141e8a24f3052a1d27
+  * minizip:x64-linux@1.3.1#1 -- git+https://github.com/microsoft/vcpkg@bb8016593efa5220d1b877c27cd8612862c13d81
+  * opengl-registry:x64-linux@2024-02-10#1 -- git+https://github.com/microsoft/vcpkg@22f7aa58ee78c9f0db904b6251e9265f2be26f9d
+  * polyclipping:x64-linux@6.4.2#13 -- git+https://github.com/microsoft/vcpkg@2388298c7ad673550c7492454666dd3a34ada895
+  * pugixml:x64-linux@1.15 -- git+https://github.com/microsoft/vcpkg@a3181de4dee35567b45611a938eb0f44f5ee016d
+  * rapidjson:x64-linux@2025-02-26 -- git+https://github.com/microsoft/vcpkg@4297a243aa0e3ed6c3a4c307579914593da5751d
+    stb:x64-linux@2024-07-29#1 -- git+https://github.com/microsoft/vcpkg@c362152d1d02973e7b1ce777960f8a6876656560
+  * utfcpp:x64-linux@4.0.6 -- git+https://github.com/microsoft/vcpkg@f73420a80f760312a45c40fce2b350009991c674
+  * vcpkg-cmake:x64-linux@2024-04-23 -- git+https://github.com/microsoft/vcpkg@e74aa1e8f93278a8e71372f1fa08c3df420eb840
+  * vcpkg-cmake-config:x64-linux@2024-05-23 -- git+https://github.com/microsoft/vcpkg@97a63e4bc1a17422ffe4eff71da53b4b561a7841
+  * vcpkg-cmake-get-vars:x64-linux@2025-05-29 -- git+https://github.com/microsoft/vcpkg@d6510f888dd526c7828f6b973349e7f30be51254
+  * zlib:x64-linux@1.3.1 -- git+https://github.com/microsoft/vcpkg@3f05e04b9aededb96786a911a16193cdb711f0c9
+The package stb provides CMake targets:
+
+    find_package(Stb REQUIRED)
+    target_include_directories(main PRIVATE ${Stb_INCLUDE_DIR})
+assimp provides CMake targets:
+
+  # this is heuristically generated, and may not be correct
+  find_package(assimp CONFIG REQUIRED)
+  target_link_libraries(main PRIVATE assimp::assimp)
+
+assimp provides pkg-config modules:
+
+  # Import various well-known 3D model formats in an uniform manner.
+  assimp
+
+bullet3 provides CMake targets:
+
+  find_package(Bullet CONFIG REQUIRED)
+  # specific set: BulletSoftBody, BulletDynamics, BulletInverseDynamics,
+  #               BulletCollision, Bullet3Common, LinearMath
+  target_link_libraries(main PRIVATE ${BULLET_LIBRARIES})
+  # individual imported targets, e.g. for Bullet 3 libs
+  target_link_libraries(main PRIVATE Bullet3Dynamics)
+
+bullet3 provides pkg-config modules:
+
+  # specific set: BulletSoftBody, BulletDynamics, BulletCollision, LinearMath
+  bullet
+
+glad provides CMake targets:
+
+  # this is heuristically generated, and may not be correct
+  find_package(glad CONFIG REQUIRED)
+  target_link_libraries(main PRIVATE glad::glad)
+
+glfw3 provides CMake targets:
+
+  # this is heuristically generated, and may not be correct
+  find_package(glfw3 CONFIG REQUIRED)
+  target_link_libraries(main PRIVATE glfw)
+
+glfw3 provides pkg-config modules:
+
+  # A multi-platform library for OpenGL, window and input
+  glfw3
+
+The package glm provides CMake targets:
+
+    find_package(glm CONFIG REQUIRED)
+    target_link_libraries(main PRIVATE glm::glm)
+
+    # Or use the header-only version
+    find_package(glm CONFIG REQUIRED)
+    target_link_libraries(main PRIVATE glm::glm-header-only)
+
+All requested installations completed successfully in: 331 us

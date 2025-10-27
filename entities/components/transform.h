@@ -14,7 +14,6 @@ public:
 
     Transform(const std::weak_ptr<Node> &node, const std::string &name): Component(node, name) {}
 
-    // Fran: Fixed type "Tranform"
     static std::shared_ptr<Transform> create(const std::shared_ptr<Node> &node, const std::string& name = "Transform") {
         return base_create<Transform>(node, name);
     }

@@ -38,7 +38,6 @@ public:
 private:
     static Engine m_instance;
 
-    // Fran: Changed this line bc the path was hardcoded
     const std::filesystem::path m_resourcesDir = std::filesystem::path(__FILE__).parent_path().parent_path() / "resources";
 
     std::shared_ptr<WindowManager> m_windowManager;

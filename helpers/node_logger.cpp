@@ -1,8 +1,9 @@
-#include "logger.h"
+#include "node_logger.h"
 
 #include "../entities/node.h"
 #include "../entities/components/component.h"
 
+#include <algorithm>
 #include <stdexcept>
 #include <utility>
 #include <vector>
@@ -38,7 +39,15 @@ void Logger::writeNode(
 
     stream << node->name;
 
-    const auto components = node->components();
+    auto components = node->components();
+    std::sort(
+        components.begin(),
+        components.end(),
+        [](const std::shared_ptr<Component>& lhs, const std::shared_ptr<Component>& rhs) {
+            return lhs->name < rhs->name;
+        }
+    );
+
     if (!components.empty()) {
         stream << " [";
         for (size_t i = 0; i < components.size(); ++i) {

@@ -1,6 +1,8 @@
 #include <iostream>
 #include <sstream>
 
+#include <BulletCollision/CollisionShapes/btBoxShape.h>
+
 #include "managers/engine.h"
 #include "managers/mesh_manager.h"
 #include "managers/shader_manager.h"
@@ -9,6 +11,7 @@
 
 #include "entities/input.h"
 #include "entities/mesh_data.h"
+#include "entities/node.h"
 #include "entities/scene.h"
 #include "entities/shader_program.h"
 #include "entities/window.h"
@@ -16,7 +19,9 @@
 #include "entities/components/free_controller.h"
 #include "entities/components/light.h"
 #include "entities/components/mesh.h"
+#include "entities/components/rigid_body.h"
 #include "entities/components/transform.h"
+#include "managers/physics_manager.h"
 
 #include "render-pipeline/screen_frame_buffer.h"
 
@@ -46,6 +51,12 @@ int main() {
         "Blinn-Phong Shader"
     );
 
+    auto blinnPhongSolidColorShaderProgram = Engine::instance().shaderManager()->createShaderProgram(
+        "shaders/blinn-phong-solid-color/vertex.glsl",
+        "shaders/blinn-phong-solid-color/fragment.glsl",
+        "Blinn-Phong Solid Color Shader"
+    );
+
     auto skyboxShaderProgram = Engine::instance().shaderManager()->createShaderProgram(
         "shaders/skybox/vertex.glsl",
         "shaders/skybox/fragment.glsl",
@@ -62,7 +73,8 @@ int main() {
     const auto scene = Scene::create();
     Engine::instance().setScene(scene);
 
-    auto rootNode = scene->rootNode();
+    auto rootNode = Node::create("ROOT");
+    scene->setRootNode(rootNode);
 
     // create skybox
     auto skyboxTexture = Engine::instance().textureManager()->getCubeMapTexture(
@@ -100,10 +112,6 @@ int main() {
 
     auto freeController = FreeController::create(cameraNode);
 
-    // create texture
-    auto diffuseTexture = Engine::instance().textureManager()->getTexture("diffuse.png");
-    auto specularTexture = Engine::instance().textureManager()->getTexture("specular.png");
-
     // Create cubes
     const auto lightSourceCubeNode = Engine::instance().meshManager()->getMesh("cube.obj");
     lightSourceCubeNode->setParent(rootNode);
@@ -118,6 +126,7 @@ int main() {
         shaderProgram->setUniform("color", 1, 1, 1);
     });
 
+    // create lights
     const auto pointLight = PointLight::create(lightSourceCubeNode);
     pointLight->ambient = glm::vec3(0.1);
     pointLight->diffuse = glm::vec3(1.0);
@@ -129,22 +138,46 @@ int main() {
     directLight->diffuse = glm::vec3(0.7);
     directLight->specular = glm::vec3(0.3);
 
-    scene->addLight(pointLight);
-    scene->addLight(directLight);
-    // ===
+    // create wooden cube
 
     const auto cubeNode = Engine::instance().meshManager()->getMesh("cube.obj");
     cubeNode->name = "cube";
     cubeNode->setParent(rootNode);
-    cubeNode->transform()->setScale(0.5);
+    cubeNode->transform()->setScale(1);
 
     const auto cubeMesh = cubeNode->children().at(0)->getComponent<MeshComponent>();
+
+    auto diffuseTexture = Engine::instance().textureManager()->getTexture("diffuse.png");
+    auto specularTexture = Engine::instance().textureManager()->getTexture("specular.png");
 
     cubeMesh->setShader(blinnPhongShaderProgram);
     cubeMesh->setBeforeDrawCallback([&diffuseTexture, &specularTexture](const std::shared_ptr<ShaderProgram>& shaderProgram) {
         shaderProgram->setTexture("diffuseTexture", diffuseTexture);
         shaderProgram->setTexture("specularTexture", specularTexture);
     });
+
+    auto cubeShape = std::make_shared<btBoxShape>(btVector3(0.5f, 0.5f, 0.5f));
+    auto cubeRigidBody = RigidBody::create(cubeNode);
+    cubeRigidBody->setMass(1.f);
+    cubeRigidBody->setCollisionShape(cubeShape);
+
+    // create ground
+    const auto groundNode = Engine::instance().meshManager()->getMesh("cube.obj");
+    groundNode->name = "ground";
+    groundNode->setParent(rootNode);
+    groundNode->transform()->setScale(100, 1, 100);
+    groundNode->transform()->setPosition(0, -5, 0);
+
+    const auto groundMesh = groundNode->children().at(0)->getComponent<MeshComponent>();
+
+    groundMesh->setShader(blinnPhongSolidColorShaderProgram);
+    groundMesh->setBeforeDrawCallback([](const std::shared_ptr<ShaderProgram>& shaderProgram) {
+        shaderProgram->setUniform("color", glm::vec3(0.3, 0.3, 0.3));
+    });
+
+    auto groundShape = std::make_shared<btBoxShape>(btVector3(50.f, 0.5, 50.f));
+    auto groundRigidBody = RigidBody::create(groundNode);
+    groundRigidBody->setCollisionShape(groundShape);
 
     // create screen frame buffer
     const auto screenFrameBuffer = ScreenFrameBuffer::create(window);
@@ -153,19 +186,19 @@ int main() {
     // rendering pipeline
     window->makeCurrent();
 
+    Engine::instance().physicsManager()->dynamicsWorld()->setGravity(btVector3(0, -10.f, 0));
+    scene->emitStart();
+
     while(window->isOpen())
     {
-        window->beforeFrameRendered();
-
-        freeController->handleInput();
-
-        auto rotation = glm::angleAxis(Window::time() * glm::radians(45.0f), glm::normalize(glm::vec3(0, 1, 1)));
-        cubeNode->transform()->setOrientation(rotation);
+        Engine::instance().physicsManager()->dynamicsWorld()->stepSimulation(window->input()->deltaTime());
 
         skyboxNode->transform()->setPosition(cameraNode->transform()->position());
 
         rootNode->transform()->recalculate();
         camera->recalculateViewMatrix();
+
+        scene->emitUpdate();
 
         // draw
         glBindFramebuffer(GL_FRAMEBUFFER, screenFrameBuffer->FBO());
@@ -179,6 +212,7 @@ int main() {
 
         cubeMesh->draw(camera);
         lightSourceCubeMesh->draw(camera);
+        groundMesh->draw(camera);
 
         glCullFace(GL_FRONT);
         glDepthFunc(GL_LEQUAL);

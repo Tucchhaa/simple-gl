@@ -24,6 +24,8 @@ add_executable(main
     managers/mesh_manager.h
     managers/texture_manager.cpp
     managers/texture_manager.h
+    managers/physics_manager.cpp
+    managers/physics_manager.h
     entities/window.cpp
     entities/window.h
     entities/input.cpp
@@ -50,12 +52,16 @@ add_executable(main
     entities/components/mesh.h
     entities/components/light.cpp
     entities/components/light.h
+    entities/components/rigid_body.cpp
+    entities/components/rigid_body.h
     render-pipeline/screen_frame_buffer.cpp
     render-pipeline/screen_frame_buffer.h
     helpers/errors.cpp
     helpers/errors.h
     helpers/node_logger.cpp
     helpers/node_logger.h
+    helpers/converter.cpp
+    helpers/converter.h
 )
 
 target_link_libraries(main PRIVATE

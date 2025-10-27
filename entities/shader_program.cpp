@@ -209,7 +209,7 @@ void ShaderProgram::setDirectLightsUniform() {
 
     if (uniformExists("directLightsNum")) {
         for (int i = 0; i < scene->directLights().size(); i++) {
-            const auto light = scene->directLights()[i];
+            const auto light = scene->directLights()[i].lock();
             auto index_str = std::to_string(i);
 
             setUniform("directLights[" + index_str + "].direction", light->transform()->direction());
@@ -227,7 +227,7 @@ void ShaderProgram::setPointLightsUniform() {
 
     if (uniformExists("pointLightsNum")) {
         for (int i = 0; i < scene->pointLights().size(); i++) {
-            const auto light = scene->pointLights()[i];
+            const auto light = scene->pointLights()[i].lock();
             auto index_str = std::to_string(i);
 
             setUniform("pointLights[" + index_str + "].position", light->transform()->position());

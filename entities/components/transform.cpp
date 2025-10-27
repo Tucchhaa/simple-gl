@@ -1,5 +1,7 @@
 #include "transform.h"
 
+#include "rigid_body.h"
+#include "../node.h"
 #include "../scene.h"
 #include "../../managers/engine.h"
 
@@ -61,16 +63,31 @@ void Transform::rotate(const glm::quat& rotation, const std::shared_ptr<Transfor
 }
 
 void Transform::recalculate() {
-    if (m_dirty) {
-        const auto& parentNode = node()->parent();
-        const auto& parentTransform = parentNode->transform();
+    const auto rigidBody = node()->rigidBody();
+    const auto& parentNode = node()->parent();
+    const auto& parentTransform = parentNode->transform();
 
+    if (m_rigidBodyDirty && rigidBody) {
+        glm::vec3 worldPosition;
+        glm::quat worldOrientation;
+
+        rigidBody->getWorldTransform(worldPosition, worldOrientation);
+
+        m_position = worldPosition - parentTransform->m_absolutePosition;
+        m_orientation = glm::inverse(parentTransform->m_absoluteOrientation) * worldOrientation;
+    }
+
+    if (m_dirty) {
         m_absolutePosition = parentTransform->m_absolutePosition + m_position;
         m_absoluteScale = parentTransform->m_absoluteScale * m_scale;
         m_absoluteOrientation = glm::normalize(parentTransform->m_absoluteOrientation * m_orientation);
 
         m_transformMatrix = calculateTransformMatrix();
         m_direction = m_absoluteOrientation * glm::vec3(0, 0, 1);
+
+        if (!m_rigidBodyDirty && rigidBody) {
+            rigidBody->setWorldTransform(m_absolutePosition, m_absoluteOrientation);
+        }
     }
 
     if (m_subtreeDirty) {
@@ -84,6 +101,15 @@ void Transform::recalculate() {
 
     m_subtreeDirty = false;
     m_dirty = false;
+    m_rigidBodyDirty = false;
+}
+
+void Transform::onUpdate() {
+    auto rigidBody = node()->rigidBody();
+    if (rigidBody != nullptr && rigidBody->isDynamic()) {
+        // TODO: we need to mark transform dirty only when rigidbody's world transform changed
+        markAsRigidBodyDirty();
+    }
 }
 
 void Transform::markAsDirty() {
@@ -100,6 +126,11 @@ void Transform::markAsDirty() {
         currentNode->transform()->m_subtreeDirty = true;
         currentNode = currentNode->parent();
     }
+}
+
+void Transform::markAsRigidBodyDirty() {
+    m_rigidBodyDirty = true;
+    markAsDirty();
 }
 
 glm::mat4 Transform::calculateTransformMatrix() const {

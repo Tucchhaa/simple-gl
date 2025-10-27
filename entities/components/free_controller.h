@@ -16,10 +16,13 @@ public:
         return base_create<FreeController>(node, name);
     }
 
-    void handleInput();
+protected:
+    void onUpdate() override;
 
 private:
     bool m_canRotate = false;
+
+    void handleInput();
 };
 
 }

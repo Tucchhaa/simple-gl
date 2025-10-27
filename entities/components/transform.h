@@ -32,6 +32,9 @@ public:
     void setScale(float x, float y, float z);
     void setScale(glm::vec3 scale);
 
+    /// Note:
+    /// Absolute values are correct only during recalculate stage.
+    /// Later parent's node may be changed, so these values are not actual anymore
     glm::vec3 absoluteScale() const { return m_absoluteScale; }
     glm::vec3 absolutePosition() const { return m_absolutePosition; }
     glm::quat absoluteOrientation() const { return m_absoluteOrientation; }
@@ -44,6 +47,8 @@ public:
     void rotate(const glm::quat& rotation, const std::shared_ptr<Transform>& transform = nullptr);
 
     void recalculate();
+
+    void onUpdate() override;
 private:
     glm::vec3 m_scale = glm::vec3(1);
     glm::vec3 m_position = glm::vec3(0);
@@ -58,8 +63,10 @@ private:
 
     bool m_dirty = false;
     bool m_subtreeDirty = false;
+    bool m_rigidBodyDirty = false;
 
     void markAsDirty();
+    void markAsRigidBodyDirty();
 
     glm::mat4 calculateTransformMatrix() const;
 };

@@ -2,6 +2,7 @@
 
 #include <glad/glad.h>
 
+#include "../entities/node.h"
 #include "../entities/shader_program.h"
 #include "../entities/window.h"
 #include "../entities/components/mesh.h"

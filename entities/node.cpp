@@ -1,6 +1,7 @@
 #include "node.h"
 
 #include "components/component.h"
+#include "components/rigid_body.h"
 #include "components/transform.h"
 #include <vector>
 
@@ -22,7 +23,6 @@ void Node::addComponent(const std::shared_ptr<Component>& component) {
 
 void Node::setParent(const std::shared_ptr<Node> &parent) {
     auto oldParent = m_parent.lock();
-    auto my = shared_from_this();
 
     if (oldParent != nullptr) {
         std::erase(oldParent->m_children, shared_from_this());

@@ -16,9 +16,9 @@ public:
 
     std::shared_ptr<Window> createWindow(const std::string& label, int screenWidth, int screenHeight);
 
-    void destroyWindow(std::shared_ptr<Window>& window);
+    void destroyWindow(const std::shared_ptr<Window> &window);
 
-    std::shared_ptr<Window>& mainWindow() { return m_mainWindow; }
+    std::shared_ptr<Window> mainWindow() { return m_mainWindow; }
 
 private:
     std::shared_ptr<Window> m_mainWindow;

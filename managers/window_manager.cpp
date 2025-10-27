@@ -50,9 +50,8 @@ std::shared_ptr<Window> WindowManager::createWindow(const std::string& label, in
     return window;
 }
 
-void WindowManager::destroyWindow(std::shared_ptr<Window>& window) {
+void WindowManager::destroyWindow(const std::shared_ptr<Window> &window) {
     m_windowsMap.erase(window->label);
-    window.reset();
 }
 
 void WindowManager::init() {

@@ -7,6 +7,7 @@
 #include <assimp/scene.h>
 
 #include "engine.h"
+#include "../entities/node.h"
 #include "../entities/components/mesh.h"
 #include "../entities/mesh_data.h"
 #include "../helpers/errors.h"

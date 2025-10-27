@@ -10,6 +10,10 @@
 
 namespace SimpleGL {
 
+void FreeController::onUpdate() {
+    handleInput();
+}
+
 void FreeController::handleInput() {
     const auto input = Engine::instance().mainWindow()->input();
 
@@ -31,5 +35,6 @@ void FreeController::handleInput() {
         Engine::instance().mainWindow()->isCursorPositionFixed = m_canRotate;
     }
 }
+
 
 }

@@ -13,7 +13,7 @@ enum LightType {
 
 class Light : public Component {
 public:
-    Light(const std::weak_ptr<Node> &node, const std::string &name): Component(node, name) {}
+    Light(const std::weak_ptr<Node> &node, const std::string &name);
 
     virtual LightType getType() = 0;
 
@@ -31,9 +31,7 @@ public:
     static std::shared_ptr<DirectLight> create(
         const std::shared_ptr<Node> &node,
         const std::string& name = "DirectLight"
-    ) {
-        return base_create<DirectLight>(node, name);
-    }
+    );
 };
 
 class PointLight : public Light {
@@ -45,9 +43,7 @@ public:
     static std::shared_ptr<PointLight> create(
         const std::shared_ptr<Node> &node,
         const std::string& name = "PointLight"
-    ) {
-        return base_create<PointLight>(node, name);
-    }
+    );
 
     /// Distance at which light from the point light is zero.
     float distance = 1.0f;

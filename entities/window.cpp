@@ -54,13 +54,11 @@ void Window::makeCurrent() const {
     glfwMakeContextCurrent(m_glfwWindow);
 }
 
-void Window::beforeFrameRendered() const {
-    m_input->process();
-}
-
 void Window::afterFrameRendered() const {
     glfwSwapBuffers(m_glfwWindow);
     glfwPollEvents();
+
+    m_input->process();
 }
 
 void Window::close() const {

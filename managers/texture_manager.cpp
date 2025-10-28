@@ -6,7 +6,6 @@
 #include "engine.h"
 #include "../entities/texture.h"
 #include "../helpers/errors.h"
-
 namespace SimpleGL {
 
 std::shared_ptr<Texture> TextureManager::getTexture(const std::string &path, bool flip) {

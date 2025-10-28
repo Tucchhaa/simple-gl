@@ -45,6 +45,8 @@ public:
     const std::vector<std::shared_ptr<Node>>& children() const { return m_children; }
     std::shared_ptr<Node> getChild(const std::string& childName) const;
 
+    std::vector<std::shared_ptr<Component>> components() const;
+
 private:
     std::shared_ptr<Transform> m_transform;
     std::shared_ptr<RigidBody> m_rigidBody;

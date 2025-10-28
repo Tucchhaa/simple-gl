@@ -58,6 +58,8 @@ add_executable(main
     render-pipeline/screen_frame_buffer.h
     helpers/errors.cpp
     helpers/errors.h
+    helpers/node_logger.cpp
+    helpers/node_logger.h
     helpers/converter.cpp
     helpers/converter.h
 )
@@ -69,8 +71,5 @@ target_link_libraries(main PRIVATE
     assimp::assimp
     ${BULLET_LIBRARIES}
 )
-
-
-
 
 

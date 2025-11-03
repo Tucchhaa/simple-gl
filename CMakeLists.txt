@@ -62,6 +62,8 @@ add_executable(main
     helpers/node_logger.h
     helpers/converter.cpp
     helpers/converter.h
+
+    demos/basic_demo.h
 )
 
 target_link_libraries(main PRIVATE

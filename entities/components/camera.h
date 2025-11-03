@@ -25,11 +25,11 @@ public:
     }
 
     const glm::mat4& viewMatrix() const { return m_viewMatrix; }
-
     const glm::mat4& projectionMatrix() const { return m_projectionMatrix; }
 
-    void recalculateViewMatrix();
+    void onUpdate() override;
 
+    void recalculateViewMatrix();
     void recalculateProjectionMatrix(float fov, float near, float far);
 
 private:

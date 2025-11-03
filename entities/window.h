@@ -27,7 +27,7 @@ public:
 
     void beforeFrameRendered() const;
 
-    void afterFrameRendered() const;
+    void pollEvents() const;
 
     std::shared_ptr<Input>& input() { return m_input; }
 

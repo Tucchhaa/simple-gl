@@ -4,6 +4,7 @@
 
 #include "node.h"
 #include "components/light.h"
+#include "components/transform.h"
 
 namespace SimpleGL {
 
@@ -42,6 +43,8 @@ void Scene::emitStart() {
 }
 
 void Scene::emitUpdate() {
+    rootNode()->transform()->recalculate();
+
     for (auto component: m_componentsMap | std::views::values) {
         component.lock()->onUpdate();
     }

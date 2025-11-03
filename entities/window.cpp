@@ -54,7 +54,7 @@ void Window::makeCurrent() const {
     glfwMakeContextCurrent(m_glfwWindow);
 }
 
-void Window::afterFrameRendered() const {
+void Window::pollEvents() const {
     glfwSwapBuffers(m_glfwWindow);
     glfwPollEvents();
 

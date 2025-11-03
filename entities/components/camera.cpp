@@ -6,6 +6,10 @@
 
 namespace SimpleGL {
 
+void Camera::onUpdate() {
+    recalculateViewMatrix();
+}
+
 void Camera::recalculateViewMatrix() {
     m_viewMatrix = glm::mat4(1.0f);
 

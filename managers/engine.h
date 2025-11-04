@@ -15,6 +15,9 @@ class Input;
 class Scene;
 class Node;
 
+#define STRINGIFY(x) #x
+#define TOSTRING(x) STRINGIFY(x)
+
 class Engine {
 public:
     static Engine& instance() { return m_instance; }

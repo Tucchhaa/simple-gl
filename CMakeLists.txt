@@ -76,4 +76,6 @@ target_link_libraries(main PRIVATE
     ${BULLET_LIBRARIES}
 )
 
+target_compile_definitions(main PRIVATE "RESOURCES_PATH=\"${CMAKE_SOURCE_DIR}/resources\"")
+
 

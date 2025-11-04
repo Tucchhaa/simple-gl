@@ -1,6 +1,5 @@
-#include "input.h"
-
 #include "window.h"
+#include "input.h"
 
 namespace SimpleGL {
 
@@ -11,6 +10,16 @@ std::shared_ptr<Input> Input::create(const std::weak_ptr<Window>& window) {
 }
 
 void Input::process() {
+    m_previousKeyStates = m_currentKeyStates;
+    m_previousMouseStates = m_currentMouseStates;
+
+    for (int key = 0; key <= GLFW_KEY_LAST; ++key) {
+        m_currentKeyStates[key] = (glfwGetKey(window()->glfwWindow(), key) == GLFW_PRESS);
+    }
+    for (int button = 0; button <= GLFW_MOUSE_BUTTON_LAST; ++button) {
+        m_currentMouseStates[button] = (glfwGetMouseButton(window()->glfwWindow(), button) == GLFW_PRESS);
+    }
+
     updateCursorPosition();
     updateDeltaTime();
 
@@ -19,22 +28,38 @@ void Input::process() {
         return;
     }
 
-    m_yPositivePressed = isKeyPressed(GLFW_KEY_W);
-    m_yNegativePressed = isKeyPressed(GLFW_KEY_S);
-    m_xPositivePressed = isKeyPressed(GLFW_KEY_D);
-    m_xNegativePressed = isKeyPressed(GLFW_KEY_A);
+    m_yPositivePressed = isKeyDown(GLFW_KEY_W);
+    m_yNegativePressed = isKeyDown(GLFW_KEY_S);
+    m_xPositivePressed = isKeyDown(GLFW_KEY_D);
+    m_xNegativePressed = isKeyDown(GLFW_KEY_A);
 
     if (window()->isCursorPositionFixed) {
         window()->setCursorPositionToCenter();
     }
 }
 
+bool Input::isKeyDown(const int key) const {
+    return m_currentKeyStates[key];
+}
+
 bool Input::isKeyPressed(const int key) const {
-    return glfwGetKey(window()->glfwWindow(), key) == GLFW_PRESS;
+    return m_currentKeyStates[key] && !m_previousKeyStates[key];
+}
+
+bool Input::isKeyReleased(const int key) const {
+    return !m_currentKeyStates[key] && m_previousKeyStates[key];
+}
+
+bool Input::isMouseButtonDown(const int button) const {
+    return m_currentMouseStates[button];
 }
 
 bool Input::isMouseButtonPressed(const int button) const {
-    return glfwGetMouseButton(window()->glfwWindow(), button) == GLFW_PRESS;
+    return m_currentMouseStates[button] && !m_previousMouseStates[button];
+}
+
+bool Input::isMouseButtonReleased(const int button) const {
+    return !m_currentMouseStates[button] && m_previousMouseStates[button];
 }
 
 glm::vec2 Input::axisVec2() const {

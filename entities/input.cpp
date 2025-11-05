@@ -13,9 +13,6 @@ void Input::process() {
     m_previousKeyStates = m_currentKeyStates;
     m_previousMouseStates = m_currentMouseStates;
 
-    for (int key = 0; key <= GLFW_KEY_LAST; ++key) {
-        m_currentKeyStates[key] = (glfwGetKey(window()->glfwWindow(), key) == GLFW_PRESS);
-    }
     for (int button = 0; button <= GLFW_MOUSE_BUTTON_LAST; ++button) {
         m_currentMouseStates[button] = (glfwGetMouseButton(window()->glfwWindow(), button) == GLFW_PRESS);
     }
@@ -91,6 +88,20 @@ void Input::reset() {
 
 void Input::updateCursorPosition() {
     glfwGetCursorPos(window()->glfwWindow(), &m_mouseX, &m_mouseY);
+}
+
+
+void Input::setKeyState(int key, bool pressed) {
+    m_currentKeyStates[key] = pressed;
+}
+
+void Input::keyCallback(GLFWwindow *window, int key, int scancode, int action, int mods) {
+    auto* w = static_cast<Window*>(glfwGetWindowUserPointer(window));
+    if (action == GLFW_PRESS) {
+        w->input()->setKeyState(key, true);
+    } else if (action == GLFW_RELEASE) {
+        w->input()->setKeyState(key, false);
+    }
 }
 
 void Input::updateDeltaTime() {

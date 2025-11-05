@@ -41,6 +41,7 @@ void Window::setCallbacks() const {
         glViewport(0, 0, frameWidth, frameHeight);
     };
     glfwSetFramebufferSizeCallback(m_glfwWindow, resizeCallback);
+    glfwSetKeyCallback(m_glfwWindow, Input::keyCallback);
 }
 
 void Window::setCursorPositionToCenter() const {

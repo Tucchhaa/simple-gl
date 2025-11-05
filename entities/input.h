@@ -12,6 +12,7 @@ class Window;
 
 class Input {
 public:
+    friend class Window;
     static std::shared_ptr<Input> create(const std::weak_ptr<Window>& window);
 
     void process();
@@ -30,7 +31,11 @@ public:
 
     float deltaTime() const { return m_deltaTime; }
 
+    void setKeyState(int key, bool pressed);
+
 private:
+    static void keyCallback(GLFWwindow* window, int key, int scancode, int action, int mods);
+
     std::weak_ptr<Window> m_window;
 
     float m_lastFrameTime = 0;

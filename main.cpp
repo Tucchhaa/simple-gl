@@ -48,20 +48,7 @@ int main() {
         // draw scene
         glBindFramebuffer(GL_FRAMEBUFFER, screenFrameBuffer->FBO());
 
-        glClearColor(0.f, 0.f, 0.f, 1.0f);
-        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-
-        glEnable(GL_DEPTH_TEST);
-        glEnable(GL_CULL_FACE);
-        glCullFace(GL_BACK);
-
         demo.draw();
-
-        // draw skybox
-        glCullFace(GL_FRONT);
-        glDepthFunc(GL_LEQUAL);
-        demo.drawSkybox();
-        glDepthFunc(GL_LESS);
 
         // update screen & poll events
         screenFrameBuffer->renderFrame();

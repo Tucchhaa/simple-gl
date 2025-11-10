@@ -21,7 +21,7 @@ std::shared_ptr<ScreenFrameBuffer> ScreenFrameBuffer::create(const std::shared_p
 
     instance->m_colorTextureId = createColorTexture(window);
 
-    instance->m_quadNode = Engine::instance().meshManager()->getMesh("plane.obj");
+    instance->m_quadNode = Engine::instance().meshManager()->createNodeFromMeshData("plane.obj");
     instance->m_quadMesh = instance->m_quadNode->children().at(0)->getComponent<MeshComponent>();
 
     glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, instance->m_colorTextureId, 0);

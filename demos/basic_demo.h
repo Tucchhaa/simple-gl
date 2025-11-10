@@ -22,6 +22,7 @@ using namespace SimpleGL;
 
 class BasicDemo {
     std::shared_ptr<Node> rootNode;
+    std::shared_ptr<MeshManager> meshManager;
 
     std::shared_ptr<ShaderProgram> basicShader;
     std::shared_ptr<ShaderProgram> solidColorShader;
@@ -50,6 +51,7 @@ public:
         Engine::instance().setScene(scene);
 
         rootNode = Node::create("ROOT");
+        meshManager = Engine::instance().meshManager();
         scene->setRootNode(rootNode);
 
         Engine::instance().physicsManager()->dynamicsWorld()->setGravity(btVector3(0, -10.f, 0));
@@ -62,9 +64,21 @@ public:
     }
 
     void draw() {
+        glClearColor(0.f, 0.f, 0.f, 1.0f);
+        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+        glEnable(GL_DEPTH_TEST);
+        glEnable(GL_CULL_FACE);
+        glCullFace(GL_BACK);
+
         cubeMesh->draw(camera);
         lightSourceCubeMesh->draw(camera);
         groundMesh->draw(camera);
+
+        glCullFace(GL_FRONT);
+        glDepthFunc(GL_LEQUAL);
+        drawSkybox();
+        glDepthFunc(GL_LESS);
     }
 
     void drawSkybox() {
@@ -140,7 +154,7 @@ private:
             false
         );
 
-        skyboxNode = Engine::instance().meshManager()->getMesh("cube.obj");
+        skyboxNode = meshManager->createNodeFromMeshData("cube.obj");
         skyboxNode->setParent(rootNode);
         skyboxNode->name = "skyboxCube";
 
@@ -152,7 +166,7 @@ private:
     }
 
     void createGround() {
-        const auto groundNode = Engine::instance().meshManager()->getMesh("cube.obj");
+        const auto groundNode = meshManager->createNodeFromMeshData("cube.obj");
         groundNode->name = "ground";
         groundNode->setParent(rootNode);
         groundNode->transform()->setScale(100, 1, 100);
@@ -171,7 +185,7 @@ private:
     }
 
     void createLightSource() {
-        const auto lightSourceCubeNode = Engine::instance().meshManager()->getMesh("cube.obj");
+        const auto lightSourceCubeNode = meshManager->createNodeFromMeshData("cube.obj");
         lightSourceCubeNode->setParent(rootNode);
         lightSourceCubeNode->name = "lightSourceCube";
         lightSourceCubeNode->transform()->setScale(0.1f);
@@ -197,7 +211,7 @@ private:
     }
 
     void createCube() {
-        const auto cubeNode = Engine::instance().meshManager()->getMesh("cube.obj");
+        const auto cubeNode = meshManager->createNodeFromMeshData("cube.obj");
         cubeNode->name = "cube";
         cubeNode->setParent(rootNode);
         cubeNode->transform()->setScale(1);

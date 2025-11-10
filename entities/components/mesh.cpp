@@ -3,6 +3,7 @@
 #include "camera.h"
 #include "transform.h"
 #include "../mesh_data.h"
+#include "../node.h"
 #include "../shader_program.h"
 #include "../../helpers/errors.h"
 
@@ -10,6 +11,16 @@ namespace SimpleGL {
 
 MeshComponent::~MeshComponent() {
     glDeleteVertexArrays(1, &m_VAO);
+}
+
+std::shared_ptr<MeshComponent> MeshComponent::create(const std::shared_ptr<Node> &node,
+    const std::shared_ptr<MeshData> &meshData, const std::string &name) {
+    auto instance = base_create<MeshComponent>(node, name);
+
+    instance->m_meshData = meshData;
+    instance->m_VAO = instance->createVAO();
+
+    return instance;
 }
 
 void MeshComponent::setShader(const std::shared_ptr<ShaderProgram> &shaderProgram) {
@@ -23,6 +34,10 @@ void MeshComponent::setShader(const std::shared_ptr<ShaderProgram> &shaderProgra
 }
 
 void MeshComponent::draw(const std::shared_ptr<Camera>& camera) const {
+    if (node()->visible == false) {
+        return;
+    }
+
     if (m_shaderProgram == nullptr) {
         throw meshShaderNotSet(name);
     }

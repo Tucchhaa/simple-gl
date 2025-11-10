@@ -22,6 +22,7 @@ public:
     friend RigidBody;
 
     std::string name;
+    bool visible = true;
 
     static std::shared_ptr<Node> create(const std::string& name = "Node");
 

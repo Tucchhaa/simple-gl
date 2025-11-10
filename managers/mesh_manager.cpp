@@ -14,15 +14,11 @@
 
 namespace SimpleGL {
 
-std::shared_ptr<Node> MeshManager::getMesh(const std::filesystem::path &path) {
+std::shared_ptr<MeshData> MeshManager::loadMeshData(const std::filesystem::path &path) {
     const auto resourcePath = Engine::instance().getResourcePath(path);
 
-    if (const auto it = m_meshes.find(resourcePath); it != m_meshes.end()) {
-        if (const auto mesh = it->second.lock()) {
-            return createNode(mesh);
-        }
-
-        m_meshes.erase(it);
+    if (m_meshes.contains(path)) {
+        return m_meshes[path];
     }
 
     Assimp::Importer importer;
@@ -43,10 +39,17 @@ std::shared_ptr<Node> MeshManager::getMesh(const std::filesystem::path &path) {
 
     m_meshes[resourcePath] = meshData;
 
-    return createNode(meshData);
+    return meshData;
 }
 
-std::shared_ptr<Node> MeshManager::createNode(const std::shared_ptr<MeshData>& meshData) {
+void MeshManager::freeMeshData(const std::filesystem::path &path) {
+    if (m_meshes.contains(path)) {
+        m_meshes[path].reset();
+    }
+}
+
+std::shared_ptr<Node> MeshManager::createNodeFromMeshData(const std::filesystem::path &path) {
+    const auto meshData = loadMeshData(path);
     auto node = Node::create();
 
     std::queue<std::pair<std::shared_ptr<Node>, std::shared_ptr<MeshData>>> q;
@@ -71,6 +74,7 @@ std::shared_ptr<Node> MeshManager::createNode(const std::shared_ptr<MeshData>& m
     }
 
     return node;
+
 }
 
 }

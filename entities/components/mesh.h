@@ -23,14 +23,7 @@ public:
         const std::shared_ptr<Node> &node,
         const std::shared_ptr<MeshData>& meshData,
         const std::string& name = "Mesh"
-    ) {
-        auto instance = base_create<MeshComponent>(node, name);
-
-        instance->m_meshData = meshData;
-        instance->m_VAO = instance->createVAO();
-
-        return instance;
-    }
+    );
 
     unsigned int VAO() const { return m_VAO; }
 

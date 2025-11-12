@@ -2,6 +2,8 @@
 
 #include <memory>
 
+#include "base_frame_buffer.h"
+
 namespace SimpleGL {
 
 class ShaderProgram;
@@ -9,21 +11,20 @@ class Window;
 class Node;
 class MeshComponent;
 
-struct ScreenFrameBuffer {
+class ScreenFrameBuffer : public BaseFrameBuffer {
+public:
     static std::shared_ptr<ScreenFrameBuffer> create(const std::shared_ptr<Window>& window);
 
-    ~ScreenFrameBuffer();
+    ScreenFrameBuffer(int width, int height);
 
-    unsigned int FBO() const { return m_FBO; }
+    ~ScreenFrameBuffer();
 
     void setShader(const std::shared_ptr<ShaderProgram>& shaderProgram) const;
 
     void renderFrame() const;
 
 private:
-    unsigned int m_FBO = 0;
     unsigned int m_RBO = 0;
-
     unsigned int m_colorTextureId = 0;
 
     std::shared_ptr<Node> m_quadNode;
@@ -31,12 +32,7 @@ private:
 
     std::shared_ptr<ShaderProgram> m_shaderProgram;
 
-    static unsigned int createFBO();
-
-    /// Creates depth-stencil render buffer object instead of texture for optimization
-    static unsigned int createDepthStencilRBO(const std::shared_ptr<Window>& window);
-
-    static unsigned int createColorTexture(const std::shared_ptr<Window>& window);
+    void bindTexturesToFBO() const;
 };
 
 }

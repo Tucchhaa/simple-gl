@@ -12,8 +12,9 @@
 #include "entities/mesh_data.h"
 #include "entities/scene.h"
 #include "entities/window.h"
+#include "render-pipeline/framebuffers/msaa_frame_buffer.h"
 
-#include "render-pipeline/screen_frame_buffer.h"
+#include "render-pipeline/framebuffers/screen_frame_buffer.h"
 
 using namespace SimpleGL;
 
@@ -31,8 +32,11 @@ int main() {
         "frame shader"
     );
 
+    auto msaaFrameBuffer = MsaaFrameBuffer::create(window, 8);
+
     auto screenFrameBuffer = ScreenFrameBuffer::create(window);
     screenFrameBuffer->setShader(frameShaderProgram);
+
 
     demo.scene->emitStart();
 
@@ -42,12 +46,23 @@ int main() {
         demo.scene->emitUpdate();
 
         // draw scene
-        glBindFramebuffer(GL_FRAMEBUFFER, screenFrameBuffer->FBO());
+        // glBindFramebuffer(GL_FRAMEBUFFER, screenFrameBuffer->FBO());
+        glBindFramebuffer(GL_FRAMEBUFFER, msaaFrameBuffer->FBO());
 
         demo.draw();
 
-        // update screen & poll events
+        // resolve ms fbo & render frame onto the screen
+        glBindFramebuffer(GL_READ_FRAMEBUFFER, msaaFrameBuffer->FBO());
+        glBindFramebuffer(GL_DRAW_FRAMEBUFFER, screenFrameBuffer->FBO());
+        glBlitFramebuffer(
+            0, 0, msaaFrameBuffer->width(), msaaFrameBuffer->height(),
+            0, 0, screenFrameBuffer->width(), screenFrameBuffer->height(),
+            GL_COLOR_BUFFER_BIT, GL_NEAREST
+        );
+
         screenFrameBuffer->renderFrame();
+
+        // poll input events
         window->pollEvents();
 
         if (window->input()->isKeyPressed(GLFW_KEY_ESCAPE)) {

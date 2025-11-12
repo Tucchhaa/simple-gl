@@ -194,8 +194,11 @@ int ShaderProgram::getTextureUnitLocation(int uniformLocation) {
 }
 
 void ShaderProgram::setCameraUniforms(const std::shared_ptr<Camera> &camera) {
-    if (camera) {
+    if (uniformExists("view")) {
         setUniform("view", camera->viewMatrix());
+    }
+
+    if (uniformExists("projection")) {
         setUniform("projection", camera->projectionMatrix());
     }
 

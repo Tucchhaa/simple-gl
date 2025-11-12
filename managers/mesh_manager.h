@@ -21,7 +21,10 @@ public:
 
     void freeMeshData(const std::filesystem::path& path);
 
-    std::shared_ptr<Node> createNodeFromMeshData(const std::filesystem::path& path);
+    std::shared_ptr<Node> createNodeFromMeshData(
+        const std::filesystem::path& path,
+        const std::shared_ptr<Node>& parent = nullptr
+    );
 
 private:
     std::unordered_map<std::string, std::shared_ptr<MeshData>> m_meshes;

@@ -24,7 +24,10 @@ public:
     std::string name;
     bool visible = true;
 
-    static std::shared_ptr<Node> create(const std::string& name = "Node");
+    static std::shared_ptr<Node> create(
+        const std::string& name = "Node",
+        const std::shared_ptr<Node>& parent = nullptr
+    );
 
     template <typename T>
     std::shared_ptr<T> getComponent() {

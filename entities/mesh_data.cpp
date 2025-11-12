@@ -17,10 +17,16 @@ std::shared_ptr<MeshData> MeshData::createFromScene(const aiScene *scene) {
 }
 
 std::shared_ptr<MeshData> MeshData::parseScene(const aiScene *scene) {
+    auto rootNode = scene->mRootNode;
+
+    while (rootNode->mNumMeshes == 0 && rootNode->mNumChildren == 1) {
+        rootNode = rootNode->mChildren[0];
+    }
+
     auto meshData = create();
 
     std::queue<std::pair<aiNode*, std::shared_ptr<MeshData>>> q;
-    q.emplace(scene->mRootNode, meshData);
+    q.emplace(rootNode, meshData);
 
     while (!q.empty()) {
         const auto [currentAiNode, currentMeshData] = q.front();

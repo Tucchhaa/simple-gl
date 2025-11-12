@@ -2,6 +2,7 @@
 
 #include <BulletCollision/CollisionShapes/btBoxShape.h>
 
+#include "../entities/input.h"
 #include "../managers/engine.h"
 #include "../managers/mesh_manager.h"
 #include "../managers/shader_manager.h"
@@ -10,6 +11,7 @@
 #include "../entities/node.h"
 #include "../entities/scene.h"
 #include "../entities/shader_program.h"
+#include "../entities/window.h"
 #include "../entities/components/camera.h"
 #include "../entities/components/free_controller.h"
 #include "../entities/components/light.h"
@@ -17,12 +19,14 @@
 #include "../entities/components/rigid_body.h"
 #include "../entities/components/transform.h"
 #include "../managers/physics_manager.h"
+#include "../managers/window_manager.h"
 
 using namespace SimpleGL;
 
 class BasicDemo {
     std::shared_ptr<Node> rootNode;
     std::shared_ptr<MeshManager> meshManager;
+    std::shared_ptr<btDynamicsWorld> dynamicsWorld;
 
     std::shared_ptr<ShaderProgram> basicShader;
     std::shared_ptr<ShaderProgram> solidColorShader;
@@ -34,14 +38,13 @@ class BasicDemo {
     std::shared_ptr<Texture> cubeDiffuseTexture;
     std::shared_ptr<Texture> cubeSpecularTexture;
 
+    std::shared_ptr<Node> staticNode;
     std::shared_ptr<Node> skyboxNode;
 
     std::shared_ptr<Camera> camera;
 
+    std::vector<std::shared_ptr<MeshComponent>> meshes;
     std::shared_ptr<MeshComponent> skyboxCubeMesh;
-    std::shared_ptr<MeshComponent> groundMesh;
-    std::shared_ptr<MeshComponent> lightSourceCubeMesh;
-    std::shared_ptr<MeshComponent> cubeMesh;
 
 public:
     std::shared_ptr<Scene> scene;
@@ -52,14 +55,18 @@ public:
 
         rootNode = Node::create("ROOT");
         meshManager = Engine::instance().meshManager();
+        dynamicsWorld = Engine::instance().physicsManager()->dynamicsWorld();
         scene->setRootNode(rootNode);
 
-        Engine::instance().physicsManager()->dynamicsWorld()->setGravity(btVector3(0, -10.f, 0));
+        dynamicsWorld->setGravity(btVector3(0, -10.f, 0));
 
         createScene();
     }
 
     void updateNodes() {
+        float timeStep = Engine::instance().windowManager()->mainWindow()->input()->deltaTime();
+        dynamicsWorld->stepSimulation(timeStep);
+
         skyboxNode->transform()->setPosition(camera->transform()->position());
     }
 
@@ -71,18 +78,14 @@ public:
         glEnable(GL_CULL_FACE);
         glCullFace(GL_BACK);
 
-        cubeMesh->draw(camera);
-        lightSourceCubeMesh->draw(camera);
-        groundMesh->draw(camera);
+        for (const auto& mesh: meshes) {
+            mesh->draw(camera);
+        }
 
         glCullFace(GL_FRONT);
         glDepthFunc(GL_LEQUAL);
-        drawSkybox();
-        glDepthFunc(GL_LESS);
-    }
-
-    void drawSkybox() {
         skyboxCubeMesh->draw(camera);
+        glDepthFunc(GL_LESS);
     }
 
 private:
@@ -90,7 +93,11 @@ private:
         createShaders();
         createCamera();
         createSkybox();
+
+        staticNode = Node::create("staticNode", rootNode);
         createGround();
+        createWalls();
+
         createLightSource();
         createCube();
     }
@@ -128,13 +135,12 @@ private:
     }
 
     void createCamera() {
-        auto cameraNode = Node::create("cameraNode");
-        cameraNode->setParent(rootNode);
+        auto cameraNode = Node::create("cameraNode", rootNode);
         cameraNode->transform()->setPosition(0, 0, 3);
 
         camera = Camera::create(
             cameraNode,
-            glm::radians(45.0f),
+            glm::radians(90.0f),
             0.3f,
             1000.0f
         );
@@ -154,82 +160,112 @@ private:
             false
         );
 
-        skyboxNode = meshManager->createNodeFromMeshData("cube.obj");
-        skyboxNode->setParent(rootNode);
+        skyboxNode = meshManager->createNodeFromMeshData("cube.obj", rootNode);
         skyboxNode->name = "skyboxCube";
 
-        skyboxCubeMesh = skyboxNode->children().at(0)->getComponent<MeshComponent>();
+        skyboxCubeMesh = skyboxNode->getComponent<MeshComponent>();
         skyboxCubeMesh->setShader(skyboxShader);
-        skyboxCubeMesh->setBeforeDrawCallback([this](const std::shared_ptr<ShaderProgram>& shaderProgram) {
+        skyboxCubeMesh->setBeforeDrawCallback([this](const auto& shaderProgram) {
             shaderProgram->setTexture("cubeMap", skyboxTexture);
         });
     }
 
     void createGround() {
-        const auto groundNode = meshManager->createNodeFromMeshData("cube.obj");
-        groundNode->name = "ground";
-        groundNode->setParent(rootNode);
-        groundNode->transform()->setScale(100, 1, 100);
-        groundNode->transform()->setPosition(0, -5, 0);
+        const auto node = meshManager->createNodeFromMeshData("cube.obj", staticNode);
+        node->name = "ground";
+        node->transform()->setScale(100, 1, 100);
+        node->transform()->setPosition(0, -5, 0);
 
-        groundMesh = groundNode->children().at(0)->getComponent<MeshComponent>();
-
-        groundMesh->setShader(blinnPhongSolidColorShader);
-        groundMesh->setBeforeDrawCallback([](const std::shared_ptr<ShaderProgram>& shaderProgram) {
+        auto mesh = node->getComponent<MeshComponent>();
+        mesh->setShader(blinnPhongSolidColorShader);
+        mesh->setBeforeDrawCallback([](const std::shared_ptr<ShaderProgram>& shaderProgram) {
             shaderProgram->setUniform("color", glm::vec3(0.3, 0.3, 0.3));
         });
 
+        meshes.push_back(mesh);
+
         auto groundShape = std::make_shared<btBoxShape>(btVector3(50.f, 0.5, 50.f));
-        auto groundRigidBody = RigidBody::create(groundNode);
-        groundRigidBody->setCollisionShape(groundShape);
+        auto rigidbody = RigidBody::create(node);
+        rigidbody->setCollisionShape(groundShape);
+    }
+
+    void createWalls() {
+        float scale = 30.0f;
+        float positionX[] = { 0.0f, 0.5f, 0.0f, -0.5f };
+        float positionZ[] = { 0.5f, 0.0f, -0.5f, 0.0f };
+
+        for (int i=0; i < 4; i++) {
+            auto node = meshManager->createNodeFromMeshData("cube.obj", staticNode);
+            node->name = "wallNode"+std::to_string(i);
+            node->transform()->setScale(scale, 4, 1);
+            node->transform()->setPosition(
+                positionX[i] * scale,
+                -3.0f,
+                positionZ[i] * scale
+            );
+
+            if (positionX[i] != 0.0f) {
+                auto r = glm::angleAxis(glm::radians(90.f), glm::vec3(0, 1, 0));
+                node->transform()->rotate(r);
+            }
+
+            auto mesh = node->getComponent<MeshComponent>();
+            mesh->setShader(blinnPhongSolidColorShader);
+            mesh->setBeforeDrawCallback([](const std::shared_ptr<ShaderProgram>& shaderProgram) {
+                shaderProgram->setUniform("color", glm::vec3(0.3, 0.3, 0.3));
+            });
+
+            meshes.push_back(mesh);
+        }
     }
 
     void createLightSource() {
-        const auto lightSourceCubeNode = meshManager->createNodeFromMeshData("cube.obj");
-        lightSourceCubeNode->setParent(rootNode);
-        lightSourceCubeNode->name = "lightSourceCube";
-        lightSourceCubeNode->transform()->setScale(0.1f);
-        lightSourceCubeNode->transform()->setPosition(5, 1, 0);
-        lightSourceCubeNode->transform()->setOrientation(glm::quat(glm::radians(glm::vec3(45, -45, 0))));
+        const auto node = meshManager->createNodeFromMeshData("cube.obj", rootNode);
+        node->name = "lightSourceCube";
+        node->transform()->setScale(0.1f);
+        node->transform()->setPosition(5, 1, 0);
+        node->transform()->setOrientation(glm::quat(glm::radians(glm::vec3(45, -45, 0))));
 
-        lightSourceCubeMesh = lightSourceCubeNode->children().at(0)->getComponent<MeshComponent>();
-        lightSourceCubeMesh->setShader(solidColorShader);
-        lightSourceCubeMesh->setBeforeDrawCallback([](const std::shared_ptr<ShaderProgram>& shaderProgram) {
+        auto mesh = node->getComponent<MeshComponent>();
+        mesh->setShader(solidColorShader);
+        mesh->setBeforeDrawCallback([](const std::shared_ptr<ShaderProgram>& shaderProgram) {
             shaderProgram->setUniform("color", 1, 1, 1);
         });
 
-        const auto pointLight = PointLight::create(lightSourceCubeNode);
+        meshes.push_back(mesh);
+
+        const auto pointLight = PointLight::create(node);
         pointLight->ambient = glm::vec3(0.1);
         pointLight->diffuse = glm::vec3(1.0);
         pointLight->specular = glm::vec3(0.4);
         pointLight->distance = 10.0f;
 
-        const auto directLight = DirectLight::create(lightSourceCubeNode);
+        const auto directLight = DirectLight::create(node);
         directLight->ambient = glm::vec3(0.1);
         directLight->diffuse = glm::vec3(0.7);
         directLight->specular = glm::vec3(0.3);
     }
 
     void createCube() {
-        const auto cubeNode = meshManager->createNodeFromMeshData("cube.obj");
-        cubeNode->name = "cube";
-        cubeNode->setParent(rootNode);
-        cubeNode->transform()->setScale(1);
+        const auto node = meshManager->createNodeFromMeshData("cube.obj", rootNode);
+        node->name = "cube";
+        node->transform()->setScale(1);
 
-        cubeMesh = cubeNode->children().at(0)->getComponent<MeshComponent>();
+        auto mesh = node->getComponent<MeshComponent>();
 
         cubeDiffuseTexture = Engine::instance().textureManager()->getTexture("diffuse.png");
         cubeSpecularTexture = Engine::instance().textureManager()->getTexture("specular.png");
 
-        cubeMesh->setShader(blinnPhongShader);
-        cubeMesh->setBeforeDrawCallback([this](const std::shared_ptr<ShaderProgram>& shaderProgram) {
+        mesh->setShader(blinnPhongShader);
+        mesh->setBeforeDrawCallback([this](const std::shared_ptr<ShaderProgram>& shaderProgram) {
             shaderProgram->setTexture("diffuseTexture", cubeDiffuseTexture);
             shaderProgram->setTexture("specularTexture", cubeSpecularTexture);
         });
+        meshes.push_back(mesh);
 
         auto cubeShape = std::make_shared<btBoxShape>(btVector3(0.5f, 0.5f, 0.5f));
-        auto cubeRigidBody = RigidBody::create(cubeNode);
-        cubeRigidBody->setMass(1.f);
-        cubeRigidBody->setCollisionShape(cubeShape);
+        auto rigidbody = RigidBody::create(node);
+        rigidbody->setMass(1.f);
+        rigidbody->setCollisionShape(cubeShape);
     }
 };

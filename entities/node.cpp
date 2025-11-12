@@ -7,12 +7,19 @@
 
 namespace SimpleGL {
 
-std::shared_ptr<Node> Node::create(const std::string &name) {
+std::shared_ptr<Node> Node::create(
+    const std::string &name,
+    const std::shared_ptr<Node>& parent
+) {
     auto instance = std::shared_ptr<Node>(new Node(name));
 
     auto transform = Transform::create(instance);
     instance->m_transform = transform;
     instance->addComponent(transform);
+
+    if (parent) {
+        instance->setParent(parent);
+    }
 
     return instance;
 }

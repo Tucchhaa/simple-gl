@@ -12,7 +12,6 @@
 #include "entities/mesh_data.h"
 #include "entities/scene.h"
 #include "entities/window.h"
-#include "managers/physics_manager.h"
 
 #include "render-pipeline/screen_frame_buffer.h"
 
@@ -32,7 +31,6 @@ int main() {
         "frame shader"
     );
 
-
     auto screenFrameBuffer = ScreenFrameBuffer::create(window);
     screenFrameBuffer->setShader(frameShaderProgram);
 
@@ -40,8 +38,6 @@ int main() {
 
     while(window->isOpen())
     {
-        Engine::instance().physicsManager()->dynamicsWorld()->stepSimulation(window->input()->deltaTime());
-
         demo.updateNodes();
         demo.scene->emitUpdate();
 

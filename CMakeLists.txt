@@ -54,6 +54,8 @@ add_executable(main
     entities/components/light.h
     entities/components/rigid_body.cpp
     entities/components/rigid_body.h
+    entities/components/portal.cpp
+    entities/components/portal.h
     render-pipeline/screen_frame_buffer.cpp
     render-pipeline/screen_frame_buffer.h
     helpers/errors.cpp

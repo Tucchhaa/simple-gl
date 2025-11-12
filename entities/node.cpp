@@ -42,8 +42,9 @@ void Node::setParent(const std::shared_ptr<Node> &parent) {
 
 std::shared_ptr<Node> Node::getChild(const std::string& childName) const {
     for (auto child : m_children) {
-        if (child->name == childName) {}
-        return child;
+        if (child->name == childName) {
+            return child;
+        }
     }
 
     return nullptr;

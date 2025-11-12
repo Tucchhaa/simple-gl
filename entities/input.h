@@ -4,6 +4,7 @@
 #include <array>
 
 #include <glm/glm.hpp>
+#include <glad/glad.h>
 #include <GLFW/glfw3.h>
 
 namespace SimpleGL {
@@ -12,8 +13,11 @@ class Window;
 
 class Input {
 public:
-    friend class Window;
     static std::shared_ptr<Input> create(const std::weak_ptr<Window>& window);
+
+    void keyCallback(int key, int action);
+
+    void mouseButtonCallback(int button, int action);
 
     void process();
 
@@ -34,17 +38,11 @@ public:
     void setKeyState(int key, bool pressed);
 
 private:
-    static void keyCallback(GLFWwindow* window, int key, int scancode, int action, int mods);
 
     std::weak_ptr<Window> m_window;
 
     float m_lastFrameTime = 0;
     float m_deltaTime = 0;
-
-    float m_yPositivePressed = 0;
-    float m_yNegativePressed = 0;
-    float m_xPositivePressed = 0;
-    float m_xNegativePressed = 0;
 
     double m_mouseX = 0;
     double m_mouseY = 0;

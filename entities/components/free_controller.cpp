@@ -36,5 +36,4 @@ void FreeController::handleInput() {
     }
 }
 
-
 }

@@ -40,7 +40,20 @@ void Window::setCallbacks() const {
         self->m_frameHeight = frameHeight;
         glViewport(0, 0, frameWidth, frameHeight);
     };
+
+    auto keyCallback = [](GLFWwindow *window, int key, int scancode, int action, int mods) {
+        auto* self = static_cast<Window*>(glfwGetWindowUserPointer(window));
+        self->input()->keyCallback(key, action);
+    };
+
+    auto mouseButtonCallback = [](GLFWwindow* window, int button, int action, int mods) {
+        auto* self = static_cast<Window*>(glfwGetWindowUserPointer(window));
+        self->input()->mouseButtonCallback(button, action);
+    };
+
     glfwSetFramebufferSizeCallback(m_glfwWindow, resizeCallback);
+    glfwSetKeyCallback(m_glfwWindow, keyCallback);
+    glfwSetMouseButtonCallback(m_glfwWindow, mouseButtonCallback);
 }
 
 void Window::setCursorPositionToCenter() const {
@@ -55,10 +68,10 @@ void Window::makeCurrent() const {
 }
 
 void Window::pollEvents() const {
+    m_input->process();
+
     glfwSwapBuffers(m_glfwWindow);
     glfwPollEvents();
-
-    m_input->process();
 }
 
 void Window::close() const {

@@ -48,9 +48,12 @@ void MeshManager::freeMeshData(const std::filesystem::path &path) {
     }
 }
 
-std::shared_ptr<Node> MeshManager::createNodeFromMeshData(const std::filesystem::path &path) {
+std::shared_ptr<Node> MeshManager::createNodeFromMeshData(
+    const std::filesystem::path& path,
+    const std::shared_ptr<Node>& parent
+) {
     const auto meshData = loadMeshData(path);
-    auto node = Node::create();
+    auto node = Node::create("Node", parent);
 
     std::queue<std::pair<std::shared_ptr<Node>, std::shared_ptr<MeshData>>> q;
     q.emplace(node, meshData);

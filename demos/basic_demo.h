@@ -16,6 +16,7 @@
 #include "../entities/components/free_controller.h"
 #include "../entities/components/light.h"
 #include "../entities/components/mesh.h"
+#include "../entities/components/portal.h"
 #include "../entities/components/rigid_body.h"
 #include "../entities/components/transform.h"
 #include "../managers/physics_manager.h"
@@ -38,13 +39,16 @@ class BasicDemo {
     std::shared_ptr<Texture> cubeDiffuseTexture;
     std::shared_ptr<Texture> cubeSpecularTexture;
 
+    // This node contains static elements of the scene
     std::shared_ptr<Node> staticNode;
-    std::shared_ptr<Node> skyboxNode;
 
     std::shared_ptr<Camera> camera;
+    std::shared_ptr<Portal> portal;
 
     std::vector<std::shared_ptr<MeshComponent>> meshes;
     std::shared_ptr<MeshComponent> skyboxCubeMesh;
+    std::shared_ptr<MeshComponent> portal1Mesh;
+    std::shared_ptr<MeshComponent> portal2Mesh;
 
 public:
     std::shared_ptr<Scene> scene;
@@ -66,26 +70,70 @@ public:
     void updateNodes() {
         float timeStep = Engine::instance().windowManager()->mainWindow()->input()->deltaTime();
         dynamicsWorld->stepSimulation(timeStep);
-
-        skyboxNode->transform()->setPosition(camera->transform()->position());
     }
 
     void draw() {
-        glClearColor(0.f, 0.f, 0.f, 1.0f);
-        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-
-        glEnable(GL_DEPTH_TEST);
         glEnable(GL_CULL_FACE);
         glCullFace(GL_BACK);
+
+        // Clear all buffers
+        glColorMask(GL_TRUE, GL_TRUE, GL_TRUE, GL_TRUE);
+        glDepthMask(GL_TRUE);
+        glStencilMask(0xFF);
+        glClearColor(0.f, 0.f, 0.f, 1.0f);
+        glClearStencil(0);
+        glClearDepth(1);
+        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
+
+        // Draw portal into stencil buffer
+        glDisable(GL_DEPTH_TEST);
+        glEnable(GL_STENCIL_TEST);
+        glColorMask(GL_FALSE, GL_FALSE, GL_FALSE, GL_FALSE);
+        glDepthMask(GL_FALSE);
+        glStencilMask(0xFF);
+        glStencilFunc(GL_ALWAYS, 1, 0xFF);
+        glStencilOp(GL_KEEP, GL_KEEP, GL_REPLACE);
+
+        portal1Mesh->draw(camera);
+
+        // Draw scene from virtual camera into the portal frame
+        glEnable(GL_DEPTH_TEST);
+        glColorMask(GL_TRUE, GL_TRUE, GL_TRUE, GL_TRUE);
+        glDepthMask(GL_TRUE);
+        glStencilMask(0x00);
+        glStencilFunc(GL_EQUAL, 1, 0xFF);
+
+        for (const auto& mesh : meshes) {
+            mesh->draw(portal->portal2VirtualCamera);
+        }
+
+        drawSkybox(portal->portal2VirtualCamera);
+
+        // Draw portal to depth buffer
+        glDisable(GL_STENCIL_TEST);
+        glClear(GL_DEPTH_BUFFER_BIT);
+        glColorMask(GL_FALSE, GL_FALSE, GL_FALSE, GL_FALSE);
+
+        portal1Mesh->draw(camera);
+
+        // Draw scene from main camera
+        glColorMask(GL_TRUE, GL_TRUE, GL_TRUE, GL_TRUE);
 
         for (const auto& mesh: meshes) {
             mesh->draw(camera);
         }
 
+        portal2Mesh->draw(camera);
+
+        drawSkybox(camera);
+    }
+
+    void drawSkybox(const std::shared_ptr<Camera>& _camera) {
         glCullFace(GL_FRONT);
         glDepthFunc(GL_LEQUAL);
-        skyboxCubeMesh->draw(camera);
+        skyboxCubeMesh->draw(_camera);
         glDepthFunc(GL_LESS);
+        glCullFace(GL_BACK);
     }
 
 private:
@@ -93,6 +141,7 @@ private:
         createShaders();
         createCamera();
         createSkybox();
+        createPortal();
 
         staticNode = Node::create("staticNode", rootNode);
         createGround();
@@ -160,13 +209,43 @@ private:
             false
         );
 
-        skyboxNode = meshManager->createNodeFromMeshData("cube.obj", rootNode);
-        skyboxNode->name = "skyboxCube";
+        auto node = meshManager->createNodeFromMeshData("cube.obj", rootNode);
+        node->name = "skyboxCube";
 
-        skyboxCubeMesh = skyboxNode->getComponent<MeshComponent>();
+        skyboxCubeMesh = node->getComponent<MeshComponent>();
         skyboxCubeMesh->setShader(skyboxShader);
         skyboxCubeMesh->setBeforeDrawCallback([this](const auto& shaderProgram) {
             shaderProgram->setTexture("cubeMap", skyboxTexture);
+        });
+    }
+
+    void createPortal() {
+        auto node = Node::create("portal", rootNode);
+
+        portal = Portal::create(node, camera);
+
+        // Need to rotate plane such that its normal is parallel to direction vector of parent node
+        const auto orientation = glm::angleAxis(glm::radians(90.f), glm::vec3(1.0f, 0, 0));
+        portal->portal1Node->getChild("meshNode")->transform()->setOrientation(orientation);
+        portal->portal2Node->getChild("meshNode")->transform()->setOrientation(orientation);
+
+        portal->portal1Node->transform()->setPosition(3, -3, -14.45);
+        portal->portal2Node->transform()->setPosition(-1, -3, -14.45);
+
+        const auto planeMesh = meshManager->loadMeshData("plane.obj");
+        portal->setPortalMesh(planeMesh);
+
+        portal1Mesh = portal->portal1Node->getChildComponent<MeshComponent>();
+        portal2Mesh = portal->portal2Node->getChildComponent<MeshComponent>();
+
+        portal1Mesh->setShader(solidColorShader);
+        portal1Mesh->setBeforeDrawCallback([](const auto& shader) {
+            shader->setUniform("color", 0.5f, 0.1f, 0.1f);
+        });
+
+        portal2Mesh->setShader(solidColorShader);
+        portal2Mesh->setBeforeDrawCallback([](const auto& shader) {
+            shader->setUniform("color", 0.1f, 0.5f, 0.1f);
         });
     }
 

@@ -5,7 +5,6 @@
 #include "managers/engine.h"
 #include "managers/mesh_manager.h"
 #include "managers/shader_manager.h"
-#include "managers/texture_manager.h"
 #include "managers/window_manager.h"
 
 #include "entities/input.h"
@@ -19,6 +18,9 @@
 using namespace SimpleGL;
 
 int main() {
+    constexpr int MSAA_SAMPLES = 4;
+    constexpr bool HDR_ENABLED = false;
+
     auto window = Engine::instance().windowManager()->createWindow("main", 800, 600);
     window->setTitle("Learn OpenGL");
     window->makeCurrent();
@@ -28,15 +30,14 @@ int main() {
     // create screen frame buffer
     auto frameShaderProgram = Engine::instance().shaderManager()->createShaderProgram(
         "shaders/frame/vertex.glsl",
-        "shaders/frame/basic-fragment.glsl",
+        HDR_ENABLED ? "shaders/frame/hdr-fragment.glsl" : "shaders/frame/basic-fragment.glsl",
         "frame shader"
     );
 
-    auto msaaFrameBuffer = MsaaFrameBuffer::create(window, 8);
+    auto msaaFrameBuffer = MsaaFrameBuffer::create(window, HDR_ENABLED, MSAA_SAMPLES);
 
-    auto screenFrameBuffer = ScreenFrameBuffer::create(window);
+    auto screenFrameBuffer = ScreenFrameBuffer::create(window, HDR_ENABLED);
     screenFrameBuffer->setShader(frameShaderProgram);
-
 
     demo.scene->emitStart();
 

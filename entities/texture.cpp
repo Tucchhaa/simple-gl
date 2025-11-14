@@ -2,14 +2,19 @@
 
 namespace SimpleGL {
 
-unsigned int Texture::createTexture(unsigned char *data, int width, int height, GLenum format) {
+unsigned int Texture::createTexture(
+    unsigned char *data, int width, int height,
+    int channelsNum, bool isAlbedo
+) {
     unsigned int textureId;
+    int internalFormat = getInternalFormat(isAlbedo);
+    unsigned int format = getFormat(channelsNum);
 
     glGenTextures(1, &textureId);
     glBindTexture(GL_TEXTURE_2D, textureId);
 
     glTexImage2D(
-        GL_TEXTURE_2D, 0, format,
+        GL_TEXTURE_2D, 0, internalFormat,
         width, height, 0,
         format, GL_UNSIGNED_BYTE, data
     );
@@ -21,18 +26,21 @@ unsigned int Texture::createTexture(unsigned char *data, int width, int height, 
 
 unsigned int Texture::createCubeMapTexture(
     const std::vector<unsigned char *> &data,
-    int width, int height, GLenum format
+    int width, int height, int channelsNum
 ) {
     constexpr int texturesCount = 6;
+
     unsigned int textureId;
+    int internalFormat = getInternalFormat(true);
+    unsigned int format = getFormat(channelsNum);
 
     glGenTextures(1, &textureId);
     glBindTexture(GL_TEXTURE_CUBE_MAP, textureId);
 
-    for (unsigned int i = 0; i < texturesCount; ++i) {
+    for (unsigned int i = 0; i < texturesCount; i++) {
         glTexImage2D(
             GL_TEXTURE_CUBE_MAP_POSITIVE_X + i,
-            0, format, width, height, 0, format,
+            0, internalFormat, width, height, 0, format,
             GL_UNSIGNED_BYTE, data[i]
         );
     }
@@ -64,4 +72,20 @@ unsigned int Texture::createCubeMapSampler() {
 
     return samplerId;
 }
+
+int Texture::getInternalFormat(bool isAlbedo) {
+    return isAlbedo ? GL_SRGB : GL_RGB;
+}
+
+unsigned int Texture::getFormat(int channelsNum) {
+    if (channelsNum == 1)
+        return GL_RED;
+    if (channelsNum == 3)
+        return GL_RGB;
+    if (channelsNum == 4)
+        return GL_RGBA;
+
+    return 0;
+}
+
 }

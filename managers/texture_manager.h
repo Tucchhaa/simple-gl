@@ -16,7 +16,7 @@ public:
         return std::make_shared<TextureManager>();
     }
 
-    std::shared_ptr<Texture> getTexture(const std::string& path, bool flip = true);
+    std::shared_ptr<Texture> getTexture(const std::string& path, bool isAlbedo, bool flip = true);
 
     std::shared_ptr<Texture> getCubeMapTexture(
         const std::string& name,
@@ -36,10 +36,9 @@ private:
     std::shared_ptr<Texture> _getTexture(
         const std::string& key,
         const std::vector<std::string>& paths,
+        bool isAlbedo,
         bool flip
     );
-
-    static GLenum getFormat(int channelsNum);
 };
 
 }

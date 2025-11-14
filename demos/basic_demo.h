@@ -314,15 +314,15 @@ private:
         meshes.push_back(mesh);
 
         const auto pointLight = PointLight::create(node);
-        pointLight->ambient = glm::vec3(0.1);
-        pointLight->diffuse = glm::vec3(1.0);
-        pointLight->specular = glm::vec3(0.4);
+        pointLight->ambient = glm::vec3(0.0);
+        pointLight->diffuse = glm::vec3(0.7);
+        pointLight->specular = glm::vec3(0.2);
         pointLight->distance = 10.0f;
 
         const auto directLight = DirectLight::create(node);
-        directLight->ambient = glm::vec3(0.1);
-        directLight->diffuse = glm::vec3(0.7);
-        directLight->specular = glm::vec3(0.3);
+        directLight->ambient = glm::vec3(0.05);
+        directLight->diffuse = glm::vec3(0.25);
+        directLight->specular = glm::vec3(0.04);
     }
 
     void createCube() {
@@ -332,8 +332,8 @@ private:
 
         auto mesh = node->getComponent<MeshComponent>();
 
-        cubeDiffuseTexture = Engine::instance().textureManager()->getTexture("diffuse.png");
-        cubeSpecularTexture = Engine::instance().textureManager()->getTexture("specular.png");
+        cubeDiffuseTexture = Engine::instance().textureManager()->getTexture("diffuse.png", true);
+        cubeSpecularTexture = Engine::instance().textureManager()->getTexture("specular.png", false);
 
         mesh->setShader(blinnPhongShader);
         mesh->setBeforeDrawCallback([this](const std::shared_ptr<ShaderProgram>& shaderProgram) {

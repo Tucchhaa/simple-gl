@@ -10,9 +10,13 @@ class Window;
 
 class MsaaFrameBuffer : public BaseFrameBuffer {
 public:
-    static std::shared_ptr<MsaaFrameBuffer> create(const std::shared_ptr<Window>& window, int samples);
+    static std::shared_ptr<MsaaFrameBuffer> create(
+        const std::shared_ptr<Window>& window,
+        bool hdr,
+        int samples
+    );
 
-    MsaaFrameBuffer(int width, int height, int samples);
+    MsaaFrameBuffer(int width, int height, bool hdr, int samples);
 
     ~MsaaFrameBuffer();
 

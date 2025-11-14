@@ -13,12 +13,14 @@
 
 namespace SimpleGL {
 
-std::shared_ptr<ScreenFrameBuffer> ScreenFrameBuffer::create(const std::shared_ptr<Window> &window) {
-    auto instance = std::make_shared<ScreenFrameBuffer>(window->frameWidth(), window->frameHeight());
+std::shared_ptr<ScreenFrameBuffer> ScreenFrameBuffer::create(const std::shared_ptr<Window> &window, bool hdr) {
+    auto instance = std::make_shared<ScreenFrameBuffer>(window->frameWidth(), window->frameHeight(), hdr);
     return instance;
 }
 
-ScreenFrameBuffer::ScreenFrameBuffer(int width, int height): BaseFrameBuffer(width, height, 1) {
+ScreenFrameBuffer::ScreenFrameBuffer(int width, int height, bool hdr)
+    : BaseFrameBuffer(width, height, hdr, 1)
+{
     m_RBO = createDepthStencilRBO();
     m_colorTextureId = createColorTexture();
 

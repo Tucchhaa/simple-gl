@@ -13,19 +13,19 @@ enum TextureType {
 };
 
 struct Texture {
-    static std::shared_ptr<Texture> create(unsigned char* data, int width, int height, GLenum format) {
+    static std::shared_ptr<Texture> create(unsigned char* data, int width, int height, int channelsNum, bool isAlbedo) {
         auto instance = std::make_shared<Texture>();
 
-        instance->m_textureId = createTexture(data, width, height, format);
+        instance->m_textureId = createTexture(data, width, height, channelsNum, isAlbedo);
         instance->m_samplerId = createSampler();
         instance->m_type = Default;
 
         return instance;
     }
-    static std::shared_ptr<Texture> create(const std::vector<unsigned char*>& data, int width, int height, GLenum format) {
+    static std::shared_ptr<Texture> create(const std::vector<unsigned char*>& data, int width, int height, int channelsNum) {
         auto instance = std::make_shared<Texture>();
 
-        instance->m_textureId = createCubeMapTexture(data, width, height, format);
+        instance->m_textureId = createCubeMapTexture(data, width, height, channelsNum);
         instance->m_samplerId = createCubeMapSampler();
         instance->m_type = CubeMap;
 
@@ -46,11 +46,16 @@ protected:
 
     TextureType m_type = Default;
 
-    static unsigned int createTexture(unsigned char* data, int width, int height, GLenum format);
-    static unsigned int createCubeMapTexture(const std::vector<unsigned char*>& data, int width, int height, GLenum format);
+    static unsigned int createTexture(unsigned char* data, int width, int height, int channelsNum, bool isAlbedo);
+    static unsigned int createCubeMapTexture(const std::vector<unsigned char*>& data, int width, int height, int channelsNum);
 
     static unsigned int createSampler();
     static unsigned int createCubeMapSampler();
+
+private:
+    static int getInternalFormat(bool isAlbedo);
+
+    static unsigned int getFormat(int channelsNum);
 };
 
 }

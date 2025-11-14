@@ -8,5 +8,9 @@ out vec4 FragColor;
 
 void main()
 {
-    FragColor = texture(frameTexture, fTextureCoord);
+    const float gamma = 2.2;
+
+    vec3 color = texture(frameTexture, fTextureCoord).rgb;
+
+    FragColor = vec4(pow(color, vec3(1.0 / gamma)), 1);
 }

@@ -7,14 +7,18 @@
 
 namespace SimpleGL {
 
-std::shared_ptr<MsaaFrameBuffer> MsaaFrameBuffer::create(const std::shared_ptr<Window> &window, int samples) {
-    auto instance = std::make_shared<MsaaFrameBuffer>(window->frameWidth(), window->frameHeight(), samples);
+std::shared_ptr<MsaaFrameBuffer> MsaaFrameBuffer::create(
+    const std::shared_ptr<Window> &window,
+    bool hdr,
+    int samples
+) {
+    auto instance = std::make_shared<MsaaFrameBuffer>(window->frameWidth(), window->frameHeight(), hdr, samples);
     return instance;
 }
 
-MsaaFrameBuffer::MsaaFrameBuffer(int width, int height, int samples)
-    : BaseFrameBuffer(width, height, samples
-) {
+MsaaFrameBuffer::MsaaFrameBuffer(int width, int height, bool hdr, int samples)
+    : BaseFrameBuffer(width, height, hdr, samples)
+{
     m_RBO = createDepthStencilRBO();
     m_colorTextureId = createColorTexture();
 

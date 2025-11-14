@@ -4,8 +4,8 @@
 
 namespace SimpleGL {
 
-BaseFrameBuffer::BaseFrameBuffer(int width, int height, unsigned int samples)
-    : m_width(width), m_height(height), m_samples(samples)
+BaseFrameBuffer::BaseFrameBuffer(int width, int height, bool hdr, unsigned int samples)
+    : m_width(width), m_height(height), m_hdr(hdr), m_samples(samples)
 {
     m_FBO = createFBO();
 }
@@ -44,20 +44,24 @@ unsigned int BaseFrameBuffer::createColorTexture() const {
     unsigned int textureId;
     glGenTextures(1, &textureId);
 
+    const int internalFormat = getColorTextureInternalFormat();
+
     if (m_samples > 1) {
         glBindTexture(GL_TEXTURE_2D_MULTISAMPLE, textureId);
         glTexImage2DMultisample(
-            GL_TEXTURE_2D_MULTISAMPLE, 4, GL_RGB,
+            GL_TEXTURE_2D_MULTISAMPLE, 4, internalFormat,
             m_width, m_height,
             GL_TRUE
         );
         glBindTexture(GL_TEXTURE_2D_MULTISAMPLE, 0);
     } else {
+        int type = getColorTextureType();
+
         glBindTexture(GL_TEXTURE_2D, textureId);
         glTexImage2D(
-            GL_TEXTURE_2D, 0, GL_RGB,
+            GL_TEXTURE_2D, 0, internalFormat,
             m_width, m_height,
-            0, GL_RGB, GL_UNSIGNED_BYTE, nullptr
+            0, GL_RGBA, type, nullptr
         );
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
@@ -65,6 +69,18 @@ unsigned int BaseFrameBuffer::createColorTexture() const {
     }
 
     return textureId;
+}
+
+int BaseFrameBuffer::getColorTextureInternalFormat() const {
+    return m_hdr
+        ? GL_RGBA16F
+        : GL_RGBA;
+}
+
+int BaseFrameBuffer::getColorTextureType() const {
+    return m_hdr
+        ? GL_FLOAT
+        : GL_UNSIGNED_BYTE;
 }
 
 }

@@ -4,7 +4,7 @@ namespace SimpleGL {
 
 class BaseFrameBuffer {
 public:
-    BaseFrameBuffer(int width, int height, unsigned int samples);
+    BaseFrameBuffer(int width, int height, bool hdr, unsigned int samples);
 
     ~BaseFrameBuffer();
 
@@ -17,6 +17,7 @@ protected:
     unsigned int m_samples;
     int m_width;
     int m_height;
+    bool m_hdr;
 
     static unsigned int createFBO();
 
@@ -24,6 +25,11 @@ protected:
     unsigned int createDepthStencilRBO() const;
 
     unsigned int createColorTexture() const;
+
+private:
+    int getColorTextureInternalFormat() const;
+
+    int getColorTextureType() const;
 };
 
 }

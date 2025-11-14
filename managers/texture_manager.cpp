@@ -8,8 +8,8 @@
 #include "../helpers/errors.h"
 namespace SimpleGL {
 
-std::shared_ptr<Texture> TextureManager::getTexture(const std::string &path, bool flip) {
-    return _getTexture(path, { path }, flip);
+std::shared_ptr<Texture> TextureManager::getTexture(const std::string &path, bool isAlbedo, bool flip) {
+    return _getTexture(path, { path }, isAlbedo, flip);
 }
 
 std::shared_ptr<Texture> TextureManager::getCubeMapTexture(
@@ -26,12 +26,13 @@ std::shared_ptr<Texture> TextureManager::getCubeMapTexture(
         positiveXPath, negativeXPath,
         positiveYPath, negativeYPath,
         positiveZPath, negativeZPath
-    }, flip);
+    }, true, flip);
 }
 
 std::shared_ptr<Texture> TextureManager::_getTexture(
     const std::string& key,
     const std::vector<std::string>& paths,
+    bool isAlbedo,
     bool flip
 ) {
     if (const auto it = m_textures.find(key); it != m_textures.end()) {
@@ -45,37 +46,34 @@ std::shared_ptr<Texture> TextureManager::_getTexture(
     stbi_set_flip_vertically_on_load(flip);
 
     std::vector<unsigned char*> data;
-    int width = 0, height = 0;
-    GLenum format = 0;
+    int width = 0, height = 0, channelsNum = 0;
     bool isFirstTexture = true;
 
     for (const auto& path : paths) {
         const auto resourcePath = Engine::instance().getResourcePath(path);
 
-        int _width, _height, channelsNum;
+        int itemWidth, itemHeight, itemChannelsNum;
 
         unsigned char *_data = stbi_load(
             resourcePath.c_str(),
-            &_width, &_height,
-            &channelsNum, 0
+            &itemWidth, &itemHeight,
+            &itemChannelsNum, 0
         );
 
         if (_data == nullptr) {
             throw unableToLoadImage(resourcePath);
         }
 
-        const auto _format = getFormat(channelsNum);
-
-        if (_format == 0) {
+        if (itemChannelsNum != 1 && itemChannelsNum != 3 && itemChannelsNum != 4) {
             throw unsupportedImageFormat(resourcePath);
         }
 
         if (isFirstTexture) {
-            width = _width;
-            height = _height;
-            format = _format;
+            width = itemWidth;
+            height = itemHeight;
+            channelsNum = itemChannelsNum;
         } else {
-            if (width != _width || height != _height || format != _format) {
+            if (width != itemWidth || height != itemHeight || channelsNum != itemChannelsNum) {
                 throw inconsistentTextureArrayMetadata(key);
             }
         }
@@ -86,10 +84,10 @@ std::shared_ptr<Texture> TextureManager::_getTexture(
 
     std::shared_ptr<Texture> texture;
     if (data.size() == 1) {
-        texture = Texture::create(data[0], width, height, format);
+        texture = Texture::create(data[0], width, height, channelsNum, isAlbedo);
     }
     else if (data.size() == 6) {
-        texture = Texture::create(data, width, height, format);
+        texture = Texture::create(data, width, height, channelsNum);
     }
 
     for (auto dataItem: data) {
@@ -99,17 +97,6 @@ std::shared_ptr<Texture> TextureManager::_getTexture(
     m_textures[key] = texture;
 
     return texture;
-}
-
-GLenum TextureManager::getFormat(int channelsNum) {
-    if (channelsNum == 1)
-        return GL_RED;
-    if (channelsNum == 3)
-        return GL_RGB;
-    if (channelsNum == 4)
-        return GL_RGBA;
-
-    return 0;
 }
 
 }

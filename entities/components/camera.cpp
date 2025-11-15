@@ -24,7 +24,7 @@ void Camera::recalculateProjectionMatrix() {
 // Lengyel, Eric. "Oblique View Frustum Depth Projection and Clipping".
 // Journal of Game Development, Vol. 1, No. 2 (2005)
 // http://www.terathon.com/code/oblique.html
-void Camera::applyNearPlaneClipping(const std::shared_ptr<Transform> &planeTransform) {
+void Camera::setNearPlane(const std::shared_ptr<Transform> &planeTransform) {
     glm::mat4 projection = projectionMatrix();
 
     auto normalViewMatrix = calculateViewNormalMatrix();

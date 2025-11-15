@@ -39,7 +39,7 @@ public:
     void recalculateViewMatrix();
     void recalculateProjectionMatrix();
 
-    void applyNearPlaneClipping(const std::shared_ptr<Transform>& planeTransform);
+    void setNearPlane(const std::shared_ptr<Transform>& planeTransform);
 
     glm::mat4 calculateViewNormalMatrix() const;
 

@@ -54,14 +54,14 @@ add_executable(main
     entities/components/light.h
     entities/components/rigid_body.cpp
     entities/components/rigid_body.h
-    entities/components/portal.cpp
-    entities/components/portal.h
     render-pipeline/framebuffers/base_frame_buffer.cpp
     render-pipeline/framebuffers/base_frame_buffer.h
     render-pipeline/framebuffers/screen_frame_buffer.cpp
     render-pipeline/framebuffers/screen_frame_buffer.h
     render-pipeline/framebuffers/msaa_frame_buffer.cpp
     render-pipeline/framebuffers/msaa_frame_buffer.h
+    render-pipeline/portal/portal.cpp
+    render-pipeline/portal/portal.h
     helpers/errors.cpp
     helpers/errors.h
     helpers/node_logger.cpp

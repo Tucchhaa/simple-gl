@@ -44,10 +44,15 @@ void ScreenFrameBuffer::setShader(const std::shared_ptr<ShaderProgram> &shaderPr
 
 void ScreenFrameBuffer::renderFrame() const {
     glBindFramebuffer(GL_FRAMEBUFFER, 0);
-    glClearColor(1.0f, 1.0f, 1.0f, 1.0f);
+    glClearColor(1.0f, 0.0f, 1.0f, 1.0f);
     glClear(GL_COLOR_BUFFER_BIT);
 
     glDisable(GL_DEPTH_TEST);
+    glDepthMask(GL_FALSE);
+
+    glDisable(GL_STENCIL_TEST);
+    glStencilMask(0x00);
+
     glDisable(GL_CULL_FACE);
 
     m_quadMesh->draw();

@@ -20,8 +20,10 @@ using namespace SimpleGL;
 int main() {
     constexpr int MSAA_SAMPLES = 4;
     constexpr bool HDR_ENABLED = false;
+    constexpr int SCREEN_WIDTH = 1200;
+    constexpr int SCREEN_HEIGHT = 900;
 
-    auto window = Engine::instance().windowManager()->createWindow("main", 800, 600);
+    auto window = Engine::instance().windowManager()->createWindow("main", SCREEN_WIDTH, SCREEN_HEIGHT);
     window->setTitle("Learn OpenGL");
     window->makeCurrent();
 
@@ -34,7 +36,9 @@ int main() {
         "frame shader"
     );
 
-    auto msaaFrameBuffer = MsaaFrameBuffer::create(window, HDR_ENABLED, MSAA_SAMPLES);
+    std::shared_ptr<MsaaFrameBuffer> msaaFrameBuffer = MSAA_SAMPLES > 1
+        ? MsaaFrameBuffer::create(window, HDR_ENABLED, MSAA_SAMPLES)
+        : nullptr;
 
     auto screenFrameBuffer = ScreenFrameBuffer::create(window, HDR_ENABLED);
     screenFrameBuffer->setShader(frameShaderProgram);
@@ -47,20 +51,26 @@ int main() {
         demo.scene->emitUpdate();
 
         // draw scene
-        // glBindFramebuffer(GL_FRAMEBUFFER, screenFrameBuffer->FBO());
-        glBindFramebuffer(GL_FRAMEBUFFER, msaaFrameBuffer->FBO());
+        if (msaaFrameBuffer != nullptr) {
+            glBindFramebuffer(GL_FRAMEBUFFER, msaaFrameBuffer->FBO());
 
-        demo.draw();
+            demo.draw();
 
-        // resolve ms fbo & render frame onto the screen
-        glBindFramebuffer(GL_READ_FRAMEBUFFER, msaaFrameBuffer->FBO());
-        glBindFramebuffer(GL_DRAW_FRAMEBUFFER, screenFrameBuffer->FBO());
-        glBlitFramebuffer(
-            0, 0, msaaFrameBuffer->width(), msaaFrameBuffer->height(),
-            0, 0, screenFrameBuffer->width(), screenFrameBuffer->height(),
-            GL_COLOR_BUFFER_BIT, GL_NEAREST
-        );
+            // resolve ms fbo
+            glBindFramebuffer(GL_READ_FRAMEBUFFER, msaaFrameBuffer->FBO());
+            glBindFramebuffer(GL_DRAW_FRAMEBUFFER, screenFrameBuffer->FBO());
+            glBlitFramebuffer(
+                0, 0, msaaFrameBuffer->width(), msaaFrameBuffer->height(),
+                0, 0, screenFrameBuffer->width(), screenFrameBuffer->height(),
+                GL_COLOR_BUFFER_BIT, GL_NEAREST
+            );
+        } else {
+            glBindFramebuffer(GL_FRAMEBUFFER, screenFrameBuffer->FBO());
 
+            demo.draw();
+        }
+
+        // render frame
         screenFrameBuffer->renderFrame();
 
         // poll input events

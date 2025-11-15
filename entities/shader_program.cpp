@@ -31,11 +31,11 @@ void ShaderProgram::use(const std::shared_ptr<Camera> &camera) {
         activeShaderProgramId = id;
         glUseProgram(id);
 
-        setCameraUniforms(camera);
         setDirectLightsUniform();
         setPointLightsUniform();
     }
 
+    setCameraUniforms(camera);
     m_boundTexturesCount = 0;
 }
 

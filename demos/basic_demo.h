@@ -33,7 +33,7 @@ class BasicDemo {
     std::shared_ptr<ShaderProgram> basicShader;
     std::shared_ptr<ShaderProgram> solidColorShader;
     std::shared_ptr<ShaderProgram> blinnPhongShader;
-    std::shared_ptr<ShaderProgram> blinnPhongSolidColorShader;
+    std::shared_ptr<ShaderProgram> shadedSolidColorShader;
     std::shared_ptr<ShaderProgram> skyboxShader;
 
     std::shared_ptr<Texture> skyboxTexture;
@@ -149,9 +149,9 @@ private:
             "Blinn-Phong Shader"
         );
 
-        blinnPhongSolidColorShader = Engine::instance().shaderManager()->createShaderProgram(
-            "shaders/blinn-phong-solid-color/vertex.glsl",
-            "shaders/blinn-phong-solid-color/fragment.glsl",
+        shadedSolidColorShader = Engine::instance().shaderManager()->createShaderProgram(
+            "shaders/shaded-solid-color/vertex.glsl",
+            "shaders/shaded-solid-color/fragment.glsl",
             "Blinn-Phong Solid Color Shader"
         );
 
@@ -225,12 +225,12 @@ private:
 
         portal1Mesh->setShader(solidColorShader);
         portal1Mesh->setBeforeDrawCallback([](const auto& shader) {
-            shader->setUniform("color", 0.1f, 0.3f, 1.f);
+            shader->setUniform("color", 0.05f, 0.15f, 1.f);
         });
 
         portal2Mesh->setShader(solidColorShader);
         portal2Mesh->setBeforeDrawCallback([](const auto& shader) {
-            shader->setUniform("color", 1.f, 0.1f, 0.1f);
+            shader->setUniform("color", 1.f, 0.05f, 0.05f);
         });
     }
 
@@ -241,7 +241,7 @@ private:
         node->transform()->setPosition(0, -5, 0);
 
         auto mesh = node->getComponent<MeshComponent>();
-        mesh->setShader(blinnPhongSolidColorShader);
+        mesh->setShader(shadedSolidColorShader);
         mesh->setBeforeDrawCallback([](const std::shared_ptr<ShaderProgram>& shaderProgram) {
             shaderProgram->setUniform("color", glm::vec3(0.3, 0.3, 0.3));
         });
@@ -274,7 +274,7 @@ private:
             }
 
             auto mesh = node->getComponent<MeshComponent>();
-            mesh->setShader(blinnPhongSolidColorShader);
+            mesh->setShader(shadedSolidColorShader);
             mesh->setBeforeDrawCallback([](const std::shared_ptr<ShaderProgram>& shaderProgram) {
                 shaderProgram->setUniform("color", glm::vec3(0.3, 0.3, 0.3));
             });

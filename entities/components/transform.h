@@ -46,6 +46,8 @@ public:
 
     void rotate(const glm::quat& rotation, const std::shared_ptr<Transform>& transform = nullptr);
 
+    void scaleBy(float x);
+
     void recalculate();
 
     void onUpdate() override;

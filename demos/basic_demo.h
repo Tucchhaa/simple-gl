@@ -101,8 +101,8 @@ public:
         };
 
         // draw portals contents
-        portal->drawPortalContents(1, drawCall);
         portal->drawPortalContents(2, drawCall);
+        portal->drawPortalContents(1, drawCall);
 
         // draw the rest of scene
         glColorMask(GL_TRUE, GL_TRUE, GL_TRUE, GL_TRUE);
@@ -113,7 +113,6 @@ public:
         glStencilMask(0x00);
 
         drawCall(camera);
-        portal2Mesh->draw(camera);
     }
 
 private:
@@ -226,12 +225,12 @@ private:
 
         portal1Mesh->setShader(solidColorShader);
         portal1Mesh->setBeforeDrawCallback([](const auto& shader) {
-            shader->setUniform("color", 0.5f, 0.1f, 0.1f);
+            shader->setUniform("color", 0.1f, 0.3f, 1.f);
         });
 
         portal2Mesh->setShader(solidColorShader);
         portal2Mesh->setBeforeDrawCallback([](const auto& shader) {
-            shader->setUniform("color", 0.1f, 0.5f, 0.1f);
+            shader->setUniform("color", 1.f, 0.1f, 0.1f);
         });
     }
 

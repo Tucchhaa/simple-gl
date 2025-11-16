@@ -62,6 +62,10 @@ void Transform::rotate(const glm::quat& rotation, const std::shared_ptr<Transfor
     }
 }
 
+void Transform::scaleBy(float x) {
+    setScale(m_scale * x);
+}
+
 void Transform::recalculate() {
     const auto rigidBody = node()->rigidBody();
     const auto& parentNode = node()->parent();

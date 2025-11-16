@@ -74,14 +74,29 @@ void Portal::drawPortalContents(
 
         drawScene(recursiveCameras[i]);
 
-        // draw portal mesh to z-buffer
-        glColorMask(GL_FALSE, GL_FALSE, GL_FALSE, GL_FALSE);
-        glStencilFunc(GL_LEQUAL, i, 0xFF);
-        glDepthFunc(GL_ALWAYS);
+        // draw portal border
+        glStencilFunc(GL_EQUAL, i - 1, 0xFF);
+
+        const glm::vec3 originalScale = portalMesh->transform()->scale();
+        portalMesh->transform()->scaleBy(1.05f);
+        portalMesh->transform()->recalculate();
 
         portalMesh->draw(recursiveCameras[i - 1]);
 
         glDepthFunc(GL_LESS);
+
+        // draw portal mesh to z-buffer
+        glColorMask(GL_FALSE, GL_FALSE, GL_FALSE, GL_FALSE);
+        glStencilFunc(GL_LEQUAL, i, 0xFF);
+        glDepthFunc(GL_ALWAYS);
+        glDepthMask(GL_TRUE);
+
+        portalMesh->draw(recursiveCameras[i - 1]);
+
+        glDepthFunc(GL_LESS);
+
+        portalMesh->transform()->setScale(originalScale);
+        portalMesh->transform()->recalculate();
     }
 }
 
@@ -120,8 +135,8 @@ std::vector<std::shared_ptr<Camera>> Portal::getRecursiveCameras(
     for (int i = 0; i < m_maxRecursionLevel; i++) {
         const auto virtualCamera = m_virtualCameras[i];
 
-        auto pNew = pDelta + (qDelta * pPrev);
-        auto qNew = qDelta * qPrev;
+        const auto pNew = pDelta + (qDelta * pPrev);
+        const auto qNew = qDelta * qPrev;
 
         virtualCamera->transform()->setPosition(pNew);
         virtualCamera->transform()->setOrientation(qNew);

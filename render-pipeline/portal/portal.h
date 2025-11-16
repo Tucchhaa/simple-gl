@@ -27,7 +27,7 @@ public:
 
     void drawPortalContents(
         int portalIndex,
-        std::function<void(const std::shared_ptr<Camera>& camera)> drawScene
+        const std::function<void(const std::shared_ptr<Camera>& camera)>& drawScene
     ) const;
 
 private:
@@ -45,10 +45,10 @@ private:
         const std::shared_ptr<Node>& destPortal
     ) const;
 
-    std::pair<glm::quat, glm::vec3> calcVirtualCameraTransform(
+    static std::pair<glm::quat, glm::vec3> calcVirtualCameraTransform(
         const std::shared_ptr<Transform>& sourceT,
         const std::shared_ptr<Transform>& destT
-    ) const;
+    );
 };
 
 }

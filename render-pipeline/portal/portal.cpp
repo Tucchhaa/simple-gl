@@ -25,21 +25,11 @@ std::shared_ptr<Portal> Portal::create(
 ) {
     auto instance = std::make_shared<Portal>(camera);
     return instance;
-
-    // instance->m_camera = camera;
-    //
-    //
-    // Node::create("meshNode", instance->portal1Node);
-    // Node::create("meshNode", instance->portal2Node);
-    //
-    // instance->createVirtualCameras();
-    //
-    // return instance;
 }
 
 void Portal::drawPortalContents(
     int portalIndex,
-    std::function<void(const std::shared_ptr<Camera>& camera)> drawScene
+    const std::function<void(const std::shared_ptr<Camera>& camera)>& drawScene
 ) const {
     if (portalIndex != 1 && portalIndex != 2) {
         throw std::runtime_error("Portal: incorrect portal index");
@@ -60,10 +50,12 @@ void Portal::drawPortalContents(
 
     glEnable(GL_STENCIL_TEST);
     glStencilMask(0xFF);
-    glStencilOp(GL_KEEP, GL_KEEP, GL_REPLACE);
+    glClearStencil(0);
+    glClear(GL_STENCIL_BUFFER_BIT);
+    glStencilOp(GL_KEEP, GL_KEEP, GL_INCR);
 
     for (int i=0; i < m_maxRecursionLevel; i++) {
-        glStencilFunc(GL_ALWAYS, i+1, 0xFF);
+        glStencilFunc(GL_EQUAL, i, 0xFF);
 
         portalMesh->draw(recursiveCameras[i]);
     }
@@ -84,10 +76,12 @@ void Portal::drawPortalContents(
 
         // draw portal mesh to z-buffer
         glColorMask(GL_FALSE, GL_FALSE, GL_FALSE, GL_FALSE);
-        glClear(GL_DEPTH_BUFFER_BIT);
-        glDisable(GL_STENCIL_TEST);
+        glStencilFunc(GL_LEQUAL, i, 0xFF);
+        glDepthFunc(GL_ALWAYS);
 
         portalMesh->draw(recursiveCameras[i - 1]);
+
+        glDepthFunc(GL_LESS);
     }
 }
 
@@ -112,29 +106,33 @@ std::vector<std::shared_ptr<Camera>> Portal::getRecursiveCameras(
     const std::shared_ptr<Node>& destPortal
 ) const {
     std::vector<std::shared_ptr<Camera>> result;
+    result.reserve(m_maxRecursionLevel + 1);
 
     result.push_back(m_camera);
-    auto prev = m_camera;
+
+    auto pPrev = m_camera->transform()->absolutePosition();
+    auto qPrev = m_camera->transform()->absoluteOrientation();
 
     auto [
-        qChange, pChange
+        qDelta, pDelta
     ] = calcVirtualCameraTransform(sourcePortal->transform(), destPortal->transform());
 
     for (int i = 0; i < m_maxRecursionLevel; i++) {
         const auto virtualCamera = m_virtualCameras[i];
 
-        const auto newPosition = pChange + prev->transform()->absolutePosition();
-        const auto newOrientation = qChange * prev->transform()->absoluteOrientation();
+        auto pNew = pDelta + (qDelta * pPrev);
+        auto qNew = qDelta * qPrev;
 
-        virtualCamera->transform()->setPosition(newPosition);
-        virtualCamera->transform()->setOrientation(newOrientation);
+        virtualCamera->transform()->setPosition(pNew);
+        virtualCamera->transform()->setOrientation(qNew);
         virtualCamera->transform()->recalculate();
 
         virtualCamera->recalculateViewMatrix();
         virtualCamera->setNearPlane(destPortal->transform());
 
         result.push_back(virtualCamera);
-        prev = virtualCamera;
+        pPrev = pNew;
+        qPrev = qNew;
     }
 
     return result;
@@ -143,22 +141,18 @@ std::vector<std::shared_ptr<Camera>> Portal::getRecursiveCameras(
 std::pair<glm::quat, glm::vec3> Portal::calcVirtualCameraTransform(
     const std::shared_ptr<Transform>& sourceT,
     const std::shared_ptr<Transform>& destT
-) const {
-    const auto cT = m_camera->transform();
-
+) {
     static auto flipY = glm::angleAxis(glm::radians(180.0f), glm::vec3(0, 1, 0));
 
-    const glm::quat sQInverse = glm::inverse(sourceT->absoluteOrientation());
+    const auto sQ = sourceT->absoluteOrientation();
+    const auto dQ = destT->absoluteOrientation();
+    const auto sP = sourceT->absolutePosition();
+    const auto dP = destT->absolutePosition();
 
-    const glm::quat qRel = sQInverse * cT->absoluteOrientation();
-    const glm::quat qVirtual = destT->absoluteOrientation() * flipY * qRel;
-    const glm::quat qResult = qVirtual * glm::inverse(cT->absoluteOrientation());
+    const glm::quat qDelta = dQ * flipY * glm::inverse(sQ);
+    const glm::vec3 pDelta = dP - (qDelta * sP);
 
-    const glm::vec3 pRel = sQInverse * (cT->absolutePosition() - sourceT->absolutePosition());
-    const glm::vec3 pVirtual = destT->absolutePosition() + destT->absoluteOrientation() * (flipY * pRel);
-    const glm::vec3 pResult = pVirtual - cT->absolutePosition();
-
-    return { qResult, pResult };
+    return { qDelta, pDelta };
 }
 
 }

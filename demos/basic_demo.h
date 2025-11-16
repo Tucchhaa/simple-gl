@@ -78,26 +78,17 @@ public:
         glEnable(GL_CULL_FACE);
         glCullFace(GL_BACK);
 
-        // Clear all buffers
+        // Clear color & depth buffers
         glColorMask(GL_TRUE, GL_TRUE, GL_TRUE, GL_TRUE);
         glClearColor(0.f, 1.f, 1.f, 1.f);
 
         glDepthMask(GL_TRUE);
         glClearDepth(1);
 
-        glStencilMask(0xFF);
-        glClearStencil(0);
-
-        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
+        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
         // define draw call
         const auto drawCall = [this](const std::shared_ptr<Camera>& _camera) {
-            glColorMask(GL_TRUE, GL_TRUE, GL_TRUE, GL_TRUE);
-            glEnable(GL_DEPTH_TEST);
-            glDepthMask(GL_TRUE);
-            glDisable(GL_STENCIL_TEST);
-            glStencilMask(0x00);
-
             for (const auto& mesh : meshes) {
                 mesh->draw(_camera);
             }
@@ -111,20 +102,18 @@ public:
 
         // draw portals contents
         portal->drawPortalContents(1, drawCall);
-        // TODO: rendering to both portals does not work yet
-        // portal->drawPortalContents(2, meshes, skyboxCubeMesh);
+        portal->drawPortalContents(2, drawCall);
 
         // draw the rest of scene
+        glColorMask(GL_TRUE, GL_TRUE, GL_TRUE, GL_TRUE);
+        glEnable(GL_DEPTH_TEST);
+        glDepthMask(GL_TRUE);
+        glDepthFunc(GL_LESS);
+        glDisable(GL_STENCIL_TEST);
+        glStencilMask(0x00);
+
         drawCall(camera);
         portal2Mesh->draw(camera);
-    }
-
-    void drawSkybox(const std::shared_ptr<Camera>& _camera) {
-        glCullFace(GL_FRONT);
-        glDepthFunc(GL_LEQUAL);
-        skyboxCubeMesh->draw(_camera);
-        glDepthFunc(GL_LESS);
-        glCullFace(GL_BACK);
     }
 
 private:
@@ -182,7 +171,7 @@ private:
             cameraNode,
             glm::radians(90.0f),
             0.3f,
-            1000.0f
+            100.0f
         );
 
         FreeController::create(cameraNode);
@@ -216,11 +205,11 @@ private:
         portal = Portal::create(camera);
 
         // position portals
-        portal->portal1Node->transform()->setPosition(3, -3, -14.45);
+        portal->portal1Node->transform()->setPosition(-13, -3, -14.45);
         // portal->portal2Node->transform()->setPosition(-1, -3, -14.45);
 
-        portal->portal2Node->transform()->setPosition(3, -3, -8.5);
-        portal->portal2Node->transform()->rotate(glm::angleAxis(glm::radians(180.f), glm::vec3(0.f, 1.0f, 0.0f)));
+        portal->portal2Node->transform()->setPosition(-14.45, -3, -13);
+        portal->portal2Node->transform()->rotate(glm::angleAxis(glm::radians(90.f), glm::vec3(0.f, 1.0f, 0.0f)));
 
         // create portal meshes
         const auto portal1Child = Node::create("meshNode", portal->portal1Node);

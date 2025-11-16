@@ -25,6 +25,8 @@ void Camera::recalculateProjectionMatrix() {
 // Journal of Game Development, Vol. 1, No. 2 (2005)
 // http://www.terathon.com/code/oblique.html
 void Camera::setNearPlane(const std::shared_ptr<Transform> &planeTransform) {
+    recalculateProjectionMatrix();
+
     glm::mat4 projection = projectionMatrix();
 
     auto normalViewMatrix = calculateViewNormalMatrix();
@@ -61,7 +63,7 @@ void Camera::setNearPlane(const std::shared_ptr<Transform> &planeTransform) {
 /// viewNormal = conjugate(rotation) * transpose(translation)
 glm::mat4 Camera::calculateViewNormalMatrix() const {
     // optimized version of:
-    // auto normalViewMatrix = glm::inverse(glm::transpose(viewMatrix()));
+    // return glm::inverse(glm::transpose(viewMatrix()));
 
     auto normalViewMatrix = viewMatrix();
 

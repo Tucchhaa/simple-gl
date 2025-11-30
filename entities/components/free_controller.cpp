@@ -15,7 +15,8 @@ void FreeController::onUpdate() {
 }
 
 void FreeController::handleInput() {
-    const auto input = Engine::instance().mainWindow()->input();
+    auto window = Engine::instance().mainWindow();
+    auto input = window->input();
 
     const auto axis = input->axisVec2() * speed * input->deltaTime();
     const auto displacement = glm::vec3(axis.x, 0, -axis.y);
@@ -23,8 +24,9 @@ void FreeController::handleInput() {
     transform()->translate(displacement);
 
     if (m_canRotate) {
-        const glm::quat qPitch = glm::angleAxis(input->mouseDelta().y * rotationSpeed, glm::vec3(-1, 0, 0));
-        const glm::quat qYaw = glm::angleAxis(input->mouseDelta().x * rotationSpeed, glm::vec3(0, -1, 0));
+        const float sensitivity = 0.005f;
+        const glm::quat qPitch = glm::angleAxis(input->mouseDelta().y * sensitivity, glm::vec3(-1, 0, 0));
+        const glm::quat qYaw = glm::angleAxis(input->mouseDelta().x * sensitivity, glm::vec3(0, -1, 0));
 
         transform()->rotate(qYaw, Transform::getGlobal());
         transform()->rotate(qPitch);
@@ -32,7 +34,8 @@ void FreeController::handleInput() {
 
     if (input->isKeyPressed(GLFW_KEY_SPACE)) {
         m_canRotate = !m_canRotate;
-        Engine::instance().mainWindow()->isCursorPositionFixed = m_canRotate;
+        auto glfwWindow = Engine::instance().mainWindow()->glfwWindow();
+        glfwSetInputMode(glfwWindow, GLFW_CURSOR, m_canRotate ? GLFW_CURSOR_DISABLED : GLFW_CURSOR_NORMAL);
     }
 }
 

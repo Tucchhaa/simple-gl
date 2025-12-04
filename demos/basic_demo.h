@@ -101,8 +101,12 @@ public:
         };
 
         // draw portals contents
+        auto start = std::chrono::high_resolution_clock::now();
         portal->drawPortalContents(2, drawCall);
         portal->drawPortalContents(1, drawCall);
+        auto end = std::chrono::high_resolution_clock::now();
+        float portalTime = std::chrono::duration<float, std::chrono::milliseconds::period>(end - start).count();
+        Engine::instance().metricsManager()->addPortalPassTime(portalTime);
 
         // draw the rest of scene
         glColorMask(GL_TRUE, GL_TRUE, GL_TRUE, GL_TRUE);

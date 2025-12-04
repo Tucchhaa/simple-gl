@@ -22,6 +22,7 @@ Engine::Engine() {
     m_meshManager = MeshManager::create();
     m_textureManager = TextureManager::create();
     m_physicsManager = PhysicsManager::create();
+    m_metricsManager = std::make_shared<MetricsManager>();
 }
 
 Engine::~Engine() {

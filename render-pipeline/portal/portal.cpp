@@ -3,6 +3,7 @@
 #include <glad/glad.h>
 
 #include "../../managers/engine.h"
+#include "../../managers/metrics_manager.h"
 #include "../../entities/node.h"
 #include "../../entities/scene.h"
 #include "../../entities/components/camera.h"
@@ -55,6 +56,7 @@ void Portal::drawPortalContents(
     glStencilOp(GL_KEEP, GL_KEEP, GL_INCR);
 
     for (int i=0; i < m_maxRecursionLevel; i++) {
+        Engine::instance().metricsManager()->updateRecursionDepth(i);
         glStencilFunc(GL_EQUAL, i, 0xFF);
 
         portalMesh->draw(recursiveCameras[i]);
@@ -68,6 +70,7 @@ void Portal::drawPortalContents(
     glStencilOp(GL_KEEP, GL_KEEP, GL_KEEP);
 
     for (int i=m_maxRecursionLevel; i >= 1; i--) {
+        Engine::instance().metricsManager()->updateRecursionDepth(i);
         glColorMask(GL_TRUE, GL_TRUE, GL_TRUE, GL_TRUE);
         glEnable(GL_STENCIL_TEST);
         glStencilFunc(GL_EQUAL, i, 0xFF);

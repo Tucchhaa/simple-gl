@@ -51,27 +51,19 @@ void Window::setCallbacks() const {
         self->input()->mouseButtonCallback(button, action);
     };
 
+    auto cursorPosCallback = [](GLFWwindow* window, double xpos, double ypos) {
+        auto* self = static_cast<Window*>(glfwGetWindowUserPointer(window));
+        self->input()->cursorPosCallback(xpos, ypos);
+    };
+
     glfwSetFramebufferSizeCallback(m_glfwWindow, resizeCallback);
     glfwSetKeyCallback(m_glfwWindow, keyCallback);
     glfwSetMouseButtonCallback(m_glfwWindow, mouseButtonCallback);
-}
-
-void Window::setCursorPositionToCenter() const {
-    const float screenWidth = static_cast<float>(m_screenWidth);
-    const float screenHeight = static_cast<float>(m_screenHeight);
-
-    glfwSetCursorPos(glfwWindow(), screenWidth / 2.f, screenHeight / 2.f);
+    glfwSetCursorPosCallback(m_glfwWindow, cursorPosCallback);
 }
 
 void Window::makeCurrent() const {
     glfwMakeContextCurrent(m_glfwWindow);
-}
-
-void Window::pollEvents() const {
-    m_input->process();
-
-    glfwSwapBuffers(m_glfwWindow);
-    glfwPollEvents();
 }
 
 void Window::close() const {

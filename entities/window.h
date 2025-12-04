@@ -15,8 +15,6 @@ class Window {
 public:
     const std::string label;
 
-    bool isCursorPositionFixed;
-
     static std::shared_ptr<Window> create(const std::string &label, GLFWwindow* glfwWindow);
 
     ~Window();
@@ -24,10 +22,6 @@ public:
     GLFWwindow* glfwWindow() const { return m_glfwWindow; }
 
     void makeCurrent() const;
-
-    void beforeFrameRendered() const;
-
-    void pollEvents() const;
 
     std::shared_ptr<Input>& input() { return m_input; }
 
@@ -47,8 +41,6 @@ public:
     int frameHeight() const { return m_frameHeight; }
 
     static float time() { return static_cast<float>(glfwGetTime()); }
-
-    void setCursorPositionToCenter() const;
 
 private:
     GLFWwindow* m_glfwWindow = nullptr;

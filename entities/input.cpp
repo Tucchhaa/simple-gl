@@ -3,6 +3,12 @@
 
 namespace SimpleGL {
 
+Input::Input(const std::weak_ptr<Window> &window): m_window(window) {
+    const auto w = this->window();
+    m_lastMouseX = static_cast<double>(w->screenWidth()) / 2.0;
+    m_lastMouseY = static_cast<double>(w->screenHeight()) / 2.0;
+}
+
 std::shared_ptr<Input> Input::create(const std::weak_ptr<Window>& window) {
     return std::shared_ptr<Input>(new Input(window));
 }
@@ -19,16 +25,26 @@ void Input::mouseButtonCallback(int button, int action) {
     m_currentMouseStates[button] = action == GLFW_PRESS;
 }
 
-void Input::process() {
+void Input::cursorPosCallback(double xpos, double ypos) {
+    if (m_firstMouse) {
+        m_lastMouseX = xpos;
+        m_lastMouseY = ypos;
+        m_firstMouse = false;
+    }
+
+    m_mouseDelta.x = static_cast<float>(xpos - m_lastMouseX);
+    m_mouseDelta.y = static_cast<float>(ypos - m_lastMouseY); // Corrected for natural y-axis movement
+
+    m_lastMouseX = xpos;
+    m_lastMouseY = ypos;
+}
+
+void Input::endFrame() {
     m_previousKeyStates = m_currentKeyStates;
     m_previousMouseStates = m_currentMouseStates;
+    m_mouseDelta = {0.0f, 0.0f};
 
-    updateCursorPosition();
     updateDeltaTime();
-
-    if (window()->isCursorPositionFixed) {
-        window()->setCursorPositionToCenter();
-    }
 }
 
 bool Input::isKeyDown(const int key) const {
@@ -60,20 +76,6 @@ glm::vec2 Input::axisVec2() const {
     float axisVertical = static_cast<int>(isKeyDown(GLFW_KEY_W)) - static_cast<int>(isKeyDown(GLFW_KEY_S));
 
     return { axisHorizontal, axisVertical };
-}
-
-glm::vec2 Input::mouseDelta() const {
-    const float screenWidth = static_cast<float>(window()->screenWidth());
-    const float screenHeight = static_cast<float>(window()->screenHeight());
-
-    auto xMouseDelta = (m_mouseX - screenWidth / 2.0f) / screenWidth;
-    auto yMouseDelta = (m_mouseY - screenHeight / 2.0f) / screenHeight;
-
-    return { xMouseDelta, yMouseDelta };
-}
-
-void Input::updateCursorPosition() {
-    glfwGetCursorPos(window()->glfwWindow(), &m_mouseX, &m_mouseY);
 }
 
 void Input::setKeyState(int key, bool pressed) {

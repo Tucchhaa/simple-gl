@@ -47,10 +47,18 @@ int main() {
 
     while(window->isOpen())
     {
+        // Poll events at the start of the frame
+        glfwPollEvents();
+
+        if (window->input()->isKeyPressed(GLFW_KEY_ESCAPE)) {
+            window->close();
+        }
+
+        // Game logic
         demo.updateNodes();
         demo.scene->emitUpdate();
 
-        // draw scene
+        // Draw scene
         if (msaaFrameBuffer != nullptr) {
             glBindFramebuffer(GL_FRAMEBUFFER, msaaFrameBuffer->FBO());
 
@@ -70,15 +78,12 @@ int main() {
             demo.draw();
         }
 
-        // render frame
+        // Render frame
         screenFrameBuffer->renderFrame();
 
-        // poll input events
-        window->pollEvents();
-
-        if (window->input()->isKeyPressed(GLFW_KEY_ESCAPE)) {
-            window->close();
-        }
+        // End of frame tasks
+        window->input()->endFrame();
+        glfwSwapBuffers(window->glfwWindow());
     }
 
     return 0;

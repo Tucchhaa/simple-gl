@@ -19,11 +19,13 @@ public:
 
     void mouseButtonCallback(int button, int action);
 
-    void process();
+    void cursorPosCallback(double xpos, double ypos);
+
+    void endFrame();
 
     glm::vec2 axisVec2() const;
 
-    glm::vec2 mouseDelta() const;
+    glm::vec2 mouseDelta() const { return m_mouseDelta; }
 
     bool isKeyDown(int key) const;
     bool isKeyPressed(int key) const;
@@ -38,14 +40,15 @@ public:
     void setKeyState(int key, bool pressed);
 
 private:
-
     std::weak_ptr<Window> m_window;
 
     float m_lastFrameTime = 0;
     float m_deltaTime = 0;
 
-    double m_mouseX = 0;
-    double m_mouseY = 0;
+    double m_lastMouseX = 0;
+    double m_lastMouseY = 0;
+    bool m_firstMouse = true;
+    glm::vec2 m_mouseDelta{0.0f, 0.0f};
 
     std::array<bool, GLFW_KEY_LAST + 1> m_currentKeyStates{};
     std::array<bool, GLFW_KEY_LAST + 1> m_previousKeyStates{};
@@ -53,11 +56,7 @@ private:
     std::array<bool, GLFW_MOUSE_BUTTON_LAST + 1> m_currentMouseStates{};
     std::array<bool, GLFW_MOUSE_BUTTON_LAST + 1> m_previousMouseStates{};
 
-    explicit Input(const std::weak_ptr<Window> &window): m_window(window) {};
-
-    void reset();
-
-    void updateCursorPosition();
+    explicit Input(const std::weak_ptr<Window> &window);
 
     void updateDeltaTime();
 

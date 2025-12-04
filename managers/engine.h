@@ -3,6 +3,8 @@
 #include <memory>
 #include <filesystem>
 
+#include "metrics_manager.h"
+
 namespace SimpleGL {
 
 class WindowManager;
@@ -24,6 +26,7 @@ public:
     std::shared_ptr<MeshManager> meshManager() { return m_meshManager; }
     std::shared_ptr<TextureManager> textureManager() { return m_textureManager; }
     std::shared_ptr<PhysicsManager> physicsManager() { return m_physicsManager; }
+    std::shared_ptr<MetricsManager> metricsManager() { return m_metricsManager; }
 
     std::shared_ptr<Window> mainWindow() const;
     std::shared_ptr<Scene> scene() { return m_scene; }
@@ -47,6 +50,7 @@ private:
     std::shared_ptr<MeshManager> m_meshManager;
     std::shared_ptr<TextureManager> m_textureManager;
     std::shared_ptr<PhysicsManager> m_physicsManager;
+    std::shared_ptr<MetricsManager> m_metricsManager;
 
     std::shared_ptr<Scene> m_scene;
 
@@ -55,3 +59,4 @@ private:
 };
 
 }
+

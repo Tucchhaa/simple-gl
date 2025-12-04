@@ -26,6 +26,8 @@ add_executable(main
     managers/texture_manager.h
     managers/physics_manager.cpp
     managers/physics_manager.h
+    managers/metrics_manager.cpp
+    managers/metrics_manager.h
     entities/window.cpp
     entities/window.h
     entities/input.cpp

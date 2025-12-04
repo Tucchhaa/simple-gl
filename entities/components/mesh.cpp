@@ -37,6 +37,7 @@ void MeshComponent::setShader(const std::shared_ptr<ShaderProgram> &shaderProgra
     enableVertexAttrib("vTextureCoord", false, 2);
     enableVertexAttrib("vNormal", false, 3);
     glBindVertexArray(0);
+    m_attribOffset = 0;
 }
 
 void MeshComponent::draw(const std::shared_ptr<Camera>& camera) const {

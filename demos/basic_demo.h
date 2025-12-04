@@ -49,8 +49,6 @@ class BasicDemo {
 
     std::vector<std::shared_ptr<MeshComponent>> meshes;
     std::shared_ptr<MeshComponent> skyboxCubeMesh;
-    std::shared_ptr<MeshComponent> portal1Mesh;
-    std::shared_ptr<MeshComponent> portal2Mesh;
 
 public:
     std::shared_ptr<Scene> scene;
@@ -208,32 +206,39 @@ private:
         portal = Portal::create(camera);
 
         // position portals
-        portal->portal1Node->transform()->setPosition(-13, -3, -14.45);
+        portal->portal1Node->transform()->setPosition(-8, -3, -14.45);
         // portal->portal2Node->transform()->setPosition(-1, -3, -14.45);
 
-        portal->portal2Node->transform()->setPosition(-14.45, -3, -13);
+        portal->portal2Node->transform()->setPosition(-8, -3, -10);
+        portal->portal2Node->transform()->rotate(glm::angleAxis(glm::radians(90.f), glm::vec3(0.f, 1.0f, 0.0f)));
         portal->portal2Node->transform()->rotate(glm::angleAxis(glm::radians(90.f), glm::vec3(0.f, 1.0f, 0.0f)));
 
-        // create portal meshes
-        const auto portal1Child = Node::create("meshNode", portal->portal1Node);
-        const auto portal2Child = Node::create("meshNode", portal->portal2Node);
-
-        // Need to rotate plane such that its normal is parallel to direction vector of parent node
-        const auto orientation = glm::angleAxis(glm::radians(90.f), glm::vec3(1.0f, 0, 0));
-        portal1Child->transform()->setOrientation(orientation);
-        portal2Child->transform()->setOrientation(orientation);
-
         const auto planeMesh = meshManager->loadMeshData("plane.obj");
-        portal1Mesh = MeshComponent::create(portal1Child, planeMesh, "portalMesh");
-        portal2Mesh = MeshComponent::create(portal2Child, planeMesh, "portalMesh");
+        portal->setPortalMesh(1, planeMesh);
+        portal->setPortalMesh(2, planeMesh);
 
-        portal1Mesh->setShader(solidColorShader);
-        portal1Mesh->setBeforeDrawCallback([](const auto& shader) {
+        glm::quat orientation = glm::quat(1, 0, 0, 0);
+
+        orientation = glm::angleAxis(glm::radians(90.f), glm::vec3(1.0f, 0, 0)) * orientation;
+        // orientation = glm::angleAxis(glm::radians(180.f), glm::vec3(0, 0, 1)) * orientation;
+        portal->portal1Node->getChild("childNode")->transform()->setOrientation(orientation);
+        portal->portal2Node->getChild("childNode")->transform()->setOrientation(orientation);
+
+        auto portal1BorderNode = portal->portal1Node->getChild("childNode")->getChild("borderNode");
+        portal1BorderNode->transform()->scaleBy(1.05);
+
+        auto portal1BorderMesh = portal1BorderNode->getComponent<MeshComponent>();
+        portal1BorderMesh->setShader(solidColorShader);
+        portal1BorderMesh->setBeforeDrawCallback([](const auto& shader) {
             shader->setUniform("color", 0.05f, 0.15f, 1.f);
         });
 
-        portal2Mesh->setShader(solidColorShader);
-        portal2Mesh->setBeforeDrawCallback([](const auto& shader) {
+        auto portal2BorderNode = portal->portal2Node->getChild("childNode")->getChild("borderNode");
+        portal2BorderNode->transform()->scaleBy(1.05);
+
+        auto portal2BorderMesh = portal2BorderNode->getComponent<MeshComponent>();
+        portal2BorderMesh->setShader(solidColorShader);
+        portal2BorderMesh->setBeforeDrawCallback([](const auto& shader) {
             shader->setUniform("color", 1.f, 0.05f, 0.05f);
         });
     }

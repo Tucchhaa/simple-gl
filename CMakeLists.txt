@@ -64,6 +64,8 @@ add_executable(main
     render-pipeline/framebuffers/msaa_frame_buffer.h
     render-pipeline/portal/portal.cpp
     render-pipeline/portal/portal.h
+    render-pipeline/portal/portal_framebuffer.cpp
+    render-pipeline/portal/portal_framebuffer.h
     helpers/errors.cpp
     helpers/errors.h
     helpers/node_logger.cpp

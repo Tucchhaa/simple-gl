@@ -13,6 +13,8 @@ class Camera;
 class Transform;
 class MeshData;
 class MeshComponent;
+class PortalFramebuffer;
+class ShaderProgram;
 
 class Portal {
 public:
@@ -25,18 +27,41 @@ public:
         const std::shared_ptr<Camera>& camera
     );
 
-    void drawPortalContents(
+    void setPortalMesh(
+        int portalIndex,
+        const std::shared_ptr<MeshData>& meshData
+    );
+
+    void drawPortal(
         int portalIndex,
         const std::function<void(const std::shared_ptr<Camera>& camera)>& drawScene
-    ) const;
+    );
 
 private:
-    int m_maxRecursionLevel = 2;
+    std::shared_ptr<PortalFramebuffer> m_tailPortalFramebuffer;
+
+    ///This shader is used to render portal into stencil buffer
+    std::shared_ptr<ShaderProgram> m_basicPortalShader;
+
+    /// This shader is used to render tail portals
+    std::shared_ptr<ShaderProgram> m_tailPortalShader;
+
+    /// Number of recursive portals that rerender the whole scene to draw the portal contents.
+    unsigned int m_maxRecursionLevel = 2;
+
+    /// Number of recursive portal that use tailPortalFramebuffer as a texture to render portal contents.
+    unsigned int m_maxTailRecursionLevel = 10;
+
+    unsigned int getTotalRecursionLevel() const {
+        return m_maxRecursionLevel + m_maxTailRecursionLevel;
+    }
 
     std::shared_ptr<Camera> m_camera;
+    std::shared_ptr<Camera> m_tailVirtualCamera;
 
-    std::shared_ptr<Node> m_virtualCamerasNode;
     std::vector<std::shared_ptr<Camera>> m_virtualCameras;
+
+    void createShaders();
 
     void createVirtualCameras();
 
@@ -49,6 +74,10 @@ private:
         const std::shared_ptr<Transform>& sourceT,
         const std::shared_ptr<Transform>& destT
     );
+
+    void drawTailPortalToFramebuffer(
+        const std::function<void(const std::shared_ptr<Camera>& camera)>& drawScene
+    ) const;
 };
 
 }

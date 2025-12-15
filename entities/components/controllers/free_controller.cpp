@@ -3,10 +3,10 @@
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
 
-#include "transform.h"
-#include "../window.h"
-#include "../../managers/engine.h"
-#include "../../entities/input.h"
+#include "../transform.h"
+#include "../../window.h"
+#include "../../../managers/engine.h"
+#include "../../../entities/input.h"
 
 namespace SimpleGL {
 

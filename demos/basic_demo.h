@@ -13,11 +13,11 @@
 #include "../entities/shader_program.h"
 #include "../entities/window.h"
 #include "../entities/components/camera.h"
-#include "../entities/components/free_controller.h"
 #include "../entities/components/light.h"
 #include "../entities/components/mesh.h"
 #include "../entities/components/rigid_body.h"
 #include "../entities/components/transform.h"
+#include "../entities/components/controllers/free_controller.h"
 #include "../managers/physics_manager.h"
 #include "../managers/window_manager.h"
 

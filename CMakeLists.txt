@@ -46,14 +46,14 @@ add_executable(main
     entities/components/transform.h
     entities/components/camera.cpp
     entities/components/camera.h
-    entities/components/free_controller.cpp
-    entities/components/free_controller.h
     entities/components/mesh.cpp
     entities/components/mesh.h
     entities/components/light.cpp
     entities/components/light.h
     entities/components/rigid_body.cpp
     entities/components/rigid_body.h
+    entities/components/controllers/free_controller.cpp
+    entities/components/controllers/free_controller.h
     render-pipeline/framebuffers/base_frame_buffer.cpp
     render-pipeline/framebuffers/base_frame_buffer.h
     render-pipeline/framebuffers/screen_frame_buffer.cpp

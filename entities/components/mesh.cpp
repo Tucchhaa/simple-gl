@@ -6,12 +6,14 @@
 #include "../node.h"
 #include "../shader_program.h"
 #include "../../helpers/errors.h"
+#include "../../managers/engine.h"
 
 namespace SimpleGL {
 
 MeshComponent::~MeshComponent() {
     glDeleteVertexArrays(1, &m_VAO);
 }
+
 
 std::shared_ptr<MeshComponent> MeshComponent::create(
     const std::shared_ptr<Node> &node,
@@ -54,6 +56,7 @@ void MeshComponent::draw(const std::shared_ptr<Camera>& camera) const {
 
     m_beforeDrawCallback(m_shaderProgram);
 
+    Engine::instance().metricsManager()->incrementDrawCalls();
     glBindVertexArray(m_VAO);
     glDrawElements(GL_TRIANGLES, m_meshData->indices().size(), GL_UNSIGNED_INT, 0);
 }

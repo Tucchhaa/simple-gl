@@ -54,6 +54,8 @@ add_executable(main
     entities/components/rigid_body.h
     entities/components/controllers/free_controller.cpp
     entities/components/controllers/free_controller.h
+    entities/components/controllers/character_controller.cpp
+    entities/components/controllers/character_controller.h
     render-pipeline/framebuffers/base_frame_buffer.cpp
     render-pipeline/framebuffers/base_frame_buffer.h
     render-pipeline/framebuffers/screen_frame_buffer.cpp

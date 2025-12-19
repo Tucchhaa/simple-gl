@@ -30,7 +30,7 @@ void FreeController::handleInput() {
         transform()->rotate(qPitch);
     }
 
-    if (input->isKeyPressed(GLFW_KEY_SPACE)) {
+    if (input->isKeyPressed(GLFW_KEY_ENTER)) {
         m_canRotate = !m_canRotate;
         Engine::instance().mainWindow()->isCursorPositionFixed = m_canRotate;
     }

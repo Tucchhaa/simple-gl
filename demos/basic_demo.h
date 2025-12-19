@@ -1,6 +1,7 @@
 #pragma once
 
 #include <BulletCollision/CollisionShapes/btBoxShape.h>
+#include <BulletCollision/CollisionShapes/btCapsuleShape.h>
 
 #include "../entities/input.h"
 #include "../managers/engine.h"
@@ -17,6 +18,7 @@
 #include "../entities/components/mesh.h"
 #include "../entities/components/rigid_body.h"
 #include "../entities/components/transform.h"
+#include "../entities/components/controllers/character_controller.h"
 #include "../entities/components/controllers/free_controller.h"
 #include "../managers/physics_manager.h"
 #include "../managers/window_manager.h"
@@ -115,8 +117,16 @@ public:
 
 private:
     void createScene() {
+        bool useFreeCamera = false;
+
         createShaders();
-        createCamera();
+
+        if (useFreeCamera) {
+            createCamera();
+        } else {
+            createPlayer();
+        }
+
         createSkybox();
         createPortal();
 
@@ -158,6 +168,29 @@ private:
             "shaders/skybox/fragment.glsl",
             "Skybox Shader"
         );
+    }
+
+    void createPlayer() {
+        auto playerNode = Node::create("playerNode", rootNode);
+        playerNode->transform()->setPosition(0, 0, 3);
+
+        auto playerShape = std::make_shared<btCapsuleShape>(0.35f, 2.5f);
+        auto rigidBody = RigidBody::create(playerNode, "playerRigidBody");
+        rigidBody->setMass(70.f);
+        rigidBody->setCollisionShape(playerShape);
+        rigidBody->init();
+
+        auto cameraNode = Node::create("cameraNode", playerNode);
+        camera = Camera::create(
+            cameraNode,
+            glm::radians(90.0f),
+            0.3f,
+            100.0f
+        );
+
+        auto controller = CharacterController::create(playerNode, "playerController");
+        controller->setCameraNode(cameraNode);
+        controller->setRigidBody(rigidBody);
     }
 
     void createCamera() {
@@ -256,6 +289,7 @@ private:
         auto groundShape = std::make_shared<btBoxShape>(btVector3(50.f, 0.5, 50.f));
         auto rigidbody = RigidBody::create(node);
         rigidbody->setCollisionShape(groundShape);
+        rigidbody->init();
     }
 
     void createWalls() {
@@ -333,8 +367,9 @@ private:
         meshes.push_back(mesh);
 
         auto cubeShape = std::make_shared<btBoxShape>(btVector3(0.5f, 0.5f, 0.5f));
-        auto rigidbody = RigidBody::create(node);
-        rigidbody->setMass(1.f);
-        rigidbody->setCollisionShape(cubeShape);
+        auto rigidBody = RigidBody::create(node);
+        rigidBody->setMass(1.f);
+        rigidBody->setCollisionShape(cubeShape);
+        rigidBody->init();
     }
 };

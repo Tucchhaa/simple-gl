@@ -4,7 +4,6 @@
 
 #include <BulletCollision/CollisionShapes/btCollisionShape.h>
 #include <BulletDynamics/Dynamics/btRigidBody.h>
-#include <glm/detail/type_quat.hpp>
 #include <LinearMath/btMotionState.h>
 
 #include "component.h"
@@ -19,6 +18,8 @@ public:
 
     static std::shared_ptr<RigidBody> create(const std::shared_ptr<Node> &node, const std::string& name = "RigidBody");
 
+    const std::shared_ptr<btRigidBody>& getBtRigidBody() const { return m_rigidBody; }
+
     void setMass(float mass) { m_mass = mass; }
 
     void setCollisionShape(const std::shared_ptr<btCollisionShape> &collisionShape) {
@@ -31,7 +32,7 @@ public:
 
     void setWorldTransform(const glm::vec3& position, const glm::quat& rotation) const;
 
-    void onStart() override;
+    void init();
 
 private:
     std::shared_ptr<btCollisionShape> m_collisionShape;

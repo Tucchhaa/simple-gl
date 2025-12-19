@@ -3,10 +3,10 @@
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
 
-#include "transform.h"
-#include "../window.h"
-#include "../../managers/engine.h"
-#include "../../entities/input.h"
+#include "../transform.h"
+#include "../../window.h"
+#include "../../../managers/engine.h"
+#include "../../../entities/input.h"
 
 namespace SimpleGL {
 
@@ -30,7 +30,7 @@ void FreeController::handleInput() {
         transform()->rotate(qPitch);
     }
 
-    if (input->isKeyPressed(GLFW_KEY_SPACE)) {
+    if (input->isKeyPressed(GLFW_KEY_ENTER)) {
         m_canRotate = !m_canRotate;
         Engine::instance().mainWindow()->isCursorPositionFixed = m_canRotate;
     }

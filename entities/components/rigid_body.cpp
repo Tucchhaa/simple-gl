@@ -47,7 +47,7 @@ void RigidBody::setWorldTransform(const glm::vec3 &position, const glm::quat& ro
     m_rigidBody->activate(true);
 }
 
-void RigidBody::onStart() {
+void RigidBody::init() {
     if (m_collisionShape == nullptr) {
         return;
     }

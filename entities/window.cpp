@@ -21,7 +21,7 @@ std::shared_ptr<Window> Window::create(const std::string &label, GLFWwindow *glf
     instance->m_frameWidth = frameWidth;
     instance->m_frameHeight = frameHeight;
     instance->m_screenWidth = static_cast<int>(static_cast<float>(frameWidth) / xScale);
-    instance->m_screenHeight = static_cast<int>(static_cast<float>(frameHeight) / xScale);
+    instance->m_screenHeight = static_cast<int>(static_cast<float>(frameHeight) / yScale);
 
     glfwSetWindowUserPointer(glfwWindow, instance.get());
     instance->setCallbacks();

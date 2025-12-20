@@ -15,7 +15,7 @@ class Window {
 public:
     const std::string label;
 
-    bool isCursorPositionFixed;
+    bool isCursorPositionFixed = false;
 
     static std::shared_ptr<Window> create(const std::string &label, GLFWwindow* glfwWindow);
 

@@ -13,7 +13,7 @@ public:
     const int id;
     const std::string name;
 
-    virtual ~Component() {}
+    virtual ~Component() = default;
 
     const std::shared_ptr<Transform>& transform() const;
 

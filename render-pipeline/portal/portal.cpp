@@ -110,13 +110,13 @@ void Portal::drawPortal(
     glEnable(GL_DEPTH_TEST);
     glDepthMask(GL_TRUE);
 
+    glEnable(GL_STENCIL_TEST);
     glStencilMask(0x00);
     glStencilOp(GL_KEEP, GL_KEEP, GL_KEEP);
 
     for (unsigned int i = getTotalRecursionLevel(); i >= 1; i--) {
         glColorMask(GL_TRUE, GL_TRUE, GL_TRUE, GL_TRUE);
-        glEnable(GL_STENCIL_TEST);
-        glStencilFunc(GL_EQUAL, i, 0xFF);
+        glStencilFunc(GL_LEQUAL, i, 0xFF);
 
         bool isTailPortal = i > m_maxRecursionLevel;
 
@@ -136,7 +136,6 @@ void Portal::drawPortal(
         glColorMask(GL_FALSE, GL_FALSE, GL_FALSE, GL_FALSE);
         glStencilFunc(GL_LEQUAL, i, 0xFF);
         glDepthFunc(GL_ALWAYS);
-        glDepthMask(GL_TRUE);
 
         portalMesh->draw(recursiveCameras[i - 1]);
 

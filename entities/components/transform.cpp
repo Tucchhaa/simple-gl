@@ -82,7 +82,7 @@ void Transform::recalculate() {
     }
 
     if (m_dirty) {
-        m_absolutePosition = parentTransform->m_absolutePosition + m_position;
+        m_absolutePosition = parentTransform->m_absolutePosition + parentTransform->m_absoluteOrientation * m_position;
         m_absoluteScale = parentTransform->m_absoluteScale * m_scale;
         m_absoluteOrientation = glm::normalize(parentTransform->m_absoluteOrientation * m_orientation);
 
@@ -94,7 +94,7 @@ void Transform::recalculate() {
         }
     }
 
-    if (m_subtreeDirty) {
+    if (m_subtreeDirty || m_dirty) {
         for (const auto& childNode : node()->children()) {
             const auto& childTransform = childNode->transform();
 

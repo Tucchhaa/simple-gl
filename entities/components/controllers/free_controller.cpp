@@ -32,7 +32,15 @@ void FreeController::handleInput() {
 
     if (input->isKeyPressed(GLFW_KEY_ENTER)) {
         m_canRotate = !m_canRotate;
-        Engine::instance().mainWindow()->isCursorPositionFixed = m_canRotate;
+        auto window = Engine::instance().mainWindow();
+        window->isCursorPositionFixed = m_canRotate;
+
+        if (m_canRotate) {
+            glfwSetInputMode(window->glfwWindow(), GLFW_CURSOR, GLFW_CURSOR_DISABLED);
+            window->setCursorPositionToCenter();
+        } else {
+            glfwSetInputMode(window->glfwWindow(), GLFW_CURSOR, GLFW_CURSOR_NORMAL);
+        }
     }
 }
 

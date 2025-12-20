@@ -15,7 +15,7 @@
 namespace SimpleGL {
 
 void CharacterController::onStart() {
-    if (node()->rigidBody() == nullptr) {
+    if (m_rigidBody == nullptr) {
         throw std::runtime_error("Character Controller: RigidBody is not set");
     }
 

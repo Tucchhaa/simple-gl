@@ -1,7 +1,7 @@
 #include <iostream>
 #include <sstream>
 
-#include "demos/basic_demo.h"
+#include "demos/test_chamber_demo.h"
 #include "managers/engine.h"
 #include "managers/mesh_manager.h"
 #include "managers/shader_manager.h"
@@ -12,7 +12,6 @@
 #include "entities/scene.h"
 #include "entities/window.h"
 #include "render-pipeline/framebuffers/msaa_frame_buffer.h"
-
 #include "render-pipeline/framebuffers/screen_frame_buffer.h"
 
 using namespace SimpleGL;
@@ -27,7 +26,7 @@ int main() {
     window->setTitle("Learn OpenGL");
     window->makeCurrent();
 
-    auto demo = BasicDemo();
+    auto demo = TestChamberDemo();
 
     // create screen frame buffer
     auto frameShaderProgram = Engine::instance().shaderManager()->createShaderProgram(
@@ -45,18 +44,15 @@ int main() {
 
     demo.scene->emitStart();
 
-    while(window->isOpen())
-    {
+    while (window->isOpen()) {
         demo.updateNodes();
         demo.scene->emitUpdate();
 
-        // draw scene
         if (msaaFrameBuffer != nullptr) {
             glBindFramebuffer(GL_FRAMEBUFFER, msaaFrameBuffer->FBO());
 
             demo.draw();
 
-            // resolve ms fbo
             glBindFramebuffer(GL_READ_FRAMEBUFFER, msaaFrameBuffer->FBO());
             glBindFramebuffer(GL_DRAW_FRAMEBUFFER, screenFrameBuffer->FBO());
             glBlitFramebuffer(
@@ -66,14 +62,10 @@ int main() {
             );
         } else {
             glBindFramebuffer(GL_FRAMEBUFFER, screenFrameBuffer->FBO());
-
             demo.draw();
         }
 
-        // render frame
         screenFrameBuffer->renderFrame();
-
-        // poll input events
         window->pollEvents();
 
         if (window->input()->isKeyPressed(GLFW_KEY_ESCAPE)) {

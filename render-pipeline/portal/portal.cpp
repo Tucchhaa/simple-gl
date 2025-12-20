@@ -5,6 +5,7 @@
 #include "portal_framebuffer.h"
 #include "../../managers/engine.h"
 #include "../../managers/shader_manager.h"
+#include "../../managers/metrics_manager.h"
 #include "../../entities/node.h"
 #include "../../entities/scene.h"
 #include "../../entities/shader_program.h"
@@ -114,6 +115,7 @@ void Portal::drawPortal(
     glStencilOp(GL_KEEP, GL_KEEP, GL_KEEP);
 
     for (unsigned int i = getTotalRecursionLevel(); i >= 1; i--) {
+        Engine::instance().metricsManager()->updateRecursionDepth(i);
         glColorMask(GL_TRUE, GL_TRUE, GL_TRUE, GL_TRUE);
         glEnable(GL_STENCIL_TEST);
         glStencilFunc(GL_EQUAL, i, 0xFF);

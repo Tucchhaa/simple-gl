@@ -1,9 +1,11 @@
 #include <iostream>
 #include <sstream>
+#include <chrono>
 
 #include "demos/basic_demo.h"
 #include "managers/engine.h"
 #include "managers/mesh_manager.h"
+
 #include "managers/shader_manager.h"
 #include "managers/window_manager.h"
 
@@ -45,8 +47,15 @@ int main() {
 
     demo.scene->emitStart();
 
+    auto lastFrame = std::chrono::high_resolution_clock::now();
     while(window->isOpen())
     {
+        auto currentFrame = std::chrono::high_resolution_clock::now();
+        float frameTime = std::chrono::duration<float, std::chrono::milliseconds::period>(currentFrame - lastFrame).count();
+        lastFrame = currentFrame;
+
+        Engine::instance().metricsManager()->addFrameTime(frameTime);
+
         demo.updateNodes();
         demo.scene->emitUpdate();
 
@@ -79,6 +88,8 @@ int main() {
         if (window->input()->isKeyPressed(GLFW_KEY_ESCAPE)) {
             window->close();
         }
+
+        Engine::instance().metricsManager()->endFrame();
     }
 
     return 0;

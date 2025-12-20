@@ -37,6 +37,14 @@ public:
         const std::function<void(const std::shared_ptr<Camera>& camera)>& drawScene
     );
 
+    void setMaxRecursionLevel(unsigned int level) {
+        m_maxRecursionLevel = level;
+    }
+
+    void setMaxTailRecursionLevel(unsigned int level) {
+        m_maxTailRecursionLevel = level;
+    }
+
 private:
     std::shared_ptr<PortalFramebuffer> m_tailPortalFramebuffer;
 

@@ -211,7 +211,11 @@ void ShaderProgram::setDirectLightsUniform() {
     const auto scene = Engine::instance().scene();
 
     if (uniformExists("directLightsNum")) {
-        for (int i = 0; i < scene->directLights().size(); i++) {
+        // Must match shader constant: MAX_DIRECT_LIGHTS_NUM
+        constexpr int kMaxDirectLights = 3;
+        const int directLightsCount = std::min<int>(static_cast<int>(scene->directLights().size()), kMaxDirectLights);
+
+        for (int i = 0; i < directLightsCount; i++) {
             const auto light = scene->directLights()[i].lock();
             auto index_str = std::to_string(i);
 
@@ -221,7 +225,7 @@ void ShaderProgram::setDirectLightsUniform() {
             setUniform("directLights[" + index_str + "].specular", light->specular);
         }
 
-        setUniform("directLightsNum", static_cast<int>(scene->directLights().size()));
+        setUniform("directLightsNum", directLightsCount);
     }
 }
 
@@ -229,7 +233,11 @@ void ShaderProgram::setPointLightsUniform() {
     const auto scene = Engine::instance().scene();
 
     if (uniformExists("pointLightsNum")) {
-        for (int i = 0; i < scene->pointLights().size(); i++) {
+        // Must match shader constant: MAX_POINT_LIGHTS_NUM
+        constexpr int kMaxPointLights = 10;
+        const int pointLightsCount = std::min<int>(static_cast<int>(scene->pointLights().size()), kMaxPointLights);
+
+        for (int i = 0; i < pointLightsCount; i++) {
             const auto light = scene->pointLights()[i].lock();
             auto index_str = std::to_string(i);
 
@@ -240,7 +248,7 @@ void ShaderProgram::setPointLightsUniform() {
             setUniform("pointLights[" + index_str + "].specular", light->specular);
         }
 
-        setUniform("pointLightsNum", static_cast<int>(scene->pointLights().size()));
+        setUniform("pointLightsNum", pointLightsCount);
     }
 }
 

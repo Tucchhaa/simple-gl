@@ -35,6 +35,9 @@ public:
 
     float deltaTime() const { return m_deltaTime; }
 
+    /// Returns time in milliseconds after glfwInit() call
+    double time() const;
+
     void setKeyState(int key, bool pressed);
 
 private:

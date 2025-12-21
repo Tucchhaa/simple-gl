@@ -56,6 +56,12 @@ add_executable(main
     entities/components/controllers/free_controller.h
     entities/components/controllers/character_controller.cpp
     entities/components/controllers/character_controller.h
+    entities/components/portal/portal_fps_controller.cpp
+    entities/components/portal/portal_fps_controller.h
+    entities/components/portal/portal_bullet.cpp
+    entities/components/portal/portal_bullet.h
+    entities/physics/contact_callback.cpp
+    entities/physics/contact_callback.h
     render-pipeline/framebuffers/base_frame_buffer.cpp
     render-pipeline/framebuffers/base_frame_buffer.h
     render-pipeline/framebuffers/screen_frame_buffer.cpp

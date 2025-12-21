@@ -22,6 +22,8 @@
 #include "../entities/components/rigid_body.h"
 #include "../entities/components/transform.h"
 #include "../entities/components/controllers/character_controller.h"
+#include "../entities/components/controllers/free_controller.h"
+#include "../entities/mesh_data.h"
 #include "../managers/physics_manager.h"
 #include "../managers/window_manager.h"
 
@@ -85,7 +87,21 @@ public:
 
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
+        // Enable depth testing (CRITICAL - was missing!)
+        glEnable(GL_DEPTH_TEST);
+        glDepthFunc(GL_LESS);
+
         // Draw all meshes
+        static int drawCallCount = 0;
+        drawCallCount++;
+        if (drawCallCount <= 5) {  // Log first 5 draw calls
+            std::cout << "MapImportDemo::draw() - Drawing " << meshes.size() << " meshes (draw call #" << drawCallCount << ")" << std::endl;
+            if (!meshes.empty()) {
+                std::cout << "  First mesh node name: " << meshes[0]->node()->name << std::endl;
+                std::cout << "  First mesh visible: " << meshes[0]->node()->visible << std::endl;
+            }
+        }
+        
         for (const auto& mesh : meshes) {
             mesh->draw(camera);
         }
@@ -107,6 +123,11 @@ private:
         createLighting();
         
         staticNode = Node::create("staticNode", rootNode);
+        
+        // Create test square first
+        createTestSquare();
+        
+        // Then load map
         loadMap();
     }
 
@@ -137,24 +158,32 @@ private:
         try {
             m_defaultMaterial.albedo = tm->getTexture("wall.jpg", true);
             m_defaultMaterial.specular = tm->getTexture("specular.png", false);
-        } catch (...) {
+            std::cout << "MapImportDemo: Loaded textures - wall.jpg and specular.png" << std::endl;
+        } catch (const std::exception& e) {
+            std::cout << "MapImportDemo: Failed to load wall.jpg, trying fallback: " << e.what() << std::endl;
             // Fallback to diffuse/specular if wall.jpg doesn't exist
-            m_defaultMaterial.albedo = tm->getTexture("diffuse.png", true);
-            m_defaultMaterial.specular = tm->getTexture("specular.png", false);
+            try {
+                m_defaultMaterial.albedo = tm->getTexture("diffuse.png", true);
+                m_defaultMaterial.specular = tm->getTexture("specular.png", false);
+                std::cout << "MapImportDemo: Loaded fallback textures - diffuse.png and specular.png" << std::endl;
+            } catch (const std::exception& e2) {
+                std::cerr << "MapImportDemo: CRITICAL - Failed to load ANY textures: " << e2.what() << std::endl;
+                std::cerr << "MapImportDemo: Objects will not render without textures!" << std::endl;
+            }
         }
+        
+        std::cout << "MapImportDemo: Material status - albedo: " << (m_defaultMaterial.albedo != nullptr) 
+                  << ", specular: " << (m_defaultMaterial.specular != nullptr) << std::endl;
     }
 
     void createPlayer() {
-        auto playerNode = Node::create("playerNode", rootNode);
-        playerNode->transform()->setPosition(0, 1, 5);
+        // Use free camera (flying mode) instead of character controller
+        auto cameraNode = Node::create("cameraNode", rootNode);
+        // Position camera to see the test square and map objects
+        cameraNode->transform()->setPosition(0, 0, 3);
+        
+        std::cout << "MapImportDemo: Free camera created at position (0, 0, 3)" << std::endl;
 
-        auto playerShape = std::make_shared<btCapsuleShape>(0.35f, 2.5f);
-        auto rigidBody = RigidBody::create(playerNode, "playerRigidBody");
-        rigidBody->setMass(70.f);
-        rigidBody->setCollisionShape(playerShape);
-        rigidBody->init();
-
-        auto cameraNode = Node::create("cameraNode", playerNode);
         camera = Camera::create(
             cameraNode,
             glm::radians(90.0f),
@@ -162,9 +191,7 @@ private:
             200.0f
         );
 
-        auto controller = CharacterController::create(playerNode, "playerController");
-        controller->setCameraNode(cameraNode);
-        controller->setRigidBody(rigidBody);
+        FreeController::create(cameraNode);
     }
 
     void createSkybox() {
@@ -227,8 +254,65 @@ private:
         }
     }
 
+    void createTestSquare() {
+        // Create a simple square at (0, 0, 0) for testing
+        // Square facing forward (+Z), 1x1 unit size
+        // Vertex format: position(3) + UV(2) + normal(3) = 8 floats per vertex
+        
+        std::vector<float> vertices = {
+            // Bottom-left
+            -0.5f, -0.5f, 0.0f,  // position
+            0.0f, 0.0f,          // UV
+            0.0f, 0.0f, 1.0f,    // normal (forward)
+            
+            // Bottom-right
+            0.5f, -0.5f, 0.0f,
+            1.0f, 0.0f,
+            0.0f, 0.0f, 1.0f,
+            
+            // Top-right
+            0.5f, 0.5f, 0.0f,
+            1.0f, 1.0f,
+            0.0f, 0.0f, 1.0f,
+            
+            // Top-left
+            -0.5f, 0.5f, 0.0f,
+            0.0f, 1.0f,
+            0.0f, 0.0f, 1.0f,
+        };
+        
+        std::vector<unsigned int> indices = {
+            0, 1, 2,  // First triangle
+            0, 2, 3   // Second triangle
+        };
+        
+        auto testMeshData = MeshData::createFromArrays("testSquare", vertices, indices, 8);
+        
+        auto testNode = Node::create("testSquareNode", staticNode);
+        testNode->transform()->setPosition(0, 0, 0);
+        
+        auto testMeshComponent = MeshComponent::create(testNode, testMeshData, "testSquareMesh");
+        testMeshComponent->setShader(blinnPhongShader);
+        
+        // Apply default material
+        testMeshComponent->setBeforeDrawCallback([this](const std::shared_ptr<ShaderProgram>& shader) {
+            if (m_defaultMaterial.albedo && m_defaultMaterial.specular) {
+                shader->setTexture("diffuseTexture", m_defaultMaterial.albedo);
+                shader->setTexture("specularTexture", m_defaultMaterial.specular);
+            }
+        });
+        
+        meshes.push_back(testMeshComponent);
+        std::cout << "MapImportDemo: Created test square at (0, 0, 0)" << std::endl;
+    }
+
     void loadMap() {
         try {
+            std::cout << "MapImportDemo: Starting map load..." << std::endl;
+            std::cout << "MapImportDemo: Default material - has albedo: " << (m_defaultMaterial.albedo != nullptr) 
+                      << ", has specular: " << (m_defaultMaterial.specular != nullptr) << std::endl;
+            std::cout << "MapImportDemo: BlinnPhong shader: " << (blinnPhongShader != nullptr) << std::endl;
+            
             auto mapLoader = MapLoader::create();
             
             // Set default material for all objects
@@ -240,18 +324,24 @@ private:
             // Load map
             auto mapRoot = mapLoader->loadMap("maps/blender_export.json", staticNode);
             
+            std::cout << "MapImportDemo: Map root created, collecting meshes..." << std::endl;
+            
             // Collect all mesh components from the loaded map for rendering
             auto loadedMeshes = mapRoot->getChildComponents<MeshComponent>();
+            std::cout << "MapImportDemo: Found " << loadedMeshes.size() << " child mesh components" << std::endl;
+            
             for (const auto& mesh : loadedMeshes) {
                 meshes.push_back(mesh);
             }
             
             // Also check the root node itself for a mesh component
             if (auto rootMesh = mapRoot->getComponent<MeshComponent>()) {
+                std::cout << "MapImportDemo: Found mesh component on root node" << std::endl;
                 meshes.push_back(rootMesh);
             }
             
             std::cout << "MapImportDemo: Successfully loaded " << meshes.size() << " meshes from map" << std::endl;
+            std::cout << "MapImportDemo: Total meshes in scene: " << meshes.size() << std::endl;
         } catch (const std::exception& e) {
             std::cerr << "MapImportDemo: Failed to load map: " << e.what() << std::endl;
             std::cerr << "MapImportDemo: Running with empty scene (no map loaded)" << std::endl;

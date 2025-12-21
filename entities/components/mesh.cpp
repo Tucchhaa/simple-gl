@@ -7,6 +7,14 @@
 #include "../shader_program.h"
 #include "../../helpers/errors.h"
 
+// #region agent log
+#include <fstream>
+#include <chrono>
+#include <nlohmann/json.hpp>
+#include <glm/glm.hpp>
+#include <glm/gtc/matrix_transform.hpp>
+// #endregion
+
 namespace SimpleGL {
 
 MeshComponent::~MeshComponent() {
@@ -49,7 +57,30 @@ void MeshComponent::draw(const std::shared_ptr<Camera>& camera) const {
     m_shaderProgram->use(camera);
 
     if (m_shaderProgram->uniformExists("transform")) {
-        m_shaderProgram->setUniform("transform", transform()->transformMatrix());
+        auto tMatrix = transform()->transformMatrix();
+        // #region agent log
+        auto camPos = camera->transform()->absolutePosition();
+        auto camDir = camera->transform()->direction();
+        std::ofstream log_file("/home/franciscobrizuela/Documents/codes1/simple-gl/.cursor/debug.log", std::ios::app);
+        nlohmann::json log_entry = {
+            {"timestamp", std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::system_clock::now().time_since_epoch()).count()},
+            {"location", "mesh.cpp:52"},
+            {"message", "Drawing mesh with camera context"},
+            {"data", {
+                {"nodeName", node()->name},
+                {"cameraPosition", {camPos.x, camPos.y, camPos.z}},
+                {"cameraDirection", {camDir.x, camDir.y, camDir.z}},
+                {"objectPosition", {tMatrix[3][0], tMatrix[3][1], tMatrix[3][2]}},
+                {"distanceFromCamera", glm::distance(camPos, glm::vec3(tMatrix[3][0], tMatrix[3][1], tMatrix[3][2]))}
+            }},
+            {"sessionId", "debug-session"},
+            {"runId", "run1"},
+            {"hypothesisId", "G"}
+        };
+        log_file << log_entry.dump() << "\n";
+        log_file.close();
+        // #endregion
+        m_shaderProgram->setUniform("transform", tMatrix);
     }
 
     m_beforeDrawCallback(m_shaderProgram);

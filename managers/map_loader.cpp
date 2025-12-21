@@ -3,6 +3,8 @@
 #include <fstream>
 #include <stdexcept>
 #include <iostream>
+#include <chrono>
+#include <nlohmann/json.hpp>
 
 #include <BulletCollision/CollisionShapes/btBoxShape.h>
 
@@ -14,6 +16,23 @@
 #include "../entities/mesh_data.h"
 #include "../entities/shader_program.h"
 #include "../helpers/errors.h"
+
+// #region agent log
+static void debug_log(const std::string& location, const std::string& message, const nlohmann::json& data, const std::string& hypothesisId = "") {
+    nlohmann::json log_entry = {
+        {"timestamp", std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::system_clock::now().time_since_epoch()).count()},
+        {"location", location},
+        {"message", message},
+        {"data", data},
+        {"sessionId", "debug-session"},
+        {"runId", "run1"},
+        {"hypothesisId", hypothesisId}
+    };
+    std::ofstream log_file("/home/franciscobrizuela/Documents/codes1/simple-gl/.cursor/debug.log", std::ios::app);
+    log_file << log_entry.dump() << "\n";
+    log_file.close();
+}
+// #endregion
 
 namespace SimpleGL {
 
@@ -49,19 +68,45 @@ std::shared_ptr<Node> MapLoader::loadMap(
     // Create root node for all map objects
     auto rootNode = Node::create("MapRoot", parent);
 
+    // #region agent log
+    int totalObjects = jsonData["objects"].size();
+    debug_log("map_loader.cpp:50", "Starting map load", {
+        {"totalObjects", totalObjects},
+        {"jsonPath", jsonPath.string()}
+    }, "A");
+    // #endregion
+
     // Process each object
     int loadedCount = 0;
     for (const auto& objData : jsonData["objects"]) {
         try {
             auto node = createNodeFromJson(objData, rootNode);
             loadedCount++;
+            // #region agent log
+            debug_log("map_loader.cpp:62", "Object loaded", {
+                {"objectName", objData["name"].get<std::string>()},
+                {"loadedCount", loadedCount}
+            }, "A");
+            // #endregion
         } catch (const std::exception& e) {
             // Log error but continue loading other objects
             std::cerr << "Error loading object: " << e.what() << std::endl;
+            // #region agent log
+            debug_log("map_loader.cpp:69", "Object load failed", {
+                {"error", e.what()}
+            }, "A");
+            // #endregion
         }
     }
 
     std::cout << "MapLoader: Successfully loaded " << loadedCount << " objects from " << jsonPath << std::endl;
+
+    // #region agent log
+    debug_log("map_loader.cpp:77", "Map load complete", {
+        {"loadedCount", loadedCount},
+        {"totalObjects", totalObjects}
+    }, "A");
+    // #endregion
 
     return rootNode;
 }
@@ -123,6 +168,14 @@ std::shared_ptr<Node> MapLoader::createNodeFromJson(
     // Create mesh component
     auto meshComponent = MeshComponent::create(node, meshData);
 
+    // #region agent log
+    debug_log("map_loader.cpp:143", "Mesh component created", {
+        {"objectName", name},
+        {"vertexCount", vertices.size() / 8},
+        {"indexCount", indices.size()}
+    }, "B");
+    // #endregion
+
     // Apply transform
     auto transform = node->transform();
     
@@ -152,8 +205,32 @@ std::shared_ptr<Node> MapLoader::createNodeFromJson(
     // Apply default material to all objects
     Material2Tex material = m_defaultMaterial;
     
+    // #region agent log
+    auto absPos = transform->absolutePosition();
+    debug_log("map_loader.cpp:200", "Transform applied", {
+        {"objectName", name},
+        {"absolutePosition", {absPos.x, absPos.y, absPos.z}},
+        {"hasShader", m_blinnPhongShader != nullptr},
+        {"hasAlbedo", material.albedo != nullptr},
+        {"hasSpecular", material.specular != nullptr}
+    }, "C");
+    // #endregion
+    
     if (m_blinnPhongShader && material.albedo && material.specular) {
         applyMaterialToMesh(meshComponent, material);
+        // #region agent log
+        debug_log("map_loader.cpp:211", "Material applied", {
+            {"objectName", name}
+        }, "D");
+        // #endregion
+    } else {
+        // #region agent log
+        std::string reason = !m_blinnPhongShader ? "no_shader" : (!material.albedo || !material.specular ? "no_textures" : "unknown");
+        debug_log("map_loader.cpp:216", "Material NOT applied", {
+            {"objectName", name},
+            {"reason", reason}
+        }, "D");
+        // #endregion
     }
 
     // Create collision body if half-extents are provided

@@ -15,6 +15,8 @@ The script will export ALL mesh objects in your scene to resources/maps/blender_
 
 import bpy
 import json
+import math
+import mathutils
 from pathlib import Path
 
 def extract_mesh_data(obj):
@@ -34,10 +36,19 @@ def extract_mesh_data(obj):
     world_matrix = obj.matrix_world
     position, rotation_quat, scale_vec = world_matrix.decompose()
     
-    position = list(position)
-    rotation_quat.normalize()
-    rotation = [rotation_quat.w, rotation_quat.x, rotation_quat.y, rotation_quat.z]
-    scale = list(scale_vec)
+    # Convert position: Blender(X, Y, Z) → OpenGL(X, Z, -Y)
+    position_gl = [position.x, position.z, -position.y]
+    
+    # Convert rotation quaternion: Blender Z-up to OpenGL Y-up
+    # Rotate quaternion by -90 degrees around X axis to convert coordinate system
+    # mathutils is available in Blender's Python environment
+    rot_x_neg90 = mathutils.Euler((math.radians(-90), 0, 0), 'XYZ').to_quaternion()
+    rotation_quat_gl = rot_x_neg90 @ rotation_quat
+    rotation_quat_gl.normalize()
+    rotation = [rotation_quat_gl.w, rotation_quat_gl.x, rotation_quat_gl.y, rotation_quat_gl.z]
+    
+    # Convert scale: Blender(X, Y, Z) → OpenGL(X, Z, Y)
+    scale = [scale_vec.x, scale_vec.z, scale_vec.y]
     
     # Extract mesh data: positions, UVs, normals
     # Vertices are in LOCAL space (mesh coordinates, not world space)
@@ -58,20 +69,24 @@ def extract_mesh_data(obj):
             vertex_idx = loop.vertex_index
             
             # Position in LOCAL space (mesh coordinates)
+            # Convert Blender (Z-up) to OpenGL (Y-up):
+            # Blender(X, Y, Z) → OpenGL(X, Z, -Y)
             pos = mesh.vertices[vertex_idx].co
-            pos_tuple = (pos.x, pos.y, pos.z)
+            pos_tuple = (pos.x, pos.z, -pos.y)
             
             # UV coordinates
             if has_uvs:
                 uv = uv_layer.data[loop_idx].uv
-                uv_tuple = (uv.x, uv.y)
+                # Blender V coordinate needs to be flipped: V = 1 - V
+                uv_tuple = (uv.x, 1.0 - uv.y)
             else:
                 # Generate default UVs if missing
                 uv_tuple = (0.0, 0.0)
             
             # Normal in LOCAL space
+            # Convert normal: Blender(X, Y, Z) → OpenGL(X, Z, -Y)
             normal = loop.normal
-            normal_tuple = (normal.x, normal.y, normal.z)
+            normal_tuple = (normal.x, normal.z, -normal.y)
             
             # Create vertex key for deduplication
             vertex_key = (pos_tuple, uv_tuple, normal_tuple)
@@ -82,9 +97,9 @@ def extract_mesh_data(obj):
                 
                 # Vertex format: pos(3) + uv(2) + normal(3) = 8 floats
                 vertices.extend([
-                    pos.x, pos.y, pos.z,  # position
-                    uv_tuple[0], uv_tuple[1],  # UV
-                    normal_tuple[0], normal_tuple[1], normal_tuple[2]  # normal
+                    pos_tuple[0], pos_tuple[1], pos_tuple[2],  # position (converted)
+                    uv_tuple[0], uv_tuple[1],  # UV (V flipped)
+                    normal_tuple[0], normal_tuple[1], normal_tuple[2]  # normal (converted)
                 ])
             else:
                 vertex_idx_new = vertex_map[vertex_key]
@@ -92,34 +107,45 @@ def extract_mesh_data(obj):
             face_verts.append(vertex_idx_new)
         
         # Triangulate faces (quads and n-gons)
+        # Note: Blender uses CCW winding, OpenGL with GL_CULL_FACE GL_BACK also expects CCW
+        # But after coordinate conversion, we need to ensure correct winding
         if len(face_verts) == 3:
+            # Triangle: keep CCW winding (0, 1, 2)
             indices.extend(face_verts)
         elif len(face_verts) == 4:
-            # Quad: split into two triangles
+            # Quad: split into two triangles with correct CCW winding
+            # First triangle: 0, 1, 2
             indices.extend([face_verts[0], face_verts[1], face_verts[2]])
+            # Second triangle: 0, 2, 3 (maintain CCW order)
             indices.extend([face_verts[0], face_verts[2], face_verts[3]])
         else:
-            # N-gon: fan triangulation
+            # N-gon: fan triangulation with CCW winding
             for i in range(1, len(face_verts) - 1):
                 indices.extend([face_verts[0], face_verts[i], face_verts[i + 1]])
     
-    # Calculate bounding box for collision half-extents (in local space)
+    # Calculate bounding box for collision half-extents (in local space, after conversion)
+    # Using converted coordinates: Blender(X, Y, Z) → OpenGL(X, Z, -Y)
     bbox_min = [float('inf'), float('inf'), float('inf')]
     bbox_max = [float('-inf'), float('-inf'), float('-inf')]
     
     for vertex in mesh.vertices:
         local_vertex = vertex.co
-        bbox_min[0] = min(bbox_min[0], local_vertex.x)
-        bbox_min[1] = min(bbox_min[1], local_vertex.y)
-        bbox_min[2] = min(bbox_min[2], local_vertex.z)
-        bbox_max[0] = max(bbox_max[0], local_vertex.x)
-        bbox_max[1] = max(bbox_max[1], local_vertex.y)
-        bbox_max[2] = max(bbox_max[2], local_vertex.z)
+        # Convert to OpenGL coordinates
+        x_gl = local_vertex.x
+        y_gl = local_vertex.z
+        z_gl = -local_vertex.y
+        
+        bbox_min[0] = min(bbox_min[0], x_gl)
+        bbox_min[1] = min(bbox_min[1], y_gl)
+        bbox_min[2] = min(bbox_min[2], z_gl)
+        bbox_max[0] = max(bbox_max[0], x_gl)
+        bbox_max[1] = max(bbox_max[1], y_gl)
+        bbox_max[2] = max(bbox_max[2], z_gl)
     
-    # Half-extents from center (local space)
+    # Half-extents from center (local space, OpenGL coordinates)
     half_extents = [(bbox_max[i] - bbox_min[i]) / 2.0 for i in range(3)]
     
-    # Scale half-extents by object's scale transform
+    # Scale half-extents by object's scale transform (already converted)
     half_extents[0] *= abs(scale[0])
     half_extents[1] *= abs(scale[1])
     half_extents[2] *= abs(scale[2])
@@ -128,7 +154,7 @@ def extract_mesh_data(obj):
         "name": obj.name,
         "vertices": vertices,
         "indices": indices,
-        "position": position,
+        "position": position_gl,
         "rotation": rotation,
         "scale": scale,
         "colliderHalfExtents": half_extents

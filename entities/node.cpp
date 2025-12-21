@@ -3,6 +3,8 @@
 #include "components/component.h"
 #include "components/rigid_body.h"
 #include "components/transform.h"
+#include "../managers/engine.h"
+#include "../entities/scene.h" // Added this line
 #include <vector>
 
 namespace SimpleGL {
@@ -26,6 +28,7 @@ std::shared_ptr<Node> Node::create(
 
 void Node::addComponent(const std::shared_ptr<Component>& component) {
     m_components[typeid(*component)] = component;
+    Engine::instance().scene()->addComponent(component);
 }
 
 void Node::setParent(const std::shared_ptr<Node> &parent) {

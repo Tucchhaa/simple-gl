@@ -1,9 +1,7 @@
 #pragma once
 
-#include <iostream>
-#include <filesystem>
 #include <unordered_map>
-
+#include <BulletCollision/CollisionShapes/btBoxShape.h>
 #include <BulletCollision/CollisionShapes/btCapsuleShape.h>
 
 #include "../entities/input.h"
@@ -23,22 +21,20 @@
 #include "../entities/components/rigid_body.h"
 #include "../entities/components/transform.h"
 #include "../entities/components/controllers/character_controller.h"
-#include "../entities/components/controllers/free_controller.h"
-#include "../entities/mesh_data.h"
 #include "../managers/physics_manager.h"
 #include "../managers/window_manager.h"
 
 using namespace SimpleGL;
 
-class MapImportDemo {
+class MapLoadingDemo {
     std::shared_ptr<Node> rootNode;
     std::shared_ptr<Node> staticNode;
-
     std::shared_ptr<MeshManager> meshManager;
     std::shared_ptr<btDynamicsWorld> dynamicsWorld;
 
     std::shared_ptr<ShaderProgram> blinnPhongShader;
     std::shared_ptr<ShaderProgram> skyboxShader;
+    std::shared_ptr<ShaderProgram> solidColorShader;
 
     std::shared_ptr<Texture> skyboxTexture;
 
@@ -53,7 +49,7 @@ class MapImportDemo {
 public:
     std::shared_ptr<Scene> scene;
 
-    MapImportDemo() {
+    MapLoadingDemo() {
         scene = Scene::create();
         Engine::instance().setScene(scene);
 
@@ -68,8 +64,8 @@ public:
     }
 
     void updateNodes() {
-        const auto input = Engine::instance().windowManager()->mainWindow()->input();
-        dynamicsWorld->stepSimulation(input->deltaTime());
+        float timeStep = Engine::instance().windowManager()->mainWindow()->input()->deltaTime();
+        dynamicsWorld->stepSimulation(timeStep);
     }
 
     void draw() {
@@ -100,12 +96,12 @@ private:
     void createScene() {
         createShaders();
         createPlayer();
-        loadMaterials();
         createSkybox();
-        createLighting();
+        createLightSource();
         
         staticNode = Node::create("staticNode", rootNode);
         
+        loadMaterials();
         loadMap();
     }
 
@@ -121,66 +117,36 @@ private:
             "shaders/skybox/fragment.glsl",
             "Skybox Shader"
         );
-    }
 
-    void loadMaterials() {
-        const auto tm = Engine::instance().textureManager();
-        
-        Material2Tex wallMaterial;
-        try {
-            wallMaterial.albedo = tm->getTexture("wall.jpg", true);
-            wallMaterial.specular = tm->getTexture("specular.png", false);
-            std::cout << "MapImportDemo: Loaded 'Wall' material textures." << std::endl;
-        } catch (const std::exception& e) {
-            std::cerr << "MapImportDemo: CRITICAL - Failed to load wall textures: " << e.what() << std::endl;
-        }
-
-        Material2Tex floorMaterial;
-        try {
-            floorMaterial.albedo = tm->getTexture("16942.jpg", true);
-            floorMaterial.specular = tm->getTexture("specular.png", false);
-            std::cout << "MapImportDemo: Loaded 'Floor' material textures." << std::endl;
-        } catch (const std::exception& e) {
-            std::cerr << "MapImportDemo: CRITICAL - Failed to load floor textures: " << e.what() << std::endl;
-        }
-        
-        m_materialMap["Wall"] = wallMaterial;
-        m_materialMap["Floor"] = floorMaterial;
-        m_defaultMaterial = wallMaterial;
+        solidColorShader = Engine::instance().shaderManager()->createShaderProgram(
+            "shaders/solid-color/vertex.glsl",
+            "shaders/solid-color/fragment.glsl",
+            "solid color shader program"
+        );
     }
 
     void createPlayer() {
-        // Create a player node to hold the character controller and camera
         auto playerNode = Node::create("playerNode", rootNode);
-        playerNode->transform()->setPosition(-20, 50, 0); // Start above ground
+        playerNode->transform()->setPosition(0, 5, 10);
 
-        // Create a RigidBody for the player
-        auto rigidBody = RigidBody::create(playerNode);
-        rigidBody->setMass(1.0f);
-        // Capsule shape for character controller (radius, height)
-        rigidBody->setCollisionShape(std::make_shared<btCapsuleShape>(0.5f, 1.0f));
+        auto playerShape = std::make_shared<btCapsuleShape>(0.5f, 1.5f);
+        auto rigidBody = RigidBody::create(playerNode, "playerRigidBody");
+        rigidBody->setMass(70.f);
+        rigidBody->setCollisionShape(playerShape);
         rigidBody->init();
 
-        // Create the CharacterController
-        auto characterController = CharacterController::create(playerNode);
-        characterController->setRigidBody(rigidBody);
-
-        // The existing cameraNode becomes a child of the playerNode
         auto cameraNode = Node::create("cameraNode", playerNode);
-        // Position camera at eye level relative to the player
         cameraNode->transform()->setPosition(0, 0.8f, 0);
-        
-        // Set the camera node for the character controller
-        characterController->setCameraNode(cameraNode);
-
         camera = Camera::create(
             cameraNode,
             glm::radians(90.0f),
             0.3f,
             200.0f
         );
-        
-        std::cout << "MapImportDemo: Character controller created." << std::endl;
+
+        auto controller = CharacterController::create(playerNode, "playerController");
+        controller->setCameraNode(cameraNode);
+        controller->setRigidBody(rigidBody);
     }
 
     void createSkybox() {
@@ -201,22 +167,51 @@ private:
         });
     }
 
-    void createLighting() {
-        auto directLightNode = Node::create("directLightNode", rootNode);
-        directLightNode->transform()->setOrientation(
-            glm::angleAxis(glm::radians(-90.0f), glm::vec3(1.0f, 0.0f, 0.0f))
-        );
-        
-        const auto directLight = DirectLight::create(directLightNode);
+    void createLightSource() {
+        const auto node = meshManager->createNodeFromMeshData("cube.obj", rootNode);
+        node->name = "lightSourceCube";
+        node->transform()->setScale(0.2f);
+        node->transform()->setPosition(0, 15, 0);
+
+        auto mesh = node->getComponent<MeshComponent>();
+        mesh->setShader(solidColorShader);
+        mesh->setBeforeDrawCallback([](const std::shared_ptr<ShaderProgram>& shaderProgram) {
+            shaderProgram->setUniform("color", 1, 1, 1);
+        });
+        meshes.push_back(mesh);
+
+        const auto directLight = DirectLight::create(node);
         directLight->ambient = glm::vec3(0.15f, 0.15f, 0.2f);
         directLight->diffuse = glm::vec3(0.8f, 0.8f, 0.9f);
         directLight->specular = glm::vec3(0.3f, 0.3f, 0.3f);
     }
 
+    void loadMaterials() {
+        const auto tm = Engine::instance().textureManager();
+        
+        Material2Tex wallMaterial;
+        try {
+            wallMaterial.albedo = tm->getTexture("wall.jpg", true);
+            wallMaterial.specular = tm->getTexture("specular.png", false);
+        } catch (const std::exception& e) {
+            std::cerr << "MapLoadingDemo: CRITICAL - Failed to load wall textures: " << e.what() << std::endl;
+        }
+
+        Material2Tex floorMaterial;
+        try {
+            floorMaterial.albedo = tm->getTexture("16942.jpg", true);
+            floorMaterial.specular = tm->getTexture("specular.png", false);
+        } catch (const std::exception& e) {
+            std::cerr << "MapLoadingDemo: CRITICAL - Failed to load floor textures: " << e.what() << std::endl;
+        }
+        
+        m_materialMap["Wall"] = wallMaterial;
+        m_materialMap["Floor"] = floorMaterial;
+        m_defaultMaterial = wallMaterial;
+    }
+
     void loadMap() {
         try {
-            std::cout << "MapImportDemo: Starting map load..." << std::endl;
-            
             auto mapLoader = MapLoader::create();
             
             for (const auto& pair : m_materialMap) {
@@ -230,9 +225,9 @@ private:
             auto loadedMeshes = mapRoot->getChildComponents<MeshComponent>();
             meshes.insert(meshes.end(), loadedMeshes.begin(), loadedMeshes.end());
             
-            std::cout << "MapImportDemo: Successfully loaded " << loadedMeshes.size() << " meshes from map" << std::endl;
+            std::cout << "MapLoadingDemo: Successfully loaded " << loadedMeshes.size() << " meshes from map" << std::endl;
         } catch (const std::exception& e) {
-            std::cerr << "MapImportDemo: Failed to load map: " << e.what() << std::endl;
+            std::cerr << "MapLoadingDemo: Failed to load map: " << e.what() << std::endl;
         }
     }
 };

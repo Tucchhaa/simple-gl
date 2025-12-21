@@ -1,5 +1,8 @@
 #pragma once
 
+#include <fstream>
+#include <sstream>
+
 #include <unordered_map>
 #include <BulletCollision/CollisionShapes/btBoxShape.h>
 #include <BulletCollision/CollisionShapes/btCapsuleShape.h>
@@ -127,7 +130,7 @@ private:
 
     void createPlayer() {
         auto playerNode = Node::create("playerNode", rootNode);
-        playerNode->transform()->setPosition(0, 5, 10);
+        playerNode->transform()->setPosition(0, 10, 10);
 
         auto playerShape = std::make_shared<btCapsuleShape>(0.5f, 1.5f);
         auto rigidBody = RigidBody::create(playerNode, "playerRigidBody");
@@ -191,16 +194,16 @@ private:
         
         Material2Tex wallMaterial;
         try {
-            wallMaterial.albedo = tm->getTexture("wall.jpg", true);
-            wallMaterial.specular = tm->getTexture("specular.png", false);
+            wallMaterial.albedo = tm->getTexture("Pav_DIFF.jpg", true);
+            wallMaterial.specular = tm->getTexture("Pav_SPEC.jpg", false);
         } catch (const std::exception& e) {
             std::cerr << "MapLoadingDemo: CRITICAL - Failed to load wall textures: " << e.what() << std::endl;
         }
 
         Material2Tex floorMaterial;
         try {
-            floorMaterial.albedo = tm->getTexture("16942.jpg", true);
-            floorMaterial.specular = tm->getTexture("specular.png", false);
+            floorMaterial.albedo = tm->getTexture("Pav_DIFF.jpg", true);
+            floorMaterial.specular = tm->getTexture("Pav_SPEC.jpg", false);
         } catch (const std::exception& e) {
             std::cerr << "MapLoadingDemo: CRITICAL - Failed to load floor textures: " << e.what() << std::endl;
         }
@@ -210,24 +213,92 @@ private:
         m_defaultMaterial = wallMaterial;
     }
 
+    // void loadMap() {
+    //     try {
+    //         auto mapLoader = MapLoader::create();
+            
+    //         for (const auto& pair : m_materialMap) {
+    //             mapLoader->addMaterial(pair.first, pair.second);
+    //         }
+    //         mapLoader->setDefaultMaterial(m_defaultMaterial);
+    //         mapLoader->setBlinnPhongShader(blinnPhongShader);
+            
+    //         auto mapRoot = mapLoader->loadMap("maps/blender_export.json", staticNode);
+            
+    //         auto loadedMeshes = mapRoot->getChildComponents<MeshComponent>();
+    //         meshes.insert(meshes.end(), loadedMeshes.begin(), loadedMeshes.end());
+            
+    //         std::cout << "MapLoadingDemo: Successfully loaded " << loadedMeshes.size() << " meshes from map" << std::endl;
+    //     } catch (const std::exception& e) {
+    //         std::cerr << "MapLoadingDemo: Failed to load map: " << e.what() << std::endl;
+    //     }
+    // }
     void loadMap() {
-        try {
-            auto mapLoader = MapLoader::create();
-            
-            for (const auto& pair : m_materialMap) {
-                mapLoader->addMaterial(pair.first, pair.second);
-            }
-            mapLoader->setDefaultMaterial(m_defaultMaterial);
-            mapLoader->setBlinnPhongShader(blinnPhongShader);
-            
-            auto mapRoot = mapLoader->loadMap("maps/blender_export.json", staticNode);
-            
-            auto loadedMeshes = mapRoot->getChildComponents<MeshComponent>();
-            meshes.insert(meshes.end(), loadedMeshes.begin(), loadedMeshes.end());
-            
-            std::cout << "MapLoadingDemo: Successfully loaded " << loadedMeshes.size() << " meshes from map" << std::endl;
-        } catch (const std::exception& e) {
-            std::cerr << "MapLoadingDemo: Failed to load map: " << e.what() << std::endl;
+        std::string path = "resources/maps/level.txt"; 
+        std::ifstream f(path);
+        
+        if (!f.is_open()) {
+            std::cerr << "CRITICAL: Could not open map file: " << path << std::endl;
+            f.open("../resources/maps/level.txt");
+            if(!f.is_open()) return;
         }
+
+        std::cout << "Loading map from: " << path << std::endl;
+
+        std::string name, matName;
+        float px, py, pz;
+        float rw, rx, ry, rz;
+        float sx, sy, sz; // These are the full dimensions (width, height, depth)
+
+        int count = 0;
+        while (f >> name >> matName >> px >> py >> pz >> rw >> rx >> ry >> rz >> sx >> sy >> sz) {
+            
+            // --- 1. VISUALS ---
+            auto node = meshManager->createNodeFromMeshData("cube.obj", staticNode);
+            node->name = name;
+            node->transform()->setPosition(px, py, pz);
+            node->transform()->setOrientation(glm::quat(rw, rx, ry, rz));
+            
+            glm::vec3 scaleVec(sx, sy, sz);
+            node->transform()->setScale(scaleVec);
+
+            auto mesh = node->getComponent<MeshComponent>();
+            mesh->setShader(blinnPhongShader);
+
+            // Resolve Material
+            Material2Tex matData = m_defaultMaterial;
+            if (m_materialMap.find(matName) != m_materialMap.end()) {
+                matData = m_materialMap[matName];
+            } else {
+                std::string baseName = matName.substr(0, matName.find('.'));
+                if (m_materialMap.find(baseName) != m_materialMap.end()) {
+                    matData = m_materialMap[baseName];
+                }
+            }
+
+            // Texture Callback (With Tiling Fix)
+            mesh->setBeforeDrawCallback([matData, scaleVec](const std::shared_ptr<ShaderProgram>& shader) {
+                shader->setTexture("diffuseTexture", matData.albedo);
+                shader->setTexture("specularTexture", matData.specular);
+                if (shader->uniformExists("uvScale")) {
+                    shader->setUniform("uvScale", scaleVec);
+                }
+            });
+
+            meshes.push_back(mesh);
+
+            // --- 2. PHYSICS (The Missing Part!) ---
+            // Bullet Physics uses "Half-Extents" (distance from center to edge).
+            // Since 'sx, sy, sz' are the full dimensions, we divide by 2.
+            auto shape = std::make_shared<btBoxShape>(btVector3(sx / 2.0f, sy / 2.0f, sz / 2.0f));
+            
+            auto rigidBody = RigidBody::create(node);
+            rigidBody->setCollisionShape(shape);
+            rigidBody->setMass(0.0f); // 0.0f Mass = Static Object (Wall/Floor)
+            rigidBody->init();
+            
+            count++;
+        }
+        std::cout << "Loaded " << count << " objects with physics." << std::endl;
     }
 };

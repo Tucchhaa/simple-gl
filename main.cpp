@@ -1,5 +1,6 @@
 #include <iostream>
 #include <sstream>
+#include "demos/map_import_demo.h"
 #include "demos/basic_demo.h"
 #include "demos/map_loading_demo.h"
 #include "managers/engine.h"
@@ -26,6 +27,7 @@ int main() {
     window->setTitle("Learn OpenGL");
     window->makeCurrent();
 
+    //auto demo = MapImportDemo();
     auto demo = MapLoadingDemo();
     //auto demo = BasicDemo();
 

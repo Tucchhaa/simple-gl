@@ -35,16 +35,20 @@ protected:
 
     void onUpdate() override;
 
+    std::shared_ptr<Node> m_cameraNode;
+
 private:
     bool m_canRotate = false;
     float m_pitch = 0.f;
     float m_yaw = 0.f;
     const float m_maxPitch = glm::radians(89.0f);
 
-    std::shared_ptr<Node> m_cameraNode;
+    const float m_jumpReloadTimeMs = 100;
+    float m_jumpReloadLeftMs = 0;
+
     std::shared_ptr<RigidBody> m_rigidBody;
 
-    bool canJump() const;
+    bool isTouchingGround() const;
 };
 
 }

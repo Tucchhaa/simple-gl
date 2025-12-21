@@ -2,6 +2,7 @@
 
 #include <BulletCollision/CollisionShapes/btBoxShape.h>
 #include <BulletCollision/CollisionShapes/btCapsuleShape.h>
+#include <BulletCollision/CollisionShapes/btSphereShape.h>
 
 #include "../entities/input.h"
 #include "../managers/engine.h"
@@ -20,6 +21,8 @@
 #include "../entities/components/transform.h"
 #include "../entities/components/controllers/character_controller.h"
 #include "../entities/components/controllers/free_controller.h"
+#include "../entities/components/portal/portal_bullet.h"
+#include "../entities/components/portal/portal_fps_controller.h"
 #include "../managers/physics_manager.h"
 #include "../managers/window_manager.h"
 
@@ -117,15 +120,11 @@ public:
 
 private:
     void createScene() {
-        bool useFreeCamera = false;
-
         createShaders();
 
-        if (useFreeCamera) {
-            createCamera();
-        } else {
-            createPlayer();
-        }
+        // Uncomment one of these:
+        // createFreeCamera();
+        createFPSController();
 
         createSkybox();
         createPortal();
@@ -170,17 +169,32 @@ private:
         );
     }
 
-    void createPlayer() {
+    void createFPSController() {
         auto playerNode = Node::create("playerNode", rootNode);
         playerNode->transform()->setPosition(0, 0, 3);
 
-        auto playerShape = std::make_shared<btCapsuleShape>(0.35f, 2.5f);
+        auto meshNode = Node::create("playerMeshNode", playerNode);
+        meshNode->transform()->setScale(0.3f);
+
+        auto capsule = meshManager->loadMeshData("./capsule.obj");
+        auto playerMesh = MeshComponent::create(meshNode, capsule, "Player Mesh");
+        playerMesh->setShader(shadedSolidColorShader);
+        playerMesh->setBeforeDrawCallback([](const std::shared_ptr<ShaderProgram>& shaderProgram) {
+            shaderProgram->setUniform("color", glm::vec3(0.6, 0.6, 0.6));
+        });
+
+        meshes.push_back(playerMesh);
+
+        auto playerShape = std::make_shared<btCapsuleShape>(0.3f, 0.8f);
         auto rigidBody = RigidBody::create(playerNode, "playerRigidBody");
         rigidBody->setMass(70.f);
         rigidBody->setCollisionShape(playerShape);
         rigidBody->init();
 
+        // Camera
         auto cameraNode = Node::create("cameraNode", playerNode);
+        cameraNode->transform()->setPosition(0, 0.7, 0);
+
         camera = Camera::create(
             cameraNode,
             glm::radians(90.0f),
@@ -188,12 +202,60 @@ private:
             100.0f
         );
 
-        auto controller = CharacterController::create(playerNode, "playerController");
+        // Weapon
+        auto weaponPivotNode = Node::create("weaponPivotNode", cameraNode);
+        weaponPivotNode->transform()->setPosition(0, 0, -0.6);
+
+        auto weaponNode = Node::create("weaponNode", weaponPivotNode);
+        weaponNode->transform()->setScale(0.2, 0.2, 0.9);
+        weaponNode->transform()->setPosition(0.5, -0.35, 0);
+
+        auto cube = meshManager->loadMeshData("./cube.obj");
+        auto weaponMesh = MeshComponent::create(weaponNode, cube, "Weapon Mesh");
+        weaponMesh->setShader(shadedSolidColorShader);
+        weaponMesh->setBeforeDrawCallback([](const std::shared_ptr<ShaderProgram>& shaderProgram) {
+            shaderProgram->setUniform("color", glm::vec3(0.8, 0.5, 0.5));
+        });
+
+        meshes.push_back(weaponMesh);
+
+        // Bullets
+        auto sphere = meshManager->loadMeshData("./sphere.obj");
+
+        auto createBullet = [&](const std::string& name) {
+            auto bulletNode = Node::create(name, playerNode);
+            bulletNode->transform()->setScale(0.1);
+
+            auto bulletMesh = MeshComponent::create(bulletNode, sphere, "Bullet Mesh");
+            bulletMesh->setShader(solidColorShader);
+
+            meshes.push_back(bulletMesh);
+
+            auto bullet = PortalBullet::create(bulletNode);
+
+            return bulletNode;
+        };
+
+        auto bullet1Node = createBullet("bullet1Node");
+        bullet1Node->getComponent<MeshComponent>()->setBeforeDrawCallback([](const std::shared_ptr<ShaderProgram>& shaderProgram) {
+            shaderProgram->setUniform("color", glm::vec3(0.1, 0.1, 0.8));
+        });
+
+        auto bullet2Node = createBullet("bullet2Node");
+        bullet2Node->getComponent<MeshComponent>()->setBeforeDrawCallback([](const std::shared_ptr<ShaderProgram>& shaderProgram) {
+            shaderProgram->setUniform("color", glm::vec3(0.8, 0.1, 0.1));
+        });
+
+        // Controller
+        auto controller = PortalFPSController::create(playerNode, "playerController");
         controller->setCameraNode(cameraNode);
         controller->setRigidBody(rigidBody);
+        controller->setWeaponNode(weaponNode);
+        controller->setPortal1Bullet(bullet1Node->getComponent<PortalBullet>());
+        controller->setPortal2Bullet(bullet2Node->getComponent<PortalBullet>());
     }
 
-    void createCamera() {
+    void createFreeCamera() {
         auto cameraNode = Node::create("cameraNode", rootNode);
         cameraNode->transform()->setPosition(0, 0, 3);
 
@@ -368,7 +430,7 @@ private:
 
         auto cubeShape = std::make_shared<btBoxShape>(btVector3(0.5f, 0.5f, 0.5f));
         auto rigidBody = RigidBody::create(node);
-        rigidBody->setMass(1.f);
+        rigidBody->setMass(40.f);
         rigidBody->setCollisionShape(cubeShape);
         rigidBody->init();
     }

@@ -76,6 +76,10 @@ void Input::updateCursorPosition() {
     glfwGetCursorPos(window()->glfwWindow(), &m_mouseX, &m_mouseY);
 }
 
+double Input::time() const {
+    return glfwGetTime() * 1000;
+}
+
 void Input::setKeyState(int key, bool pressed) {
     m_currentKeyStates[key] = pressed;
 }

@@ -124,10 +124,7 @@ private:
         
         staticNode = Node::create("staticNode", rootNode);
         
-        // Create test square first
-        createTestSquare();
-        
-        // Then load map
+        // Load map
         loadMap();
     }
 
@@ -180,9 +177,9 @@ private:
         // Use free camera (flying mode) instead of character controller
         auto cameraNode = Node::create("cameraNode", rootNode);
         // Position camera to see the test square and map objects
-        cameraNode->transform()->setPosition(0, 0, 3);
+        cameraNode->transform()->setPosition(0, 5, 15);
         
-        std::cout << "MapImportDemo: Free camera created at position (0, 0, 3)" << std::endl;
+        std::cout << "MapImportDemo: Free camera created at position (0, 5, 15)" << std::endl;
 
         camera = Camera::create(
             cameraNode,

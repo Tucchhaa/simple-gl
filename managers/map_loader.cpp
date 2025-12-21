@@ -145,34 +145,29 @@ std::shared_ptr<Node> MapLoader::createNodeFromJson(
     const std::shared_ptr<Node>& parent
 ) {
     // Extract required fields
-    if (!objData.contains("name") || !objData.contains("vertices") || !objData.contains("indices")) {
-        throw std::runtime_error("Object missing required fields (name, vertices, indices)");
+    if (!objData.contains("name") || !objData.contains("type") || !objData.contains("size")) {
+        throw std::runtime_error("Object missing required fields (name, type, size)");
     }
 
     std::string name = objData["name"];
-    
-    // Extract vertex data
-    std::vector<float> vertices = objData["vertices"].get<std::vector<float>>();
-    std::vector<unsigned int> indices = objData["indices"].get<std::vector<unsigned int>>();
+    std::string type = objData["type"];
 
-    if (vertices.empty() || indices.empty()) {
-        throw std::runtime_error("Object has empty vertices or indices: " + name);
+    if (type != "box") {
+        throw std::runtime_error("Unsupported object type: " + type + ". Only 'box' is supported.");
     }
 
-    // Create mesh data from arrays
-    auto meshData = MeshData::createFromArrays(name, vertices, indices, 8);
+    // Get the unit cube mesh data (or create it if it doesn't exist)
+    auto cubeMeshData = getUnitCube();
 
     // Create node
     auto node = Node::create(name, parent);
 
-    // Create mesh component
-    auto meshComponent = MeshComponent::create(node, meshData);
+    // Create mesh component using the shared cube mesh
+    auto meshComponent = MeshComponent::create(node, cubeMeshData);
 
     // #region agent log
-    debug_log("map_loader.cpp:143", "Mesh component created", {
-        {"objectName", name},
-        {"vertexCount", vertices.size() / 8},
-        {"indexCount", indices.size()}
+    debug_log("map_loader.cpp:143", "Mesh component created from unit cube", {
+        {"objectName", name}
     }, "B");
     // #endregion
 
@@ -186,17 +181,14 @@ std::shared_ptr<Node> MapLoader::createNodeFromJson(
 
     if (objData.contains("rotation") && objData["rotation"].is_array() && objData["rotation"].size() >= 4) {
         auto rot = objData["rotation"].get<std::vector<float>>();
-        transform->setOrientation(rot[0], rot[1], rot[2], rot[3]);  // w, x, y, z
+        // JSON has w, x, y, z. GLM constructor is w, x, y, z.
+        transform->setOrientation(glm::quat(rot[0], rot[1], rot[2], rot[3]));
     }
 
-    if (objData.contains("scale")) {
-        if (objData["scale"].is_number()) {
-            float scale = objData["scale"];
-            transform->setScale(scale);
-        } else if (objData["scale"].is_array() && objData["scale"].size() >= 3) {
-            auto scale = objData["scale"].get<std::vector<float>>();
-            transform->setScale(scale[0], scale[1], scale[2]);
-        }
+    // Use "size" for scale
+    if (objData.contains("size") && objData["size"].is_array() && objData["size"].size() >= 3) {
+        auto scale = objData["size"].get<std::vector<float>>();
+        transform->setScale(scale[0], scale[1], scale[2]);
     }
 
     // Force transform recalculation to ensure matrix is correct
@@ -233,18 +225,19 @@ std::shared_ptr<Node> MapLoader::createNodeFromJson(
         // #endregion
     }
 
-    // Create collision body if half-extents are provided
-    if (objData.contains("colliderHalfExtents") && 
-        objData["colliderHalfExtents"].is_array() && 
-        objData["colliderHalfExtents"].size() >= 3) {
+    // Create collision body using the object's size
+    if (objData.contains("size") && 
+        objData["size"].is_array() && 
+        objData["size"].size() >= 3) {
         
-        auto halfExtents = objData["colliderHalfExtents"].get<std::vector<float>>();
+        auto size = objData["size"].get<std::vector<float>>();
+        
+        // Half-extents are half of the size
+        btVector3 halfExtents(size[0] * 0.5f, size[1] * 0.5f, size[2] * 0.5f);
         
         // Only create collider if extents are non-zero
-        if (halfExtents[0] > 0.0f && halfExtents[1] > 0.0f && halfExtents[2] > 0.0f) {
-            auto shape = std::make_shared<btBoxShape>(
-                btVector3(halfExtents[0], halfExtents[1], halfExtents[2])
-            );
+        if (halfExtents.x() > 0.0f && halfExtents.y() > 0.0f && halfExtents.z() > 0.0f) {
+            auto shape = std::make_shared<btBoxShape>(halfExtents);
             auto rigidBody = RigidBody::create(node);
             rigidBody->setCollisionShape(shape);
             rigidBody->init();
@@ -267,6 +260,63 @@ void MapLoader::applyMaterialToMesh(
         shader->setTexture("diffuseTexture", material.albedo);
         shader->setTexture("specularTexture", material.specular);
     });
+}
+
+std::shared_ptr<MeshData> MapLoader::getUnitCube() {
+    // If the cube mesh data has already been created, return it.
+    if (m_cubeMeshData) {
+        return m_cubeMeshData;
+    }
+
+    // Define the vertices for a 1x1x1 cube.
+    // Each vertex has position (3), normal (3), and UV (2) data.
+    // Total = 8 floats per vertex.
+    std::vector<float> vertices = {
+        // Front face (+Z)
+        -0.5f, -0.5f,  0.5f,  0.0f,  0.0f,  1.0f, 0.0f, 0.0f,
+         0.5f, -0.5f,  0.5f,  0.0f,  0.0f,  1.0f, 1.0f, 0.0f,
+         0.5f,  0.5f,  0.5f,  0.0f,  0.0f,  1.0f, 1.0f, 1.0f,
+        -0.5f,  0.5f,  0.5f,  0.0f,  0.0f,  1.0f, 0.0f, 1.0f,
+        // Back face (-Z)
+        -0.5f, -0.5f, -0.5f,  0.0f,  0.0f, -1.0f, 1.0f, 0.0f,
+         0.5f, -0.5f, -0.5f,  0.0f,  0.0f, -1.0f, 0.0f, 0.0f,
+         0.5f,  0.5f, -0.5f,  0.0f,  0.0f, -1.0f, 0.0f, 1.0f,
+        -0.5f,  0.5f, -0.5f,  0.0f,  0.0f, -1.0f, 1.0f, 1.0f,
+        // Left face (-X)
+        -0.5f, -0.5f, -0.5f, -1.0f,  0.0f,  0.0f, 0.0f, 0.0f,
+        -0.5f, -0.5f,  0.5f, -1.0f,  0.0f,  0.0f, 1.0f, 0.0f,
+        -0.5f,  0.5f,  0.5f, -1.0f,  0.0f,  0.0f, 1.0f, 1.0f,
+        -0.5f,  0.5f, -0.5f, -1.0f,  0.0f,  0.0f, 0.0f, 1.0f,
+        // Right face (+X)
+         0.5f, -0.5f, -0.5f,  1.0f,  0.0f,  0.0f, 1.0f, 0.0f,
+         0.5f, -0.5f,  0.5f,  1.0f,  0.0f,  0.0f, 0.0f, 0.0f,
+         0.5f,  0.5f,  0.5f,  1.0f,  0.0f,  0.0f, 0.0f, 1.0f,
+         0.5f,  0.5f, -0.5f,  1.0f,  0.0f,  0.0f, 1.0f, 1.0f,
+        // Top face (+Y)
+        -0.5f,  0.5f,  0.5f,  0.0f,  1.0f,  0.0f, 0.0f, 1.0f,
+         0.5f,  0.5f,  0.5f,  0.0f,  1.0f,  0.0f, 1.0f, 1.0f,
+         0.5f,  0.5f, -0.5f,  0.0f,  1.0f,  0.0f, 1.0f, 0.0f,
+        -0.5f,  0.5f, -0.5f,  0.0f,  1.0f,  0.0f, 0.0f, 0.0f,
+        // Bottom face (-Y)
+        -0.5f, -0.5f, -0.5f,  0.0f, -1.0f,  0.0f, 0.0f, 0.0f,
+         0.5f, -0.5f, -0.5f,  0.0f, -1.0f,  0.0f, 1.0f, 0.0f,
+         0.5f, -0.5f,  0.5f,  0.0f, -1.0f,  0.0f, 1.0f, 1.0f,
+        -0.5f, -0.5f,  0.5f,  0.0f, -1.0f,  0.0f, 0.0f, 1.0f
+    };
+
+    std::vector<unsigned int> indices = {
+        0, 1, 2, 0, 2, 3,       // Front
+        4, 5, 6, 4, 6, 7,       // Back
+        8, 9, 10, 8, 10, 11,    // Left
+        12, 13, 14, 12, 14, 15, // Right
+        16, 17, 18, 16, 18, 19, // Top
+        20, 21, 22, 20, 22, 23  // Bottom
+    };
+
+    // Create the mesh data and cache it.
+    // The stride is 8 floats (3 pos, 3 normal, 2 uv).
+    m_cubeMeshData = MeshData::createFromArrays("unit_cube", vertices, indices, 8);
+    return m_cubeMeshData;
 }
 
 }

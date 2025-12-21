@@ -13,6 +13,7 @@ class Node;
 class ShaderProgram;
 class Texture;
 class MeshComponent;
+class MeshData;
 
 // Forward declare Engine for getResourcePath
 class Engine;
@@ -65,6 +66,12 @@ private:
         const std::shared_ptr<MeshComponent>& mesh,
         const Material2Tex& material
     );
+
+    // Gets or creates the unit cube mesh data
+    std::shared_ptr<MeshData> getUnitCube();
+
+    // Cached mesh data for a 1x1x1 cube
+    std::shared_ptr<MeshData> m_cubeMeshData;
 };
 
 }

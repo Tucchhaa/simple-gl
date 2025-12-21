@@ -23,6 +23,7 @@
 #include "../entities/components/controllers/free_controller.h"
 #include "../entities/components/portal/portal_bullet.h"
 #include "../entities/components/portal/portal_fps_controller.h"
+#include "../entities/components/portal/teleportable.h"
 #include "../managers/physics_manager.h"
 #include "../managers/window_manager.h"
 
@@ -34,7 +35,7 @@ enum CollisionGroups {
     GROUP_PLAYER = 1 << 0,
     GROUP_BULLET = 1 << 1,
     GROUP_ALLOW_PORTAL = 1 << 2,
-    GROUP_OTHER = 1 << 3
+    GROUP_OTHER = 1 << 3,
 };
 
 class BasicDemo {
@@ -58,6 +59,7 @@ class BasicDemo {
     std::shared_ptr<Node> staticNode;
 
     std::vector<std::shared_ptr<MeshComponent>> meshes;
+    std::vector<std::shared_ptr<Teleportable>> teleportables;
     std::shared_ptr<MeshComponent> skyboxCubeMesh;
 
 public:
@@ -100,6 +102,10 @@ public:
         const auto drawCall = [this](const std::shared_ptr<Camera>& _camera) {
             for (const auto& mesh : meshes) {
                 mesh->draw(_camera);
+            }
+
+            for (const auto& teleportable : teleportables) {
+                teleportable->draw(_camera);
             }
 
             glCullFace(GL_FRONT);
@@ -215,7 +221,7 @@ private:
 
         // Camera
         camera->node()->setParent(playerNode);
-        camera->node()->transform()->setPosition(0, 0.5, -0.2);
+        camera->node()->transform()->setPosition(0, 0.5, -0.1);
 
         // Weapon
         auto weaponPivotNode = Node::create("weaponPivotNode", camera->node());
@@ -278,6 +284,16 @@ private:
         controller->setWeaponNode(weaponNode);
         controller->setPortal1Bullet(bullet1Node->getComponent<PortalBullet>());
         controller->setPortal2Bullet(bullet2Node->getComponent<PortalBullet>());
+
+        // Teleportable
+        auto teleportable = Teleportable::create(playerNode, "playerTeleportable");
+        teleportable->setPortal(portal);
+        teleportable->setRigidBody(rigidBody);
+        teleportable->setAllowPortalGroup(GROUP_ALLOW_PORTAL);
+
+        teleportable->setMeshes({ playerMesh, weaponMesh });
+
+        teleportables.push_back(teleportable);
     }
 
     void createFreeCameraController() {
@@ -459,5 +475,14 @@ private:
         rigidBody->group = GROUP_OTHER;
         rigidBody->mask &= ~GROUP_BULLET;
         rigidBody->init();
+
+        // Teleportable
+        auto teleportable = Teleportable::create(node, "playerTeleportable");
+        teleportable->setPortal(portal);
+        teleportable->setRigidBody(rigidBody);
+        teleportable->setAllowPortalGroup(GROUP_ALLOW_PORTAL);
+        teleportable->setMeshes({ mesh });
+
+        teleportables.push_back(teleportable);
     }
 };

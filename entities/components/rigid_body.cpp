@@ -76,4 +76,11 @@ void RigidBody::init() {
     Engine::instance().physicsManager()->dynamicsWorld()->addRigidBody(m_rigidBody.get(), group, mask);
 }
 
+void RigidBody::reinit() const {
+    const auto world = Engine::instance().physicsManager()->dynamicsWorld();
+
+    world->removeRigidBody(m_rigidBody.get());
+    world->addRigidBody(m_rigidBody.get(), group, mask);
+}
+
 }

@@ -60,6 +60,8 @@ add_executable(main
     entities/components/portal/portal_fps_controller.h
     entities/components/portal/portal_bullet.cpp
     entities/components/portal/portal_bullet.h
+    entities/components/portal/teleportable.cpp
+    entities/components/portal/teleportable.h
     entities/physics/contact_callback.cpp
     entities/physics/contact_callback.h
     entities/physics/sweep_callback.cpp

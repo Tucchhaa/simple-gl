@@ -211,7 +211,7 @@ std::vector<std::shared_ptr<Camera>> Portal::getRecursiveCameras(
 
     auto [
         qDelta, pDelta
-    ] = calcVirtualCameraTransform(sourcePortal->transform(), destPortal->transform());
+    ] = calculatePortalTransform(sourcePortal->transform(), destPortal->transform());
 
     for (int i = 0; i < getTotalRecursionLevel(); i++) {
         const auto virtualCamera = m_virtualCameras[i];
@@ -234,7 +234,7 @@ std::vector<std::shared_ptr<Camera>> Portal::getRecursiveCameras(
     return result;
 }
 
-std::pair<glm::quat, glm::vec3> Portal::calcVirtualCameraTransform(
+std::pair<glm::quat, glm::vec3> Portal::calculatePortalTransform(
     const std::shared_ptr<Transform>& sourceT,
     const std::shared_ptr<Transform>& destT
 ) {

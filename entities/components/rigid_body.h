@@ -37,6 +37,8 @@ public:
 
     void init();
 
+    void reinit() const;
+
 private:
     std::shared_ptr<btCollisionShape> m_collisionShape;
     std::shared_ptr<btMotionState> m_motionState;

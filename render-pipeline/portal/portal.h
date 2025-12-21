@@ -37,6 +37,11 @@ public:
         const std::function<void(const std::shared_ptr<Camera>& camera)>& drawScene
     );
 
+    static std::pair<glm::quat, glm::vec3> calculatePortalTransform(
+        const std::shared_ptr<Transform>& sourceT,
+        const std::shared_ptr<Transform>& destT
+    );
+
 private:
     std::shared_ptr<PortalFramebuffer> m_tailPortalFramebuffer;
 
@@ -69,11 +74,6 @@ private:
         const std::shared_ptr<Node>& sourcePortal,
         const std::shared_ptr<Node>& destPortal
     ) const;
-
-    static std::pair<glm::quat, glm::vec3> calcVirtualCameraTransform(
-        const std::shared_ptr<Transform>& sourceT,
-        const std::shared_ptr<Transform>& destT
-    );
 
     void drawTailPortalToFramebuffer(
         const std::function<void(const std::shared_ptr<Camera>& camera)>& drawScene

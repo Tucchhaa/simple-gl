@@ -63,7 +63,7 @@ void PortalBullet::onUpdate() {
 }
 
 void PortalBullet::placePortal(glm::vec3 position, glm::vec3 normal) {
-    auto shiftedPosition = position + normal * 0.1f;
+    auto shiftedPosition = position + normal * 0.05f;
     auto orientation = glm::quatLookAt(-normal, glm::vec3(0, 1, 0));
 
     m_portalNode->transform()->setPosition(shiftedPosition);

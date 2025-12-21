@@ -43,8 +43,6 @@ void Scene::emitStart() {
 }
 
 void Scene::emitUpdate() {
-    rootNode()->transform()->recalculate();
-
     for (auto component: m_componentsMap | std::views::values) {
         component.lock()->onUpdate();
     }

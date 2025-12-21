@@ -6,10 +6,6 @@
 
 namespace SimpleGL {
 
-void Camera::onUpdate() {
-    recalculateViewMatrix();
-}
-
 void Camera::recalculateViewMatrix() {
     m_viewMatrix = glm::mat4_cast(glm::conjugate(transform()->absoluteOrientation()));
     m_viewMatrix = glm::translate(m_viewMatrix, -transform()->absolutePosition());

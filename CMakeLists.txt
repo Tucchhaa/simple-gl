@@ -62,6 +62,8 @@ add_executable(main
     entities/components/portal/portal_bullet.h
     entities/physics/contact_callback.cpp
     entities/physics/contact_callback.h
+    entities/physics/sweep_callback.cpp
+    entities/physics/sweep_callback.h
     render-pipeline/framebuffers/base_frame_buffer.cpp
     render-pipeline/framebuffers/base_frame_buffer.h
     render-pipeline/framebuffers/screen_frame_buffer.cpp

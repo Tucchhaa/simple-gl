@@ -30,6 +30,13 @@
 
 using namespace SimpleGL;
 
+enum CollisionGroups {
+    GROUP_PLAYER = 1 << 0,
+    GROUP_BULLET = 1 << 1,
+    GROUP_ALLOW_PORTAL = 1 << 2,
+    GROUP_OTHER = 1 << 3
+};
+
 class BasicDemo {
     std::shared_ptr<Node> rootNode;
     std::shared_ptr<MeshManager> meshManager;
@@ -50,12 +57,11 @@ class BasicDemo {
     // This node contains static elements of the scene
     std::shared_ptr<Node> staticNode;
 
-    std::shared_ptr<Camera> camera;
-
     std::vector<std::shared_ptr<MeshComponent>> meshes;
     std::shared_ptr<MeshComponent> skyboxCubeMesh;
 
 public:
+    std::shared_ptr<Camera> camera;
     std::shared_ptr<Scene> scene;
 
     BasicDemo() {
@@ -72,7 +78,7 @@ public:
         createScene();
     }
 
-    void updateNodes() {
+    void stepPhysicsSimulation() {
         float timeStep = Engine::instance().windowManager()->mainWindow()->input()->deltaTime();
         dynamicsWorld->stepSimulation(timeStep);
     }
@@ -122,9 +128,7 @@ private:
     void createScene() {
         createShaders();
 
-        // Uncomment one of these:
-        // createFreeCamera();
-        createFPSController();
+        createCamera();
 
         createSkybox();
         createPortal();
@@ -135,6 +139,10 @@ private:
 
         createLightSource();
         createCube();
+
+        // Uncomment one of these:
+        // createFreeCameraController();
+        createFPSController();
     }
 
     void createShaders() {
@@ -169,6 +177,18 @@ private:
         );
     }
 
+    void createCamera() {
+        auto cameraNode = Node::create("cameraNode", rootNode);
+        cameraNode->transform()->setPosition(0, 0.7, 0);
+
+        camera = Camera::create(
+            cameraNode,
+            glm::radians(90.0f),
+            0.1f,
+            100.0f
+        );
+    }
+
     void createFPSController() {
         auto playerNode = Node::create("playerNode", rootNode);
         playerNode->transform()->setPosition(0, 0, 3);
@@ -185,25 +205,20 @@ private:
 
         meshes.push_back(playerMesh);
 
-        auto playerShape = std::make_shared<btCapsuleShape>(0.3f, 0.8f);
+        auto playerShape = std::make_shared<btCapsuleShape>(0.5f, 0.8f);
         auto rigidBody = RigidBody::create(playerNode, "playerRigidBody");
         rigidBody->setMass(70.f);
         rigidBody->setCollisionShape(playerShape);
+        rigidBody->group = GROUP_PLAYER;
+        rigidBody->mask &= ~GROUP_BULLET;
         rigidBody->init();
 
         // Camera
-        auto cameraNode = Node::create("cameraNode", playerNode);
-        cameraNode->transform()->setPosition(0, 0.7, 0);
-
-        camera = Camera::create(
-            cameraNode,
-            glm::radians(90.0f),
-            0.3f,
-            100.0f
-        );
+        camera->node()->setParent(playerNode);
+        camera->node()->transform()->setPosition(0, 0.5, -0.2);
 
         // Weapon
-        auto weaponPivotNode = Node::create("weaponPivotNode", cameraNode);
+        auto weaponPivotNode = Node::create("weaponPivotNode", camera->node());
         weaponPivotNode->transform()->setPosition(0, 0, -0.6);
 
         auto weaponNode = Node::create("weaponNode", weaponPivotNode);
@@ -221,9 +236,10 @@ private:
 
         // Bullets
         auto sphere = meshManager->loadMeshData("./sphere.obj");
+        const auto bulletShape = std::make_shared<btSphereShape>(0.1f);
 
-        auto createBullet = [&](const std::string& name) {
-            auto bulletNode = Node::create(name, playerNode);
+        auto createBullet = [&](const std::string& name, const std::shared_ptr<Node>& portalNode) {
+            auto bulletNode = Node::create(name, rootNode);
             bulletNode->transform()->setScale(0.1);
 
             auto bulletMesh = MeshComponent::create(bulletNode, sphere, "Bullet Mesh");
@@ -231,42 +247,41 @@ private:
 
             meshes.push_back(bulletMesh);
 
+            const auto bulletRigidBody = RigidBody::create(bulletNode, "bulletRigidBody");
+            bulletRigidBody->setMass(1.f);
+            bulletRigidBody->setCollisionShape(bulletShape);
+            bulletRigidBody->group = GROUP_BULLET;
+            bulletRigidBody->mask = GROUP_ALLOW_PORTAL;
+            bulletRigidBody->init();
+
             auto bullet = PortalBullet::create(bulletNode);
+            bullet->setPortalNode(portalNode);
+            bullet->setRigidBody(bulletRigidBody);
 
             return bulletNode;
         };
 
-        auto bullet1Node = createBullet("bullet1Node");
+        auto bullet1Node = createBullet("bullet1Node", portal->portal1Node);
         bullet1Node->getComponent<MeshComponent>()->setBeforeDrawCallback([](const std::shared_ptr<ShaderProgram>& shaderProgram) {
             shaderProgram->setUniform("color", glm::vec3(0.1, 0.1, 0.8));
         });
 
-        auto bullet2Node = createBullet("bullet2Node");
+        auto bullet2Node = createBullet("bullet2Node", portal->portal2Node);
         bullet2Node->getComponent<MeshComponent>()->setBeforeDrawCallback([](const std::shared_ptr<ShaderProgram>& shaderProgram) {
             shaderProgram->setUniform("color", glm::vec3(0.8, 0.1, 0.1));
         });
 
         // Controller
         auto controller = PortalFPSController::create(playerNode, "playerController");
-        controller->setCameraNode(cameraNode);
+        controller->setCameraNode(camera->node());
         controller->setRigidBody(rigidBody);
         controller->setWeaponNode(weaponNode);
         controller->setPortal1Bullet(bullet1Node->getComponent<PortalBullet>());
         controller->setPortal2Bullet(bullet2Node->getComponent<PortalBullet>());
     }
 
-    void createFreeCamera() {
-        auto cameraNode = Node::create("cameraNode", rootNode);
-        cameraNode->transform()->setPosition(0, 0, 3);
-
-        camera = Camera::create(
-            cameraNode,
-            glm::radians(90.0f),
-            0.3f,
-            100.0f
-        );
-
-        FreeController::create(cameraNode);
+    void createFreeCameraController() {
+        FreeController::create(camera->node());
     }
 
     void createSkybox() {
@@ -351,22 +366,26 @@ private:
         auto groundShape = std::make_shared<btBoxShape>(btVector3(50.f, 0.5, 50.f));
         auto rigidbody = RigidBody::create(node);
         rigidbody->setCollisionShape(groundShape);
+        rigidbody->group = GROUP_OTHER;
+        rigidbody->mask &= ~GROUP_BULLET;
         rigidbody->init();
     }
 
     void createWalls() {
-        float scale = 30.0f;
+        glm::vec3 scale = glm::vec3(30, 4, 1);
         float positionX[] = { 0.0f, 0.5f, 0.0f, -0.5f };
         float positionZ[] = { 0.5f, 0.0f, -0.5f, 0.0f };
+
+        auto wallShape = std::make_shared<btBoxShape>(btVector3(scale.x / 2.f, scale.y / 2.f, scale.z / 2.f));
 
         for (int i=0; i < 4; i++) {
             auto node = meshManager->createNodeFromMeshData("cube.obj", staticNode);
             node->name = "wallNode"+std::to_string(i);
-            node->transform()->setScale(scale, 4, 1);
+            node->transform()->setScale(scale.x, scale.y, scale.z);
             node->transform()->setPosition(
-                positionX[i] * scale,
+                positionX[i] * scale.x,
                 -3.0f,
-                positionZ[i] * scale
+                positionZ[i] * scale.x
             );
 
             if (positionX[i] != 0.0f) {
@@ -381,6 +400,11 @@ private:
             });
 
             meshes.push_back(mesh);
+
+            auto rigidbody = RigidBody::create(node);
+            rigidbody->setCollisionShape(wallShape);
+            rigidbody->group = GROUP_ALLOW_PORTAL;
+            rigidbody->init();
         }
     }
 
@@ -432,6 +456,8 @@ private:
         auto rigidBody = RigidBody::create(node);
         rigidBody->setMass(40.f);
         rigidBody->setCollisionShape(cubeShape);
+        rigidBody->group = GROUP_OTHER;
+        rigidBody->mask &= ~GROUP_BULLET;
         rigidBody->init();
     }
 };

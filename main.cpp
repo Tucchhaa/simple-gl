@@ -47,8 +47,17 @@ int main() {
 
     while(window->isOpen())
     {
-        demo.updateNodes();
+        // poll input events
+        window->pollEvents();
+
+        if (window->input()->isKeyPressed(GLFW_KEY_ESCAPE)) {
+            window->close();
+        }
+
         demo.scene->emitUpdate();
+        demo.stepPhysicsSimulation();
+        demo.scene->rootNode()->transform()->recalculate();
+        demo.camera->recalculateViewMatrix();
 
         // draw scene
         if (msaaFrameBuffer != nullptr) {
@@ -72,13 +81,6 @@ int main() {
 
         // render frame
         screenFrameBuffer->renderFrame();
-
-        // poll input events
-        window->pollEvents();
-
-        if (window->input()->isKeyPressed(GLFW_KEY_ESCAPE)) {
-            window->close();
-        }
     }
 
     return 0;

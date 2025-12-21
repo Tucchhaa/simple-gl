@@ -34,8 +34,6 @@ public:
     const glm::mat4& viewMatrix() const { return m_viewMatrix; }
     const glm::mat4& projectionMatrix() const { return m_projectionMatrix; }
 
-    void onUpdate() override;
-
     void recalculateViewMatrix();
     void recalculateProjectionMatrix();
 

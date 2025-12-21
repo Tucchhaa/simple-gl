@@ -41,7 +41,7 @@ void PortalBullet::onUpdate() {
     ContactCallback callback;
     Engine::instance().physicsManager()->dynamicsWorld()->contactTest(btRigidBody.get(), callback);
 
-    if (callback.hasHit) {
+    if (callback.hasHit()) {
         // node()->visible = false;
 
         btRigidBody->setLinearVelocity(btVector3(0, 0, 0));

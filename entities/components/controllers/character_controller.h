@@ -43,9 +43,12 @@ private:
     float m_yaw = 0.f;
     const float m_maxPitch = glm::radians(89.0f);
 
+    const float m_jumpReloadTimeMs = 100;
+    float m_jumpReloadLeftMs = 0;
+
     std::shared_ptr<RigidBody> m_rigidBody;
 
-    bool canJump() const;
+    bool isTouchingGround() const;
 };
 
 }

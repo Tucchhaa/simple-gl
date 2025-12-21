@@ -5,6 +5,7 @@
 #include "../camera.h"
 #include "../rigid_body.h"
 #include "../transform.h"
+#include "../../physics/contact_callback.h"
 #include "../../window.h"
 #include "../../node.h"
 #include "../../../managers/engine.h"
@@ -60,8 +61,13 @@ void CharacterController::onUpdate() {
     }
 
     // Jump
-    if (this->canJump() && input->isKeyPressed(GLFW_KEY_SPACE)) {
-        rigidBody->applyCentralForce(btVector3(0, 25000, 0));
+    if (m_jumpReloadLeftMs > 0) {
+        m_jumpReloadLeftMs -= input->deltaTime() * 1000;
+    }
+
+    if (this->isTouchingGround() && input->isKeyDown(GLFW_KEY_SPACE) && m_jumpReloadLeftMs <= 0) {
+        rigidBody->applyCentralImpulse(btVector3(0, 400, 0));
+        m_jumpReloadLeftMs = m_jumpReloadTimeMs;
     }
 
     // Camera Orientation
@@ -87,29 +93,19 @@ void CharacterController::onUpdate() {
     }
 }
 
-bool CharacterController::canJump() const {
+bool CharacterController::isTouchingGround() const {
     auto physicsWorld = Engine::instance().physicsManager()->dynamicsWorld();
-    auto rigidBody = node()->rigidBody()->getBtRigidBody().get();
-    int numManifolds = physicsWorld->getDispatcher()->getNumManifolds();
+    auto rigidBody = node()->rigidBody()->getBtRigidBody();
 
-    for (int i = 0; i < numManifolds; i++) {
-        btPersistentManifold* manifold = physicsWorld->getDispatcher()->getManifoldByIndexInternal(i);
+    ContactCallback callback;
+    Engine::instance().physicsManager()->dynamicsWorld()->contactTest(rigidBody.get(), callback);
 
-        if (manifold->getBody0() != rigidBody && manifold->getBody1() != rigidBody)
-            continue;
+    for (const auto& contactResult : callback.results) {
+        const btManifoldPoint& point = contactResult.hitPoint;
+        const btVector3& normal = point.m_normalWorldOnB;
 
-        for (int j = 0; j < manifold->getNumContacts(); j++) {
-            const btManifoldPoint& point = manifold->getContactPoint(j);
-
-            if (point.getDistance() < 0.15f) {
-                btVector3 normal = point.m_normalWorldOnB;
-                if (manifold->getBody1() == rigidBody)
-                    normal = -normal;
-
-                if (normal.dot(btVector3(0, 1, 0)) > 0.6f) {
-                    return true;
-                }
-            }
+        if (point.getDistance() <= 0.05f && normal.dot(btVector3(0, 1, 0)) > 0.6f) {
+            return true;
         }
     }
 

@@ -2,12 +2,17 @@
 
 namespace SimpleGL {
 
-btScalar ContactCallback::addSingleResult(btManifoldPoint &cp, const btCollisionObjectWrapper *colObj0Wrap, int, int,
-    const btCollisionObjectWrapper *colObj1Wrap, int, int) {
-    hasHit = true;
-    hitObject = colObj1Wrap->getCollisionObject();
-    hitPointWorld = cp.m_positionWorldOnB;
-    hitNormalWorld = cp.m_normalWorldOnB;
+btScalar ContactCallback::addSingleResult(
+    btManifoldPoint &contactPoint,
+    const btCollisionObjectWrapper *colObj0Wrap,
+    int, int,
+    const btCollisionObjectWrapper *colObj1Wrap,
+    int, int
+) {
+    // hasHit = true;
+    results.emplace_back(colObj1Wrap->getCollisionObject(), contactPoint);
+    // hitObject = colObj1Wrap->getCollisionObject();
+    // hitPoint = contactPoint;
     return 0;
 }
 

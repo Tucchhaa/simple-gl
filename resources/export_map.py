@@ -18,14 +18,12 @@ GEOMETRY_COLLECTION_NAME = "Geometry"
 # to our engine's system (X-right, Y-up, Z-forward).
 # It swaps the Y and Z axes and inverts the new Z axis.
 # (x, y, z)_blender -> (x, z, -y)_engine
-CONVERSION_MATRIX = Matrix(
-    (
-        (1, 0, 0, 0),
-        (0, 0, 1, 0),
-        (0, -1, 0, 0),
-        (0, 0, 0, 1),
-    )
-)
+CONVERSION_MATRIX = Matrix((
+    (1, 0, 0, 0),
+    (0, 0, 1, 0),
+    (0, -1, 0, 0),
+    (0, 0, 0, 1),
+))
 CONVERSION_MATRIX_INV = CONVERSION_MATRIX.inverted()
 
 def transform_matrix_to_engine_space(blender_matrix: Matrix) -> Matrix:
@@ -77,12 +75,19 @@ def export_level():
         dims = obj.dimensions
         size = (dims.x, dims.z, dims.y)
 
+        # Get material name
+        material_name = "default"
+        if obj.active_material:
+            material_name = obj.active_material.name
+            print(f"  - Found material: '{material_name}'")
+
         exported_objects.append({
             "name": obj.name,
             "type": "box",  # We'll assume all objects are boxes for now.
             "position": vec3_to_list(pos),
             "rotation": quat_to_list(rot),
             "size": [float(s) for s in size],
+            "material": material_name,
         })
 
     # Prepare the final JSON structure.

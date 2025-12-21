@@ -17,6 +17,14 @@ struct MeshData {
 
     static std::shared_ptr<MeshData> createFromScene(const aiScene* scene);
 
+    // Create MeshData directly from vertex and index arrays (bypasses Assimp)
+    static std::shared_ptr<MeshData> createFromArrays(
+        const std::string& name,
+        const std::vector<float>& vertices,
+        const std::vector<unsigned int>& indices,
+        unsigned int vertexStride = 8  // pos(3) + uv(2) + normal(3)
+    );
+
     const std::string& name() { return m_name; }
 
     const std::vector<float>& vertices() { return m_vertices; }
@@ -24,7 +32,7 @@ struct MeshData {
     bool hasVertices() const { return !m_vertices.empty(); }
 
     const std::vector<unsigned int>& indices() { return m_indices; }
-    int indicesSize() const { return sizeof(float) * m_indices.size(); }
+    int indicesSize() const { return sizeof(unsigned int) * m_indices.size(); }
 
     unsigned int VBO() const { return m_VBO; }
     unsigned int EBO() const { return m_EBO; }

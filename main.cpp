@@ -1,7 +1,7 @@
 #include <iostream>
 #include <sstream>
 
-#include "demos/test_chamber_demo.h"
+#include "demos/map_import_demo.h"
 #include "managers/engine.h"
 #include "managers/mesh_manager.h"
 #include "managers/shader_manager.h"
@@ -26,7 +26,7 @@ int main() {
     window->setTitle("Learn OpenGL");
     window->makeCurrent();
 
-    auto demo = TestChamberDemo();
+    auto demo = MapImportDemo();
 
     // create screen frame buffer
     auto frameShaderProgram = Engine::instance().shaderManager()->createShaderProgram(

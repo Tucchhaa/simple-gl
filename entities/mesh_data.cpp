@@ -16,6 +16,22 @@ std::shared_ptr<MeshData> MeshData::createFromScene(const aiScene *scene) {
     return meshData;
 }
 
+std::shared_ptr<MeshData> MeshData::createFromArrays(
+    const std::string& name,
+    const std::vector<float>& vertices,
+    const std::vector<unsigned int>& indices,
+    unsigned int vertexStride
+) {
+    auto meshData = create();
+    meshData->m_name = name;
+    meshData->m_vertices = vertices;
+    meshData->m_indices = indices;
+    
+    createBuffers(meshData);
+    
+    return meshData;
+}
+
 std::shared_ptr<MeshData> MeshData::parseScene(const aiScene *scene) {
     auto rootNode = scene->mRootNode;
 

@@ -10,6 +10,7 @@ find_package(glfw3 CONFIG REQUIRED)
 find_package(glad CONFIG REQUIRED)
 find_package(glm CONFIG REQUIRED)
 find_package(assimp CONFIG REQUIRED)
+find_package(nlohmann_json CONFIG REQUIRED)
 find_package(Bullet CONFIG REQUIRED)
 
 add_executable(main
@@ -26,6 +27,8 @@ add_executable(main
     managers/texture_manager.h
     managers/physics_manager.cpp
     managers/physics_manager.h
+    managers/map_loader.cpp
+    managers/map_loader.h
     entities/window.cpp
     entities/window.h
     entities/input.cpp
@@ -74,6 +77,7 @@ add_executable(main
     helpers/converter.h
 
     demos/basic_demo.h
+    demos/map_import_demo.h
 )
 
 target_link_libraries(main PRIVATE
@@ -81,6 +85,7 @@ target_link_libraries(main PRIVATE
     glad::glad
     glm::glm
     assimp::assimp
+    nlohmann_json::nlohmann_json
     ${BULLET_LIBRARIES}
 )
 

@@ -12,6 +12,9 @@ namespace SimpleGL {
 
 class RigidBody : public Component {
 public:
+    int group = -1; // 0xffffffff
+    int mask = -1; // 0xffffffff
+
     RigidBody(const std::weak_ptr<Node> &node, const std::string &name): Component(node, name) {}
 
     ~RigidBody() override;

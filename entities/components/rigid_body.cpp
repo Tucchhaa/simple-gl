@@ -73,7 +73,7 @@ void RigidBody::init() {
     );
     m_rigidBody = std::make_shared<btRigidBody>(info);
 
-    Engine::instance().physicsManager()->dynamicsWorld()->addRigidBody(m_rigidBody.get());
+    Engine::instance().physicsManager()->dynamicsWorld()->addRigidBody(m_rigidBody.get(), group, mask);
 }
 
 }

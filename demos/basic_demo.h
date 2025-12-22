@@ -205,7 +205,7 @@ private:
 
     void createFPSController() {
         auto playerNode = Node::create("playerNode", rootNode);
-        playerNode->transform()->setPosition(0, 0, 3);
+        playerNode->transform()->setPosition(22, -2, 11);
 
         auto meshNode = Node::create("playerMeshNode", playerNode);
         meshNode->transform()->setScale(0.3f);
@@ -336,12 +336,8 @@ private:
         portal = Portal::create(camera);
 
         // position portals
-        portal->portal1Node->transform()->setPosition(-8, -3, -14.45);
-        // portal->portal2Node->transform()->setPosition(-1, -3, -14.45);
-
-        portal->portal2Node->transform()->setPosition(-8, -3, -10);
-        portal->portal2Node->transform()->rotate(glm::angleAxis(glm::radians(90.f), glm::vec3(0.f, 1.0f, 0.0f)));
-        portal->portal2Node->transform()->rotate(glm::angleAxis(glm::radians(90.f), glm::vec3(0.f, 1.0f, 0.0f)));
+        portal->portal1Node->transform()->setPosition(20, -3.4, 14.6);
+        portal->portal2Node->transform()->setPosition(25, -3.4, 14.6);
 
         const auto planeMesh = meshManager->loadMeshData("plane.obj");
         portal->setPortalMesh(1, planeMesh);
@@ -580,6 +576,7 @@ private:
             auto rigidBody = RigidBody::create(node);
             rigidBody->setCollisionShape(shape);
             rigidBody->setMass(0.0f); // 0.0f Mass = Static Object (Wall/Floor)
+            rigidBody->group = GROUP_ALLOW_PORTAL;
             rigidBody->init();
             
             count++;

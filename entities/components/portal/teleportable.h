@@ -3,6 +3,7 @@
 #include <glm/fwd.hpp>
 
 #include "../component.h"
+#include <vector>
 
 namespace SimpleGL {
 

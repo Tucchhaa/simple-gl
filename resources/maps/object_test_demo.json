@@ -1,0 +1,65 @@
+{
+  "pieces": [
+    {
+      "colliderHalfExtentsLocal": [
+        200.0,
+        200.0,
+        200.0
+      ],
+      "colliderOffsetLocal": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "modelPath": "sci-fi_walls/sci-fi_walls.obj",
+      "name": "wall",
+      "pos": [
+        15.0,
+        -4.0,
+        0.0
+      ],
+      "rot": [
+        1.0,
+        0.0,
+        0.0,
+        0.0
+      ],
+      "scale": [
+        0.009999999776482582,
+        0.009999999776482582,
+        0.009999999776482582
+      ]
+    },
+    {
+      "colliderHalfExtentsLocal": [
+        0.30000001192092896,
+        0.05000000074505806,
+        0.6000000238418579
+      ],
+      "colliderOffsetLocal": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "modelPath": "sci-fi_bridge/sci-fi_bridge.obj",
+      "name": "bridge",
+      "pos": [
+        10.0,
+        -2.0,
+        0.0
+      ],
+      "rot": [
+        1.0,
+        0.0,
+        0.0,
+        0.0
+      ],
+      "scale": [
+        10.0,
+        10.0,
+        10.0
+      ]
+    }
+  ],
+  "version": 1
+}

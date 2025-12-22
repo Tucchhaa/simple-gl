@@ -26,6 +26,8 @@ add_executable(main
     managers/texture_manager.h
     managers/physics_manager.cpp
     managers/physics_manager.h
+    managers/map_loader.cpp
+    managers/map_loader.h
     entities/window.cpp
     entities/window.h
     entities/input.cpp
@@ -84,6 +86,7 @@ add_executable(main
     helpers/converter.h
 
     demos/basic_demo.h
+    demos/map_loading_demo.h
 )
 
 target_link_libraries(main PRIVATE

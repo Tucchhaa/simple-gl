@@ -66,14 +66,12 @@ public:
         createScene();
     }
 
-    void update() {
+    void updateNodes() {
         float timeStep = Engine::instance().windowManager()->mainWindow()->input()->deltaTime();
         dynamicsWorld->stepSimulation(timeStep);
     }
 
     void draw() {
-        camera->recalculateViewMatrix();
-
         glEnable(GL_CULL_FACE);
         glCullFace(GL_BACK);
 
@@ -148,12 +146,10 @@ private:
             0.3f,
             200.0f
         );
-        scene->addComponent(camera);
 
         auto controller = CharacterController::create(playerNode, "playerController");
         controller->setCameraNode(cameraNode);
         controller->setRigidBody(rigidBody);
-        scene->addComponent(controller);
     }
 
     void createSkybox() {
@@ -191,7 +187,6 @@ private:
         directLight->ambient = glm::vec3(0.15f, 0.15f, 0.2f);
         directLight->diffuse = glm::vec3(0.8f, 0.8f, 0.9f);
         directLight->specular = glm::vec3(0.3f, 0.3f, 0.3f);
-        scene->addLight(directLight);
     }
 
     void loadMaterials() {
@@ -239,15 +234,16 @@ private:
     //     }
     // }
     void loadMap() {
-        auto resourcePath = Engine::instance().getResourcePath("maps/level.txt");
-        std::ifstream f(resourcePath);
+        std::string path = "resources/maps/level.txt"; 
+        std::ifstream f(path);
         
         if (!f.is_open()) {
-            std::cerr << "CRITICAL: Could not open map file: " << resourcePath << std::endl;
-            return;
+            std::cerr << "CRITICAL: Could not open map file: " << path << std::endl;
+            f.open("../resources/maps/level.txt");
+            if(!f.is_open()) return;
         }
 
-        std::cout << "Loading map from: " << resourcePath << std::endl;
+        std::cout << "Loading map from: " << path << std::endl;
 
         std::string name, matName;
         float px, py, pz;

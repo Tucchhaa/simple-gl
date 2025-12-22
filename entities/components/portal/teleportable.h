@@ -48,14 +48,13 @@ private:
 
     float m_thresholdDistance2 = 1.f;
 
-    bool m_disabledPortal1Collision = false;
-    bool m_disabledPortal2Collision = false;
+    bool m_disabledPortalCollision = false;
+
+    bool m_isCloseEnough1 = false;
+    bool m_isCloseEnough2 = false;
 
 
-    void toggleCollisionIfNeed(
-        const std::shared_ptr<Node>& portalNode,
-        bool& disabledPortalCollision
-    ) const;
+    void toggleCollisionIfNeed();
 
     void teleportIfNeed(
         const std::shared_ptr<Node>& sourcePortalNode,

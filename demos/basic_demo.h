@@ -389,12 +389,13 @@ private:
 
     void createWalls() {
         glm::vec3 scale = glm::vec3(30, 4, 1);
-        float positionX[] = { 0.0f, 0.5f, 0.0f, -0.5f };
-        float positionZ[] = { 0.5f, 0.0f, -0.5f, 0.0f };
+        float positionX[] = { 0.0f, 0.5f, 0.0f, -0.5f, -0.3f };
+        float positionZ[] = { 0.5f, 0.0f, -0.5f, 0.0f, 0.3f, 0.5f };
+        bool rotate[] = { false, true, false, true, true };
 
         auto wallShape = std::make_shared<btBoxShape>(btVector3(scale.x / 2.f, scale.y / 2.f, scale.z / 2.f));
 
-        for (int i=0; i < 4; i++) {
+        for (int i=0; i < 5; i++) {
             auto node = meshManager->createNodeFromMeshData("cube.obj", staticNode);
             node->name = "wallNode"+std::to_string(i);
             node->transform()->setScale(scale.x, scale.y, scale.z);
@@ -404,7 +405,7 @@ private:
                 positionZ[i] * scale.x
             );
 
-            if (positionX[i] != 0.0f) {
+            if (rotate[i]) {
                 auto r = glm::angleAxis(glm::radians(90.f), glm::vec3(0, 1, 0));
                 node->transform()->rotate(r);
             }

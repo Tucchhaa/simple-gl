@@ -24,43 +24,44 @@ void Teleportable::onStart() {
 }
 
 void Teleportable::onUpdate() {
-    if (m_disabledPortal1Collision) {
+    if (m_isCloseEnough1) {
         teleportIfNeed(m_portal->portal1Node, m_portal->portal2Node);
     }
 
-    if (m_disabledPortal2Collision) {
+    if (m_isCloseEnough2) {
         teleportIfNeed(m_portal->portal2Node, m_portal->portal1Node);
     }
 
-    toggleCollisionIfNeed(m_portal->portal1Node, m_disabledPortal1Collision);
-    toggleCollisionIfNeed(m_portal->portal2Node, m_disabledPortal2Collision);
+    toggleCollisionIfNeed();
 }
 
 void Teleportable::draw(const std::shared_ptr<Camera> &camera) const {
-    if (m_disabledPortal1Collision) {
+    if (m_isCloseEnough1) {
         drawClone(camera, m_portal->portal1Node, m_portal->portal2Node);
     }
 
-    if (m_disabledPortal2Collision) {
+    if (m_isCloseEnough2) {
         drawClone(camera, m_portal->portal2Node, m_portal->portal1Node);
     }
 }
 
-void Teleportable::toggleCollisionIfNeed(
-    const std::shared_ptr<Node> &portalNode,
-    bool& disabledPortalCollision
-) const {
-    const auto displacement = portalNode->transform()->position() - transform()->position();
-    const auto distance2 = glm::dot(displacement, displacement);
-    const bool needDisableCollision = distance2 < m_thresholdDistance2 * m_thresholdDistance2;
+void Teleportable::toggleCollisionIfNeed() {
+    const auto displacement1 = m_portal->portal1Node->transform()->position() - transform()->position();
+    const auto displacement2 = m_portal->portal2Node->transform()->position() - transform()->position();
+    const auto distance2_1 = glm::dot(displacement1, displacement1);
+    const auto distance2_2 = glm::dot(displacement2, displacement2);
 
-    if (needDisableCollision && !disabledPortalCollision) {
-        disabledPortalCollision = true;
+    m_isCloseEnough1 = distance2_1 < m_thresholdDistance2;
+    m_isCloseEnough2 = distance2_2 < m_thresholdDistance2;
+
+    if ((m_isCloseEnough1 || m_isCloseEnough2) && !m_disabledPortalCollision) {
+        m_disabledPortalCollision = true;
         m_rigidBody->mask &= ~m_allowPortalGroup;
         m_rigidBody->reinit();
     }
-    if (!needDisableCollision && disabledPortalCollision) {
-        disabledPortalCollision = false;
+
+    if (!m_isCloseEnough1 && !m_isCloseEnough2 && m_disabledPortalCollision) {
+        m_disabledPortalCollision = false;
         m_rigidBody->mask |= m_allowPortalGroup;
         m_rigidBody->reinit();
     }

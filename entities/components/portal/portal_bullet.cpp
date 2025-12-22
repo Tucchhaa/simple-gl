@@ -60,6 +60,8 @@ void PortalBullet::onUpdate() {
             btRigidBody->setLinearVelocity(btVector3(0, 0, 0));
         }
     }
+
+    m_previousTransform = btRigidBody->getWorldTransform();
 }
 
 void PortalBullet::placePortal(glm::vec3 position, glm::vec3 normal) {

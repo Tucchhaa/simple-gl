@@ -31,7 +31,7 @@ void CharacterController::onStart() {
 }
 
 void CharacterController::onUpdate() {
-    const auto input = Engine::instance().mainWindow()->input();
+    const auto input = Engine::instance().window()->input();
     const auto rigidBody = node()->rigidBody()->getBtRigidBody();
     const auto cameraTransform = m_cameraNode->transform();
 
@@ -89,12 +89,12 @@ void CharacterController::onUpdate() {
 
     if (input->isKeyPressed(GLFW_KEY_ENTER)) {
         m_canRotate = !m_canRotate;
-        auto window = Engine::instance().mainWindow();
-        window->isCursorPositionFixed = m_canRotate;
+        auto window = Engine::instance().window();
+        window->isCursorPosFixed = m_canRotate;
 
         if (m_canRotate) {
             glfwSetInputMode(window->glfwWindow(), GLFW_CURSOR, GLFW_CURSOR_DISABLED);
-            window->setCursorPositionToCenter();
+            window->setCursorPosToCenter();
         } else {
             glfwSetInputMode(window->glfwWindow(), GLFW_CURSOR, GLFW_CURSOR_NORMAL);
         }

@@ -25,7 +25,6 @@
 #include "../entities/components/portal/portal_fps_controller.h"
 #include "../entities/components/portal/teleportable.h"
 #include "../managers/physics_manager.h"
-#include "../managers/window_manager.h"
 
 #include "../render-pipeline/portal/portal.h"
 
@@ -81,7 +80,7 @@ public:
     }
 
     void stepPhysicsSimulation() {
-        float timeStep = Engine::instance().windowManager()->mainWindow()->input()->deltaTime();
+        float timeStep = Engine::instance().window()->input()->deltaTime();
         dynamicsWorld->stepSimulation(timeStep);
     }
 

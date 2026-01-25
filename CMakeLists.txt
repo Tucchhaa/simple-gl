@@ -16,8 +16,6 @@ add_executable(main
     main.cpp
     managers/engine.cpp
     managers/engine.h
-    managers/window_manager.cpp
-    managers/window_manager.h
     managers/shader_manager.cpp
     managers/shader_manager.h
     managers/mesh_manager.cpp

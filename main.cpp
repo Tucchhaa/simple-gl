@@ -5,7 +5,7 @@
 #include "managers/engine.h"
 #include "managers/mesh_manager.h"
 #include "managers/shader_manager.h"
-#include "managers/window_manager.h"
+#include "entities/window.h"
 
 #include "entities/input.h"
 #include "entities/mesh_data.h"
@@ -23,9 +23,9 @@ int main() {
     constexpr int SCREEN_WIDTH = 1200;
     constexpr int SCREEN_HEIGHT = 900;
 
-    auto window = Engine::instance().windowManager()->createWindow("main", SCREEN_WIDTH, SCREEN_HEIGHT);
+    auto window = Engine::instance().window();
+    window->open(SCREEN_WIDTH, SCREEN_HEIGHT);
     window->setTitle("Learn OpenGL");
-    window->makeCurrent();
 
     auto demo = BasicDemo();
 

@@ -5,12 +5,11 @@
 
 namespace SimpleGL {
 
-class WindowManager;
+class Window;
 class ShaderManager;
 class MeshManager;
 class TextureManager;
 class PhysicsManager;
-class Window;
 class Input;
 class Scene;
 class Node;
@@ -19,13 +18,12 @@ class Engine {
 public:
     static Engine& instance() { return m_instance; }
 
-    std::shared_ptr<WindowManager> windowManager() { return m_windowManager; }
+    std::shared_ptr<Window> window() { return m_window; }
     std::shared_ptr<ShaderManager> shaderManager() { return m_shaderManager; }
     std::shared_ptr<MeshManager> meshManager() { return m_meshManager; }
     std::shared_ptr<TextureManager> textureManager() { return m_textureManager; }
     std::shared_ptr<PhysicsManager> physicsManager() { return m_physicsManager; }
 
-    std::shared_ptr<Window> mainWindow() const;
     std::shared_ptr<Scene> scene() { return m_scene; }
 
     void setScene(const std::shared_ptr<Scene>& scene) { m_scene = scene; }
@@ -42,7 +40,7 @@ private:
 
     const std::filesystem::path m_resourcesDir = std::filesystem::path(__FILE__).parent_path().parent_path() / "resources";
 
-    std::shared_ptr<WindowManager> m_windowManager;
+    std::shared_ptr<Window> m_window;
     std::shared_ptr<ShaderManager> m_shaderManager;
     std::shared_ptr<MeshManager> m_meshManager;
     std::shared_ptr<TextureManager> m_textureManager;

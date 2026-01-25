@@ -28,7 +28,7 @@ void PortalFPSController::onStart() {
 void PortalFPSController::onUpdate() {
     CharacterController::onUpdate();
 
-    const auto input = Engine::instance().mainWindow()->input();
+    const auto input = Engine::instance().window()->input();
 
     const bool isLMB = input->isMouseButtonPressed(GLFW_MOUSE_BUTTON_1);
     const bool isRMB = input->isMouseButtonPressed(GLFW_MOUSE_BUTTON_2);

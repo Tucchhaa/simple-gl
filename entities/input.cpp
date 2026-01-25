@@ -1,16 +1,20 @@
 #include "window.h"
 #include "input.h"
 
+#include "../managers/engine.h"
+#include "window.h"
+
 namespace SimpleGL {
 
-std::shared_ptr<Input> Input::create(const std::weak_ptr<Window>& window) {
-    return std::shared_ptr<Input>(new Input(window));
+std::shared_ptr<Input> Input::create() {
+    return std::shared_ptr<Input>(new Input());
 }
 
 void Input::keyCallback(int key, int action) {
     if (action == GLFW_PRESS) {
         setKeyState(key, true);
-    } else if (action == GLFW_RELEASE) {
+    }
+    else if (action == GLFW_RELEASE) {
         setKeyState(key, false);
     }
 }
@@ -19,15 +23,15 @@ void Input::mouseButtonCallback(int button, int action) {
     m_currentMouseStates[button] = action == GLFW_PRESS;
 }
 
-void Input::process() {
+void Input::updateState() {
     m_previousKeyStates = m_currentKeyStates;
     m_previousMouseStates = m_currentMouseStates;
 
-    updateCursorPosition();
+    window()->getCursorPos(&m_mouseX, &m_mouseY);
     updateDeltaTime();
 
-    if (window()->isCursorPositionFixed) {
-        window()->setCursorPositionToCenter();
+    if (window()->isCursorPosFixed) {
+        window()->setCursorPosToCenter();
     }
 }
 
@@ -72,14 +76,6 @@ glm::vec2 Input::mouseDelta() const {
     return { xMouseDelta, yMouseDelta };
 }
 
-void Input::updateCursorPosition() {
-    glfwGetCursorPos(window()->glfwWindow(), &m_mouseX, &m_mouseY);
-}
-
-double Input::time() const {
-    return glfwGetTime() * 1000;
-}
-
 void Input::setKeyState(int key, bool pressed) {
     m_currentKeyStates[key] = pressed;
 }
@@ -87,6 +83,10 @@ void Input::setKeyState(int key, bool pressed) {
 void Input::updateDeltaTime() {
     m_deltaTime = Window::time() - m_lastFrameTime;
     m_lastFrameTime = Window::time();
+}
+
+std::shared_ptr<Window> Input::window() {
+    return Engine::instance().window();
 }
 
 }

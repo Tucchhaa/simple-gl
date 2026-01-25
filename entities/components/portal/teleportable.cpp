@@ -81,6 +81,8 @@ void Teleportable::teleportIfNeed(
         getTeleportedTransform(sourcePortalNode, destPortalNode, qNew, pNew, qDelta);
 
         const auto btRigidBody = m_rigidBody->getBtRigidBody();
+        const auto oldVelocity = btRigidBody->getLinearVelocity();
+        const auto oldAngularVelocity = btRigidBody->getAngularVelocity();
 
         btTransform transform;
         transform.setOrigin(Converter::toBt(pNew));
@@ -93,8 +95,8 @@ void Teleportable::teleportIfNeed(
         }
 
         const auto btQDelta = Converter::toBt(qDelta);
-        const auto velocity = quatRotate(btQDelta, btRigidBody->getLinearVelocity());
-        const auto angularVelocity = quatRotate(btQDelta, btRigidBody->getAngularVelocity());
+        const auto velocity = quatRotate(btQDelta, oldVelocity);
+        const auto angularVelocity = quatRotate(btQDelta, oldAngularVelocity);
 
         btRigidBody->setLinearVelocity(velocity);
         btRigidBody->setAngularVelocity(angularVelocity);

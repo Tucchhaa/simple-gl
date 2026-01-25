@@ -42,6 +42,8 @@ public:
         const std::shared_ptr<Transform>& destT
     );
 
+    void applyCameraNearPlane();
+
 private:
     std::shared_ptr<PortalFramebuffer> m_tailPortalFramebuffer;
 

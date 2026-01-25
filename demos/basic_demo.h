@@ -53,8 +53,6 @@ class BasicDemo {
     std::shared_ptr<Texture> cubeDiffuseTexture;
     std::shared_ptr<Texture> cubeSpecularTexture;
 
-    std::shared_ptr<Portal> portal;
-
     // This node contains static elements of the scene
     std::shared_ptr<Node> staticNode;
 
@@ -63,6 +61,8 @@ class BasicDemo {
     std::shared_ptr<MeshComponent> skyboxCubeMesh;
 
 public:
+    std::shared_ptr<Portal> portal;
+
     std::shared_ptr<Camera> camera;
     std::shared_ptr<Scene> scene;
 
@@ -118,6 +118,8 @@ public:
         // draw portals contents
         portal->drawPortal(2, drawCall);
         portal->drawPortal(1, drawCall);
+
+        // portal->applyCameraNearPlane();
 
         // draw the rest of scene
         glColorMask(GL_TRUE, GL_TRUE, GL_TRUE, GL_TRUE);
@@ -221,7 +223,7 @@ private:
 
         // Camera
         camera->node()->setParent(playerNode);
-        camera->node()->transform()->setPosition(0, 0.5, -0.1);
+        camera->node()->transform()->setPosition(0, 0.5, 0);
 
         // Weapon
         auto weaponPivotNode = Node::create("weaponPivotNode", camera->node());

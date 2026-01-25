@@ -35,7 +35,7 @@ public:
     void shoot(const std::shared_ptr<Transform>& origin, const btVector3& direction) const;
 
 private:
-    float m_bulletSpeed = 50.f;
+    float m_bulletSpeed = 30.f;
 
     std::shared_ptr<Node> m_portalNode;
 

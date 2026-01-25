@@ -251,4 +251,24 @@ std::pair<glm::quat, glm::vec3> Portal::calculatePortalTransform(
     return { qDelta, pDelta };
 }
 
+void Portal::applyCameraNearPlane() {
+    auto cT = m_camera->transform();
+
+    float dist1 = glm::dot(cT->absolutePosition() - portal1Node->transform()->absolutePosition(), portal1Node->transform()->direction());
+    float dist2 = glm::dot(cT->absolutePosition() - portal2Node->transform()->absolutePosition(), portal2Node->transform()->direction());
+
+    static bool flag = false;
+
+    if (dist1 > 0 && dist1 < 0.15f) {
+        flag = true;
+        m_camera->setNearPlane(portal2Node->transform());
+    }
+    else if (dist2 > 0 && dist2 < 0.15f) {
+        flag = true;
+        m_camera->setNearPlane(portal1Node->transform());
+    } else if (flag) {
+        flag = false;
+        m_camera->recalculateProjectionMatrix();
+    }
+}
 }

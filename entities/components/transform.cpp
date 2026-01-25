@@ -89,7 +89,8 @@ void Transform::recalculate() {
         m_transformMatrix = calculateTransformMatrix();
         m_direction = m_absoluteOrientation * glm::vec3(0, 0, 1);
 
-        if (!m_rigidBodyDirty && rigidBody) {
+        if (!m_rigidBodyDirty && rigidBody && isFirst) {
+            isFirst = false;
             rigidBody->setWorldTransform(m_absolutePosition, m_absoluteOrientation);
         }
     }

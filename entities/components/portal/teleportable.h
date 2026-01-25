@@ -1,5 +1,6 @@
 #pragma once
 
+#include <vector>
 #include <glm/fwd.hpp>
 
 #include "../component.h"
@@ -46,7 +47,7 @@ private:
 
     int m_allowPortalGroup = -1;
 
-    float m_thresholdDistance2 = 1.f;
+    float m_thresholdDistance2 = 1.5f;
 
     bool m_disabledPortalCollision = false;
 

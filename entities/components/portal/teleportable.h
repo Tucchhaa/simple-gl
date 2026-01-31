@@ -14,18 +14,9 @@ class Camera;
 
 class Teleportable : public Component {
 public:
-    Teleportable(
-        const std::weak_ptr<Node>& node,
-        const std::string &name
-    ): Component(node, name) {}
+    class Factory : public ComponentFactory<Teleportable> {};
 
-    static std::shared_ptr<Teleportable> create(
-        const std::shared_ptr<Node>& node,
-        const std::string& name = "Teleportable"
-    ) {
-        auto instance = base_create<Teleportable>(node, name);
-        return instance;
-    }
+    explicit Teleportable(const std::string& name = "Teleportable"): Component(name) {}
 
     void setPortal(const std::shared_ptr<Portal>& portal) { m_portal = portal; }
     void setRigidBody(const std::shared_ptr<RigidBody>& rigidBody) { m_rigidBody = rigidBody; }
@@ -33,7 +24,6 @@ public:
     void setAllowPortalGroup(int teleportableGroup) { m_allowPortalGroup = teleportableGroup; }
 
     void onStart() override;
-
     void onUpdate() override;
 
     void draw(const std::shared_ptr<Camera>& camera) const;

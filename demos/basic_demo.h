@@ -39,8 +39,14 @@ enum CollisionGroups {
 
 class BasicDemo {
     std::shared_ptr<Node> rootNode;
-    std::shared_ptr<MeshManager> meshManager;
-    std::shared_ptr<btDynamicsWorld> dynamicsWorld;
+    
+    static const std::unique_ptr<MeshManager>& meshManager() {
+        return Engine::get()->meshManager();
+    }
+    
+    static const std::unique_ptr<btDynamicsWorld>& dynamicsWorld() {
+        return Engine::get()->physicsManager()->dynamicsWorld();
+    }
 
     std::shared_ptr<ShaderProgram> basicShader;
     std::shared_ptr<ShaderProgram> solidColorShader;
@@ -66,22 +72,20 @@ public:
     std::shared_ptr<Scene> scene;
 
     BasicDemo() {
-        scene = Scene::create();
-        Engine::instance().setScene(scene);
+        scene = std::make_shared<Scene>();
+        Engine::get()->setScene(scene);
 
         rootNode = Node::create("ROOT");
-        meshManager = Engine::instance().meshManager();
-        dynamicsWorld = Engine::instance().physicsManager()->dynamicsWorld();
         scene->setRootNode(rootNode);
 
-        dynamicsWorld->setGravity(btVector3(0, -10.f, 0));
+        dynamicsWorld()->setGravity(btVector3(0, -10.f, 0));
 
         createScene();
     }
 
     void stepPhysicsSimulation() {
-        float timeStep = Engine::instance().window()->input()->deltaTime();
-        dynamicsWorld->stepSimulation(timeStep);
+        float timeStep = Engine::get()->window()->input()->deltaTime();
+        dynamicsWorld()->stepSimulation(timeStep);
     }
 
     void draw() {
@@ -153,31 +157,31 @@ private:
     }
 
     void createShaders() {
-        basicShader = Engine::instance().shaderManager()->createShaderProgram(
+        basicShader = Engine::get()->shaderManager()->createShaderProgram(
             "shaders/basic/vertex.glsl",
             "shaders/basic/fragment.glsl",
             "basic shader program"
         );
 
-        solidColorShader = Engine::instance().shaderManager()->createShaderProgram(
+        solidColorShader = Engine::get()->shaderManager()->createShaderProgram(
             "shaders/solid-color/vertex.glsl",
             "shaders/solid-color/fragment.glsl",
             "solid color shader program"
         );
 
-        blinnPhongShader = Engine::instance().shaderManager()->createShaderProgram(
+        blinnPhongShader = Engine::get()->shaderManager()->createShaderProgram(
             "shaders/blinn-phong/vertex.glsl",
             "shaders/blinn-phong/fragment.glsl",
             "Blinn-Phong Shader"
         );
 
-        shadedSolidColorShader = Engine::instance().shaderManager()->createShaderProgram(
+        shadedSolidColorShader = Engine::get()->shaderManager()->createShaderProgram(
             "shaders/shaded-solid-color/vertex.glsl",
             "shaders/shaded-solid-color/fragment.glsl",
             "Blinn-Phong Solid Color Shader"
         );
 
-        skyboxShader = Engine::instance().shaderManager()->createShaderProgram(
+        skyboxShader = Engine::get()->shaderManager()->createShaderProgram(
             "shaders/skybox/vertex.glsl",
             "shaders/skybox/fragment.glsl",
             "Skybox Shader"
@@ -188,7 +192,7 @@ private:
         auto cameraNode = Node::create("cameraNode", rootNode);
         cameraNode->transform()->setPosition(0, 0.7, 0);
 
-        camera = Camera::create(
+        camera = Camera::Factory::create(
             cameraNode,
             glm::radians(90.0f),
             0.1f,
@@ -203,8 +207,8 @@ private:
         auto meshNode = Node::create("playerMeshNode", playerNode);
         meshNode->transform()->setScale(0.3f);
 
-        auto capsule = meshManager->loadMeshData("./capsule.obj");
-        auto playerMesh = MeshComponent::create(meshNode, capsule, "Player Mesh");
+        auto capsule = meshManager()->loadMeshData("./capsule.obj");
+        auto playerMesh = MeshComponent::Factory::create(meshNode, capsule, "Player Mesh");
         playerMesh->setShader(shadedSolidColorShader);
         playerMesh->setBeforeDrawCallback([](const std::shared_ptr<ShaderProgram>& shaderProgram) {
             shaderProgram->setUniform("color", glm::vec3(0.6, 0.6, 0.6));
@@ -213,7 +217,7 @@ private:
         meshes.push_back(playerMesh);
 
         auto playerShape = std::make_shared<btCapsuleShape>(0.5f, 0.8f);
-        auto rigidBody = RigidBody::create(playerNode, "playerRigidBody");
+        auto rigidBody = RigidBody::Factory::create(playerNode, "playerRigidBody");
         rigidBody->setMass(70.f);
         rigidBody->setCollisionShape(playerShape);
         rigidBody->group = GROUP_PLAYER;
@@ -232,8 +236,8 @@ private:
         weaponNode->transform()->setScale(0.2, 0.2, 0.9);
         weaponNode->transform()->setPosition(0.5, -0.35, 0);
 
-        auto cube = meshManager->loadMeshData("./cube.obj");
-        auto weaponMesh = MeshComponent::create(weaponNode, cube, "Weapon Mesh");
+        auto cube = meshManager()->loadMeshData("./cube.obj");
+        auto weaponMesh = MeshComponent::Factory::create(weaponNode, cube, "Weapon Mesh");
         weaponMesh->setShader(shadedSolidColorShader);
         weaponMesh->setBeforeDrawCallback([](const std::shared_ptr<ShaderProgram>& shaderProgram) {
             shaderProgram->setUniform("color", glm::vec3(0.8, 0.5, 0.5));
@@ -242,26 +246,26 @@ private:
         meshes.push_back(weaponMesh);
 
         // Bullets
-        auto sphere = meshManager->loadMeshData("./sphere.obj");
+        auto sphere = meshManager()->loadMeshData("./sphere.obj");
         const auto bulletShape = std::make_shared<btSphereShape>(0.1f);
 
         auto createBullet = [&](const std::string& name, const std::shared_ptr<Node>& portalNode) {
             auto bulletNode = Node::create(name, rootNode);
             bulletNode->transform()->setScale(0.1);
 
-            auto bulletMesh = MeshComponent::create(bulletNode, sphere, "Bullet Mesh");
+            auto bulletMesh = MeshComponent::Factory::create(bulletNode, sphere, "Bullet Mesh");
             bulletMesh->setShader(solidColorShader);
 
             meshes.push_back(bulletMesh);
 
-            const auto bulletRigidBody = RigidBody::create(bulletNode, "bulletRigidBody");
+            const auto bulletRigidBody = RigidBody::Factory::create(bulletNode, "bulletRigidBody");
             bulletRigidBody->setMass(1.f);
             bulletRigidBody->setCollisionShape(bulletShape);
             bulletRigidBody->group = GROUP_BULLET;
             bulletRigidBody->mask = GROUP_ALLOW_PORTAL;
             bulletRigidBody->init();
 
-            auto bullet = PortalBullet::create(bulletNode);
+            auto bullet = PortalBullet::Factory::create(bulletNode);
             bullet->setPortalNode(portalNode);
             bullet->setRigidBody(bulletRigidBody);
 
@@ -279,7 +283,7 @@ private:
         });
 
         // Controller
-        auto controller = PortalFPSController::create(playerNode, "playerController");
+        auto controller = PortalFPSController::Factory::create(playerNode, "playerController");
         controller->setCameraNode(camera->node());
         controller->setRigidBody(rigidBody);
         controller->setWeaponNode(weaponNode);
@@ -287,7 +291,7 @@ private:
         controller->setPortal2Bullet(bullet2Node->getComponent<PortalBullet>());
 
         // Teleportable
-        auto teleportable = Teleportable::create(playerNode, "playerTeleportable");
+        auto teleportable = Teleportable::Factory::create(playerNode, "playerTeleportable");
         teleportable->setPortal(portal);
         teleportable->setRigidBody(rigidBody);
         teleportable->setAllowPortalGroup(GROUP_ALLOW_PORTAL);
@@ -298,11 +302,11 @@ private:
     }
 
     void createFreeCameraController() {
-        FreeController::create(camera->node());
+        FreeController::Factory::create(camera->node());
     }
 
     void createSkybox() {
-        skyboxTexture = Engine::instance().textureManager()->getCubeMapTexture(
+        skyboxTexture = Engine::get()->textureManager()->getCubeMapTexture(
             "sky",
             "skybox/right.jpg",
             "skybox/left.jpg",
@@ -313,7 +317,7 @@ private:
             false
         );
 
-        auto node = meshManager->createNodeFromMeshData("cube.obj", rootNode);
+        auto node = meshManager()->createNodeFromMeshData("cube.obj", rootNode);
         node->name = "skyboxCube";
 
         skyboxCubeMesh = node->getComponent<MeshComponent>();
@@ -336,7 +340,7 @@ private:
         portal->portal2Node->transform()->rotate(glm::angleAxis(glm::radians(90.f), glm::vec3(0.f, 1.0f, 0.0f)));
         portal->portal2Node->transform()->rotate(glm::angleAxis(glm::radians(90.f), glm::vec3(0.f, 1.0f, 0.0f)));
 
-        const auto planeMesh = meshManager->loadMeshData("plane.obj");
+        const auto planeMesh = meshManager()->loadMeshData("plane.obj");
         portal->setPortalMesh(1, planeMesh);
         portal->setPortalMesh(2, planeMesh);
 
@@ -367,7 +371,7 @@ private:
     }
 
     void createGround() {
-        const auto node = meshManager->createNodeFromMeshData("cube.obj", staticNode);
+        const auto node = meshManager()->createNodeFromMeshData("cube.obj", staticNode);
         node->name = "ground";
         node->transform()->setScale(100, 1, 100);
         node->transform()->setPosition(0, -5, 0);
@@ -381,7 +385,7 @@ private:
         meshes.push_back(mesh);
 
         auto groundShape = std::make_shared<btBoxShape>(btVector3(50.f, 0.5, 50.f));
-        auto rigidbody = RigidBody::create(node);
+        auto rigidbody = RigidBody::Factory::create(node);
         rigidbody->setCollisionShape(groundShape);
         rigidbody->group = GROUP_OTHER;
         rigidbody->mask &= ~GROUP_BULLET;
@@ -397,7 +401,7 @@ private:
         auto wallShape = std::make_shared<btBoxShape>(btVector3(scale.x / 2.f, scale.y / 2.f, scale.z / 2.f));
 
         for (int i=0; i < 5; i++) {
-            auto node = meshManager->createNodeFromMeshData("cube.obj", staticNode);
+            auto node = meshManager()->createNodeFromMeshData("cube.obj", staticNode);
             node->name = "wallNode"+std::to_string(i);
             node->transform()->setScale(scale.x, scale.y, scale.z);
             node->transform()->setPosition(
@@ -419,7 +423,7 @@ private:
 
             meshes.push_back(mesh);
 
-            auto rigidbody = RigidBody::create(node);
+            auto rigidbody = RigidBody::Factory::create(node);
             rigidbody->setCollisionShape(wallShape);
             rigidbody->group = GROUP_ALLOW_PORTAL;
             rigidbody->init();
@@ -427,7 +431,7 @@ private:
     }
 
     void createLightSource() {
-        const auto node = meshManager->createNodeFromMeshData("cube.obj", rootNode);
+        const auto node = meshManager()->createNodeFromMeshData("cube.obj", rootNode);
         node->name = "lightSourceCube";
         node->transform()->setScale(0.1f);
         node->transform()->setPosition(5, 1, 0);
@@ -440,28 +444,27 @@ private:
         });
 
         meshes.push_back(mesh);
-
-        const auto pointLight = PointLight::create(node);
+        const auto pointLight = PointLight::Factory::create(node);
         pointLight->ambient = glm::vec3(0.0);
         pointLight->diffuse = glm::vec3(0.7);
         pointLight->specular = glm::vec3(0.2);
         pointLight->distance = 10.0f;
 
-        const auto directLight = DirectLight::create(node);
+        const auto directLight = DirectLight::Factory::create(node);
         directLight->ambient = glm::vec3(0.05);
         directLight->diffuse = glm::vec3(0.25);
         directLight->specular = glm::vec3(0.04);
     }
 
     void createCube() {
-        const auto node = meshManager->createNodeFromMeshData("cube.obj", rootNode);
+        const auto node = meshManager()->createNodeFromMeshData("cube.obj", rootNode);
         node->name = "cube";
         node->transform()->setScale(1);
 
         auto mesh = node->getComponent<MeshComponent>();
 
-        cubeDiffuseTexture = Engine::instance().textureManager()->getTexture("diffuse.png", true);
-        cubeSpecularTexture = Engine::instance().textureManager()->getTexture("specular.png", false);
+        cubeDiffuseTexture = Engine::get()->textureManager()->getTexture("diffuse.png", true);
+        cubeSpecularTexture = Engine::get()->textureManager()->getTexture("specular.png", false);
 
         mesh->setShader(blinnPhongShader);
         mesh->setBeforeDrawCallback([this](const std::shared_ptr<ShaderProgram>& shaderProgram) {
@@ -471,7 +474,7 @@ private:
         meshes.push_back(mesh);
 
         auto cubeShape = std::make_shared<btBoxShape>(btVector3(0.5f, 0.5f, 0.5f));
-        auto rigidBody = RigidBody::create(node);
+        auto rigidBody = RigidBody::Factory::create(node);
         rigidBody->setMass(40.f);
         rigidBody->setCollisionShape(cubeShape);
         rigidBody->group = GROUP_OTHER;
@@ -479,7 +482,7 @@ private:
         rigidBody->init();
 
         // Teleportable
-        auto teleportable = Teleportable::create(node, "playerTeleportable");
+        auto teleportable = Teleportable::Factory::create(node, "playerTeleportable");
         teleportable->setPortal(portal);
         teleportable->setRigidBody(rigidBody);
         teleportable->setAllowPortalGroup(GROUP_ALLOW_PORTAL);

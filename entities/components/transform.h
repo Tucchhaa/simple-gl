@@ -10,13 +10,11 @@ namespace SimpleGL {
 
 class Transform : public Component {
 public:
+    class Factory : public ComponentFactory<Transform> {};
+
     static std::shared_ptr<Transform> getGlobal();
 
-    Transform(const std::weak_ptr<Node> &node, const std::string &name): Component(node, name) {}
-
-    static std::shared_ptr<Transform> create(const std::shared_ptr<Node> &node, const std::string& name = "Transform") {
-        return base_create<Transform>(node, name);
-    }
+    explicit Transform(const std::string &name = "Transform"): Component(name) {}
 
     glm::vec3 scale() const { return m_scale; }
     glm::vec3 position() const { return m_position; }

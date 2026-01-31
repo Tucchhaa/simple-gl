@@ -2,19 +2,11 @@
 
 #include <glad/glad.h>
 
+#include "../../managers/engine.h"
 #include "../../entities/window.h"
 #include "../../helpers/errors.h"
 
 namespace SimpleGL {
-
-std::shared_ptr<MsaaFrameBuffer> MsaaFrameBuffer::create(
-    const std::shared_ptr<Window> &window,
-    bool hdr,
-    int samples
-) {
-    auto instance = std::make_shared<MsaaFrameBuffer>(window->frameWidth(), window->frameHeight(), hdr, samples);
-    return instance;
-}
 
 MsaaFrameBuffer::MsaaFrameBuffer(int width, int height, bool hdr, int samples)
     : BaseFrameBuffer(width, height, hdr, samples)

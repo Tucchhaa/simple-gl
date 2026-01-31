@@ -13,8 +13,6 @@ class Window;
 
 class Input {
 public:
-    static std::shared_ptr<Input> create();
-
     void keyCallback(int key, int action);
     void mouseButtonCallback(int button, int action);
 
@@ -48,13 +46,11 @@ private:
     std::array<bool, GLFW_MOUSE_BUTTON_LAST + 1> m_currentMouseStates{};
     std::array<bool, GLFW_MOUSE_BUTTON_LAST + 1> m_previousMouseStates{};
 
-    Input() = default;
-
     void updateCursorPosition();
 
     void updateDeltaTime();
 
-    static std::shared_ptr<Window> window();
+    static inline const std::unique_ptr<Window>& window();
 };
 
 }

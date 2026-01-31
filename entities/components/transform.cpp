@@ -8,7 +8,7 @@
 namespace SimpleGL {
 
 std::shared_ptr<Transform> Transform::getGlobal() {
-    return Engine::instance().scene()->rootNode()->transform();
+    return Engine::get()->scene()->rootNode()->transform();
 }
 
 void Transform::setPosition(float x, float y, float z) {

@@ -13,10 +13,6 @@ struct MeshData;
 
 class MeshManager {
 public:
-    static std::shared_ptr<MeshManager> create() {
-        return std::make_shared<MeshManager>();
-    }
-
     std::shared_ptr<MeshData> loadMeshData(const std::filesystem::path& path);
 
     void freeMeshData(const std::filesystem::path& path);

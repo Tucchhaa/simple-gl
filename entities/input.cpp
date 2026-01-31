@@ -6,10 +6,6 @@
 
 namespace SimpleGL {
 
-std::shared_ptr<Input> Input::create() {
-    return std::shared_ptr<Input>(new Input());
-}
-
 void Input::keyCallback(int key, int action) {
     if (action == GLFW_PRESS) {
         setKeyState(key, true);
@@ -85,8 +81,8 @@ void Input::updateDeltaTime() {
     m_lastFrameTime = Window::time();
 }
 
-std::shared_ptr<Window> Input::window() {
-    return Engine::instance().window();
+const std::unique_ptr<Window>& Input::window() {
+    return Engine::get()->window();
 }
 
 }

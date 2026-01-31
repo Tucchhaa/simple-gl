@@ -10,19 +10,18 @@ namespace SimpleGL {
 
 class Input;
 
-class Window : public std::enable_shared_from_this<Window> {
+class Window {
 public:
     bool isCursorPosFixed = false;
 
-    static std::shared_ptr<Window> create();
-
+    Window();
     ~Window();
 
     void open(int screenWidth, int screenHeight);
     void close() const;
     void destroy();
 
-    std::shared_ptr<Input> input() const { return m_input; }
+    const std::unique_ptr<Input>& input() const { return m_input; }
 
     // TODO: remove this in the future
     GLFWwindow* glfwWindow() const { return m_glfwWindow; }
@@ -41,20 +40,18 @@ public:
     void getCursorPos(double* mouseX, double* mouseY) const;
     void setCursorPosToCenter() const;
 
-    void setTitle(const std::string& title);
+    void setTitle(const std::string& title) const;
 
     void pollEvents() const;
 
 private:
     GLFWwindow* m_glfwWindow = nullptr;
-    std::shared_ptr<Input> m_input;
+    std::unique_ptr<Input> m_input;
 
     int m_screenWidth = 0;
     int m_screenHeight = 0;
     int m_frameWidth = 0;
     int m_frameHeight = 0;
-
-    Window() = default;
 
     GLFWwindow* createGLFWWindow(int screenWidth, int screenHeight);
 

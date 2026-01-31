@@ -15,7 +15,7 @@
 namespace SimpleGL {
 
 std::shared_ptr<MeshData> MeshManager::loadMeshData(const std::filesystem::path &path) {
-    const auto resourcePath = Engine::instance().getResourcePath(path);
+    const auto resourcePath = Engine::get()->getResourcePath(path);
 
     if (m_meshes.contains(path)) {
         return m_meshes[path];
@@ -65,7 +65,7 @@ std::shared_ptr<Node> MeshManager::createNodeFromMeshData(
         currentNode->name = currentMeshData->name();
 
         if (currentMeshData->hasVertices()) {
-            MeshComponent::create(currentNode, currentMeshData);
+            MeshComponent::Factory::create(currentNode, currentMeshData);
         }
 
         for (const auto& subMeshData : currentMeshData->subMeshes()) {

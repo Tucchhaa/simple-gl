@@ -7,16 +7,17 @@
 
 namespace SimpleGL {
 
-std::shared_ptr<Window> Window::create() {
-    glfwInit();
-    glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 4);
-    glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 1);
-    glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
-    glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE);
+Window::Window() {
+    static bool isGLFWContextInited = false;
 
-    auto instance = std::shared_ptr<Window>(new Window());
-
-    return instance;
+    if (!isGLFWContextInited) {
+        isGLFWContextInited = true;
+        glfwInit();
+        glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 4);
+        glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 1);
+        glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
+        glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE);
+    }
 }
 
 Window::~Window() {
@@ -33,7 +34,7 @@ void Window::open(int screenWidth, int screenHeight) {
     }
 
     m_glfwWindow = createGLFWWindow(screenWidth, screenHeight);
-    m_input = Input::create();
+    m_input = std::make_unique<Input>();
 
     int frameWidth, frameHeight;
     float xScale, yScale;
@@ -77,7 +78,7 @@ void Window::setCursorPosToCenter() const {
     glfwSetCursorPos(m_glfwWindow, screenWidth / 2.f, screenHeight / 2.f);
 }
 
-void Window::setTitle(const std::string &title) {
+void Window::setTitle(const std::string &title) const {
     glfwSetWindowTitle(m_glfwWindow, title.c_str());
 }
 

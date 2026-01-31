@@ -11,10 +11,6 @@ namespace SimpleGL {
 struct MeshData {
     ~MeshData();
 
-    static std::shared_ptr<MeshData> create() {
-        return std::make_shared<MeshData>();
-    }
-
     static std::shared_ptr<MeshData> createFromScene(const aiScene* scene);
 
     const std::string& name() { return m_name; }

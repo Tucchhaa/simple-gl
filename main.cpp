@@ -10,7 +10,6 @@
 #include "entities/input.h"
 #include "entities/mesh_data.h"
 #include "entities/scene.h"
-#include "entities/window.h"
 #include "render-pipeline/framebuffers/msaa_frame_buffer.h"
 
 #include "render-pipeline/framebuffers/screen_frame_buffer.h"
@@ -23,27 +22,29 @@ int main() {
     constexpr int SCREEN_WIDTH = 1200;
     constexpr int SCREEN_HEIGHT = 900;
 
-    auto window = Engine::instance().window();
+    Engine::init();
+
+    const auto& window = Engine::get()->window();
     window->open(SCREEN_WIDTH, SCREEN_HEIGHT);
     window->setTitle("Learn OpenGL");
 
     auto demo = BasicDemo();
 
     // create screen frame buffer
-    auto frameShaderProgram = Engine::instance().shaderManager()->createShaderProgram(
+    const std::shared_ptr<ShaderProgram> frameShaderProgram = Engine::get()->shaderManager()->createShaderProgram(
         "shaders/frame/vertex.glsl",
         HDR_ENABLED ? "shaders/frame/hdr-fragment.glsl" : "shaders/frame/basic-fragment.glsl",
         "frame shader"
     );
 
     std::shared_ptr<MsaaFrameBuffer> msaaFrameBuffer = MSAA_SAMPLES > 1
-        ? MsaaFrameBuffer::create(window, HDR_ENABLED, MSAA_SAMPLES)
+        ? std::make_shared<MsaaFrameBuffer>(window->frameWidth(), window->frameHeight(), HDR_ENABLED, MSAA_SAMPLES)
         : nullptr;
 
-    auto screenFrameBuffer = ScreenFrameBuffer::create(window, HDR_ENABLED);
+    auto screenFrameBuffer = std::make_shared<ScreenFrameBuffer>(window->frameWidth(), window->frameHeight(), HDR_ENABLED);
     screenFrameBuffer->setShader(frameShaderProgram);
 
-    demo.scene->emitStart();
+    demo.scene->start();
 
     while(window->isOpen())
     {
@@ -54,7 +55,7 @@ int main() {
             window->close();
         }
 
-        demo.scene->emitUpdate();
+        demo.scene->update();
         demo.stepPhysicsSimulation();
         demo.scene->rootNode()->transform()->recalculate();
         demo.camera->recalculateViewMatrix();

@@ -10,6 +10,7 @@
 #include "../../../helpers/converter.h"
 #include "../../../managers/engine.h"
 #include "../../../managers/physics_manager.h"
+#include "../../../helpers/quick_accessors.h"
 
 namespace SimpleGL {
 
@@ -28,13 +29,11 @@ void PortalFPSController::onStart() {
 void PortalFPSController::onUpdate() {
     CharacterController::onUpdate();
 
-    const auto input = Engine::instance().window()->input();
-
-    const bool isLMB = input->isMouseButtonPressed(GLFW_MOUSE_BUTTON_1);
-    const bool isRMB = input->isMouseButtonPressed(GLFW_MOUSE_BUTTON_2);
+    const bool isLMB = input()->isMouseButtonPressed(GLFW_MOUSE_BUTTON_1);
+    const bool isRMB = input()->isMouseButtonPressed(GLFW_MOUSE_BUTTON_2);
 
     if (m_reloadLeftMs > 0) {
-        m_reloadLeftMs -= input->deltaTime() * 1000;
+        m_reloadLeftMs -= input()->deltaTime() * 1000;
     }
 
     if ((isLMB || isRMB) && m_reloadLeftMs <= 0) {
@@ -57,7 +56,7 @@ btVector3 PortalFPSController::getBulletDirection() const {
 
     btCollisionWorld::ClosestRayResultCallback rayCast(from, to);
 
-    Engine::instance().physicsManager()->dynamicsWorld()->rayTest(from, to, rayCast);
+    dynamicsWorld()->rayTest(from, to, rayCast);
 
     if (rayCast.hasHit()) {
         const auto weaponPosition = Converter::toBt(m_weaponNode->transform()->position());

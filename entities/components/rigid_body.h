@@ -8,18 +8,22 @@
 
 #include "component.h"
 
+class btDynamicsWorld;
+
 namespace SimpleGL {
 
 class RigidBody : public Component {
 public:
+    class Factory : public ComponentFactory<RigidBody> {};
+
     int group = -1; // 0xffffffff
     int mask = -1; // 0xffffffff
 
-    RigidBody(const std::weak_ptr<Node> &node, const std::string &name): Component(node, name) {}
+    explicit RigidBody(const std::string &name = "RigidBody"): Component(name) {}
 
     ~RigidBody() override;
 
-    static std::shared_ptr<RigidBody> create(const std::shared_ptr<Node> &node, const std::string& name = "RigidBody");
+    void attachTo(const std::shared_ptr<Node> &node) override;
 
     const std::shared_ptr<btRigidBody>& getBtRigidBody() const { return m_rigidBody; }
 
@@ -45,6 +49,8 @@ private:
     std::shared_ptr<btRigidBody> m_rigidBody;
 
     float m_mass = 0.0f;
+
+    // static inline const std::unique_ptr<btDynamicsWorld>& dynamicsWorld();
 };
 
 }

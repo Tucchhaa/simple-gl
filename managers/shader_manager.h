@@ -13,8 +13,7 @@ class ShaderProgram;
 
 class ShaderManager {
 public:
-    static std::shared_ptr<ShaderManager> create();
-
+    ShaderManager() = default;
     ~ShaderManager();
 
     std::shared_ptr<ShaderProgram> createShaderProgram(
@@ -25,8 +24,6 @@ public:
 
 private:
     std::vector<std::shared_ptr<ShaderProgram>> m_shaderPrograms;
-
-    ShaderManager() = default;
 
     static unsigned int createShader(
         const std::string& label,

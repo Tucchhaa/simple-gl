@@ -1,6 +1,24 @@
 #include "texture.h"
 
+#include <glad/glad.h>
+
 namespace SimpleGL {
+
+Texture::Texture(unsigned char *data, int width, int height, int channelsNum, bool isAlbedo) {
+    m_textureId = createTexture(data, width, height, channelsNum, isAlbedo);
+    m_samplerId = createSampler();
+    m_type = Default;
+}
+
+Texture::Texture(const std::vector<unsigned char *> &data, int width, int height, int channelsNum) {
+    m_textureId = createCubeMapTexture(data, width, height, channelsNum);
+    m_samplerId = createCubeMapSampler();
+    m_type = CubeMap;
+}
+
+Texture::~Texture() {
+    glDeleteTextures(1, &m_textureId);
+}
 
 unsigned int Texture::createTexture(
     unsigned char *data, int width, int height,

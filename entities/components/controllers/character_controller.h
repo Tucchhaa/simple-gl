@@ -11,21 +11,12 @@ class RigidBody;
 
 class CharacterController : public Component {
 public:
+    class Factory : public ComponentFactory<CharacterController> {};
+
     float speed = 350.f;
     float rotationSpeed = 2.0f;
 
-    CharacterController(
-        const std::weak_ptr<Node>& node,
-        const std::string &name
-    ): Component(node, name) {}
-
-    static std::shared_ptr<CharacterController> create(
-        const std::shared_ptr<Node>& node,
-        const std::string& name = "CharacterController"
-    ) {
-        auto instance = base_create<CharacterController>(node, name);
-        return instance;
-    }
+    explicit CharacterController(const std::string &name = "CharacterController"): Component(name) {}
 
     void setCameraNode(const std::shared_ptr<Node>& cameraNode) { m_cameraNode = cameraNode; }
     void setRigidBody(const std::shared_ptr<RigidBody>& rigidBody) { m_rigidBody = rigidBody; }

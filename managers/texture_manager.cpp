@@ -50,7 +50,7 @@ std::shared_ptr<Texture> TextureManager::_getTexture(
     bool isFirstTexture = true;
 
     for (const auto& path : paths) {
-        const auto resourcePath = Engine::instance().getResourcePath(path);
+        const auto resourcePath = Engine::get()->getResourcePath(path);
 
         int itemWidth, itemHeight, itemChannelsNum;
 
@@ -84,10 +84,10 @@ std::shared_ptr<Texture> TextureManager::_getTexture(
 
     std::shared_ptr<Texture> texture;
     if (data.size() == 1) {
-        texture = Texture::create(data[0], width, height, channelsNum, isAlbedo);
+        texture = std::make_shared<Texture>(data[0], width, height, channelsNum, isAlbedo);
     }
     else if (data.size() == 6) {
-        texture = Texture::create(data, width, height, channelsNum);
+        texture = std::make_shared<Texture>(data, width, height, channelsNum);
     }
 
     for (auto dataItem: data) {

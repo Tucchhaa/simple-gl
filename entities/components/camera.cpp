@@ -12,7 +12,7 @@ void Camera::recalculateViewMatrix() {
 }
 
 void Camera::recalculateProjectionMatrix() {
-    const float aspect = Engine::instance().window()->aspectRatio();
+    const float aspect = Engine::get()->window()->aspectRatio();
 
     m_projectionMatrix = glm::perspective(m_fov, aspect, m_near, m_far);
 }

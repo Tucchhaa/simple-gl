@@ -24,6 +24,8 @@ add_executable(main
     managers/texture_manager.h
     managers/physics_manager.cpp
     managers/physics_manager.h
+    managers/settings_manager.cpp
+    managers/settings_manager.h
     entities/window.cpp
     entities/window.h
     entities/input.cpp
@@ -80,6 +82,8 @@ add_executable(main
     helpers/node_logger.h
     helpers/converter.cpp
     helpers/converter.h
+    helpers/quick_accessors.cpp
+    helpers/quick_accessors.h
 
     demos/basic_demo.h
 )

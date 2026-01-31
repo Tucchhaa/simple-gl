@@ -13,18 +13,13 @@
 
 namespace SimpleGL {
 
-std::shared_ptr<ScreenFrameBuffer> ScreenFrameBuffer::create(const std::shared_ptr<Window> &window, bool hdr) {
-    auto instance = std::make_shared<ScreenFrameBuffer>(window->frameWidth(), window->frameHeight(), hdr);
-    return instance;
-}
-
 ScreenFrameBuffer::ScreenFrameBuffer(int width, int height, bool hdr)
     : BaseFrameBuffer(width, height, hdr, 1)
 {
     m_RBO = createDepthStencilRBO();
     m_colorTextureId = createColorTexture();
 
-    m_quadNode = Engine::instance().meshManager()->createNodeFromMeshData("plane.obj");
+    m_quadNode = Engine::get()->meshManager()->createNodeFromMeshData("plane.obj");
     m_quadMesh = m_quadNode->getComponent<MeshComponent>();
 
     bindTexturesToFBO();

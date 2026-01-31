@@ -1,7 +1,6 @@
 #include "node.h"
 
 #include "components/component.h"
-#include "components/rigid_body.h"
 #include "components/transform.h"
 #include <vector>
 
@@ -11,11 +10,9 @@ std::shared_ptr<Node> Node::create(
     const std::string &name,
     const std::shared_ptr<Node>& parent
 ) {
-    auto instance = std::shared_ptr<Node>(new Node(name));
+    auto instance = std::make_shared<Node>(name);
 
-    auto transform = Transform::create(instance);
-    instance->m_transform = transform;
-    instance->addComponent(transform);
+    instance->m_transform = Transform::Factory::create(instance);
 
     if (parent) {
         instance->setParent(parent);
@@ -59,6 +56,22 @@ std::vector<std::shared_ptr<Component>> Node::components() const {
     }
 
     return result;
+}
+
+void Node::traverseChildren(const std::function<void(const std::shared_ptr<Node>&)>& callback) {
+    std::queue<std::shared_ptr<Node>> q;
+    q.push(shared_from_this());
+
+    while (!q.empty()) {
+        auto currentNode = q.front();
+        q.pop();
+
+        callback(currentNode);
+
+        for (const auto& child : currentNode->children()) {
+            q.push(child);
+        }
+    }
 }
 
 }

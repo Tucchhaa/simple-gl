@@ -12,21 +12,9 @@
 #include "../../../managers/physics_manager.h"
 #include "../../physics/contact_callback.h"
 #include "../../physics/sweep_callback.h"
+#include "../../../helpers/quick_accessors.h"
 
 namespace SimpleGL {
-
-std::shared_ptr<PortalBullet> PortalBullet::create(const std::shared_ptr<Node> &node, const std::string &name) {
-    auto instance = base_create<PortalBullet>(node, name);
-
-    const auto btRigidBody = instance->node()->rigidBody()->getBtRigidBody();
-    btRigidBody->setGravity(btVector3(0, 0, 0));
-    btRigidBody->setCcdMotionThreshold(0.01f);
-    btRigidBody->setCcdSweptSphereRadius(0.05f);
-
-    instance->m_previousTransform = btRigidBody->getWorldTransform();
-
-    return instance;
-}
 
 void PortalBullet::onStart() {
     if (m_rigidBody == nullptr) {
@@ -38,6 +26,13 @@ void PortalBullet::onStart() {
     }
 
     node()->visible = false;
+
+    const auto btRigidBody = node()->rigidBody()->getBtRigidBody();
+    btRigidBody->setGravity(btVector3(0, 0, 0));
+    btRigidBody->setCcdMotionThreshold(0.01f);
+    btRigidBody->setCcdSweptSphereRadius(0.05f);
+
+    m_previousTransform = btRigidBody->getWorldTransform();
 }
 
 void PortalBullet::onUpdate() {
@@ -45,7 +40,7 @@ void PortalBullet::onUpdate() {
 
     if (btRigidBody->getActivationState() == ACTIVE_TAG) {
         ContactCallback callback;
-        Engine::instance().physicsManager()->dynamicsWorld()->contactTest(btRigidBody.get(), callback);
+        dynamicsWorld()->contactTest(btRigidBody.get(), callback);
 
         if (callback.hasHit()) {
             glm::vec3 position, normal;
@@ -64,7 +59,7 @@ void PortalBullet::onUpdate() {
     m_previousTransform = btRigidBody->getWorldTransform();
 }
 
-void PortalBullet::placePortal(glm::vec3 position, glm::vec3 normal) {
+void PortalBullet::placePortal(glm::vec3 position, glm::vec3 normal) const {
     auto shiftedPosition = position + normal * 0.05f;
     auto orientation = glm::quatLookAt(-normal, glm::vec3(0, 1, 0));
 
@@ -73,7 +68,7 @@ void PortalBullet::placePortal(glm::vec3 position, glm::vec3 normal) {
 }
 
 void PortalBullet::shoot(const std::shared_ptr<Transform> &origin, const btVector3 &direction) const {
-    auto btRigidBody = node()->rigidBody()->getBtRigidBody();
+    const std::shared_ptr<btRigidBody> btRigidBody = node()->rigidBody()->getBtRigidBody();
     btRigidBody->forceActivationState(ACTIVE_TAG);
     btRigidBody->activate(true);
 
@@ -89,19 +84,18 @@ void PortalBullet::shoot(const std::shared_ptr<Transform> &origin, const btVecto
 }
 
 bool PortalBullet::computeImpactPoint(glm::vec3& position, glm::vec3& normal) const {
-    const auto world = Engine::instance().physicsManager()->dynamicsWorld();
-    const auto btRigidBody = node()->rigidBody()->getBtRigidBody();
+    const std::shared_ptr<btRigidBody> btRigidBody = node()->rigidBody()->getBtRigidBody();
     const btTransform& from = m_previousTransform;
     const btTransform& to = btRigidBody->getWorldTransform();
 
-    const btSphereShape sphere = btSphereShape(0.2f);
+    const auto sphere = btSphereShape(0.2f);
 
     SweepCallback cb(from.getOrigin(), to.getOrigin(), btRigidBody.get());
 
     cb.m_collisionFilterGroup = btRigidBody->getBroadphaseProxy()->m_collisionFilterGroup;
     cb.m_collisionFilterMask = btRigidBody->getBroadphaseProxy()->m_collisionFilterMask;
 
-    world->convexSweepTest(&sphere, from, to, cb);
+    dynamicsWorld()->convexSweepTest(&sphere, from, to, cb);
 
     if (!cb.hasHit())
         return false;

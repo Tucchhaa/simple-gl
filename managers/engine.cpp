@@ -8,18 +8,18 @@
 
 namespace SimpleGL {
 
-Engine Engine::m_instance;
+std::unique_ptr<Engine> Engine::m_instance;
 
 std::filesystem::path Engine::getResourcePath(const std::filesystem::path& filePath) const {
     return m_resourcesDir / filePath;
 }
 
 Engine::Engine() {
-    m_window = Window::create();
-    m_shaderManager = ShaderManager::create();
-    m_meshManager = MeshManager::create();
-    m_textureManager = TextureManager::create();
-    m_physicsManager = PhysicsManager::create();
+    m_window = std::make_unique<Window>();
+    m_shaderManager = std::make_unique<ShaderManager>();
+    m_meshManager = std::make_unique<MeshManager>();
+    m_textureManager = std::make_unique<TextureManager>();
+    m_physicsManager = std::make_unique<PhysicsManager>();
 }
 
 Engine::~Engine() {
@@ -29,6 +29,7 @@ Engine::~Engine() {
     m_meshManager.reset();
     m_shaderManager.reset();
     m_window.reset();
+    m_instance.reset();
 }
 
 }

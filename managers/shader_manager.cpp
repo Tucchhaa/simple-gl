@@ -14,12 +14,6 @@ TODO: This code contains memory leaks on error paths
 
 namespace SimpleGL {
 
-std::shared_ptr<ShaderManager> ShaderManager::create() {
-    auto instance = std::shared_ptr<ShaderManager>(new ShaderManager());
-
-    return instance;
-}
-
 ShaderManager::~ShaderManager() {
     for (const auto& shaderProgram : this->m_shaderPrograms) {
         glDeleteProgram(shaderProgram->id);
@@ -40,10 +34,10 @@ std::shared_ptr<ShaderProgram> ShaderManager::createShaderProgram(
         throw createShaderProgramFailed(label);
     }
 
-    const auto vertexShaderFilepath = Engine::instance().getResourcePath(vertexShaderFile);
+    const auto vertexShaderFilepath = Engine::get()->getResourcePath(vertexShaderFile);
     const auto vertexShaderID = createShader(label, vertexShaderFilepath, GL_VERTEX_SHADER);
 
-    const auto fragmentShaderFilepath = Engine::instance().getResourcePath(fragmentShaderFile);
+    const auto fragmentShaderFilepath = Engine::get()->getResourcePath(fragmentShaderFile);
     const auto fragmentShaderID = createShader(label, fragmentShaderFilepath, GL_FRAGMENT_SHADER);
 
     glAttachShader(shaderProgramID, vertexShaderID);
@@ -64,7 +58,7 @@ std::shared_ptr<ShaderProgram> ShaderManager::createShaderProgram(
     glDeleteShader(vertexShaderID);
     glDeleteShader(fragmentShaderID);
 
-    auto shaderProgram = ShaderProgram::create(shaderProgramID, label);
+    auto shaderProgram = std::make_shared<ShaderProgram>(shaderProgramID, label);
 
     this->m_shaderPrograms.push_back(shaderProgram);
 

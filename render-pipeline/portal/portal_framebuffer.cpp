@@ -6,11 +6,6 @@
 
 namespace SimpleGL {
 
-std::shared_ptr<PortalFramebuffer> PortalFramebuffer::create(int width, int height) {
-    auto instance = std::make_shared<PortalFramebuffer>(width, height, true);
-    return instance;
-}
-
 PortalFramebuffer::~PortalFramebuffer() {
     glDeleteTextures(1, &m_colorTextureId);
     glDeleteRenderbuffers(1, &m_RBO);

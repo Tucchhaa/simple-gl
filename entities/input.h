@@ -13,16 +13,12 @@ class Window;
 
 class Input {
 public:
-    static std::shared_ptr<Input> create(const std::weak_ptr<Window>& window);
-
     void keyCallback(int key, int action);
-
     void mouseButtonCallback(int button, int action);
 
-    void process();
+    void updateState();
 
     glm::vec2 axisVec2() const;
-
     glm::vec2 mouseDelta() const;
 
     bool isKeyDown(int key) const;
@@ -35,15 +31,9 @@ public:
 
     float deltaTime() const { return m_deltaTime; }
 
-    /// Returns time in milliseconds after glfwInit() call
-    double time() const;
-
     void setKeyState(int key, bool pressed);
 
 private:
-
-    std::weak_ptr<Window> m_window;
-
     float m_lastFrameTime = 0;
     float m_deltaTime = 0;
 
@@ -56,15 +46,11 @@ private:
     std::array<bool, GLFW_MOUSE_BUTTON_LAST + 1> m_currentMouseStates{};
     std::array<bool, GLFW_MOUSE_BUTTON_LAST + 1> m_previousMouseStates{};
 
-    explicit Input(const std::weak_ptr<Window> &window): m_window(window) {};
-
-    void reset();
-
     void updateCursorPosition();
 
     void updateDeltaTime();
 
-    std::shared_ptr<Window> window() const { return m_window.lock(); }
+    static inline const std::unique_ptr<Window>& window();
 };
 
 }

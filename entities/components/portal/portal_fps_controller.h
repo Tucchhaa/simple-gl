@@ -10,25 +10,15 @@ class PortalBullet;
 
 class PortalFPSController : public CharacterController {
 public:
-    PortalFPSController(
-        const std::weak_ptr<Node>& node,
-        const std::string &name
-    ): CharacterController(node, name) {}
+    class Factory : public ComponentFactory<PortalFPSController> {};
 
-    static std::shared_ptr<PortalFPSController> create(
-        const std::shared_ptr<Node>& node,
-        const std::string& name = "FPSController"
-    ) {
-        auto instance = base_create<PortalFPSController>(node, name);
-        return instance;
-    }
+    explicit PortalFPSController(const std::string &name = "FPSController"): CharacterController(name) {}
 
     void setWeaponNode(const std::shared_ptr<Node>& node) { m_weaponNode = node; }
     void setPortal1Bullet(const std::shared_ptr<PortalBullet>& bullet) { m_portal1Bullet = bullet; }
     void setPortal2Bullet(const std::shared_ptr<PortalBullet>& bullet) { m_portal2Bullet = bullet; }
 
     void onStart() override;
-
     void onUpdate() override;
 
 private:

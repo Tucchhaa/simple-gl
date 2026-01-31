@@ -2,7 +2,6 @@
 
 #include <memory>
 #include <string>
-#include <utility>
 
 #include <glad/glad.h>
 #include <GLFW/glfw3.h>
@@ -13,34 +12,24 @@ class Input;
 
 class Window {
 public:
-    const std::string label;
+    bool isCursorPosFixed = false;
 
-    bool isCursorPositionFixed = false;
-
-    static std::shared_ptr<Window> create(const std::string &label, GLFWwindow* glfwWindow);
-
+    Window();
     ~Window();
 
+    void open(int screenWidth, int screenHeight);
+    void close() const;
+    void destroy();
+
+    const std::unique_ptr<Input>& input() const { return m_input; }
+
+    // TODO: remove this in the future
     GLFWwindow* glfwWindow() const { return m_glfwWindow; }
 
-    void makeCurrent() const;
-
-    void beforeFrameRendered() const;
-
-    void pollEvents() const;
-
-    std::shared_ptr<Input>& input() { return m_input; }
-
-    void close() const;
-
-    void setTitle(const std::string& title) const;
-
     bool isOpen() const;
-
     bool isFocused() const;
 
     float aspectRatio() const { return static_cast<float>(m_frameWidth) / static_cast<float>(m_frameHeight); }
-
     int screenWidth() const { return m_screenWidth; }
     int screenHeight() const { return m_screenHeight; }
     int frameWidth() const { return m_frameWidth; }
@@ -48,22 +37,25 @@ public:
 
     static float time() { return static_cast<float>(glfwGetTime()); }
 
-    void setCursorPositionToCenter() const;
+    void getCursorPos(double* mouseX, double* mouseY) const;
+    void setCursorPosToCenter() const;
+
+    void setTitle(const std::string& title) const;
+
+    void pollEvents() const;
 
 private:
     GLFWwindow* m_glfwWindow = nullptr;
-
-    std::shared_ptr<Input> m_input;
+    std::unique_ptr<Input> m_input;
 
     int m_screenWidth = 0;
     int m_screenHeight = 0;
     int m_frameWidth = 0;
     int m_frameHeight = 0;
 
-    Window(std::string label, GLFWwindow* glfwWindow): label(std::move(label)), m_glfwWindow(glfwWindow) {}
+    GLFWwindow* createGLFWWindow(int screenWidth, int screenHeight);
 
-    void setCallbacks() const;
+    void setEventCallbacks() const;
 };
 
 }
-

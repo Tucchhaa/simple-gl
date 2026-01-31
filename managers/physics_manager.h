@@ -12,20 +12,17 @@ namespace SimpleGL {
 
 class PhysicsManager {
 public:
-    static std::shared_ptr<PhysicsManager> create();
-
     PhysicsManager();
-
     ~PhysicsManager();
 
-    std::shared_ptr<btDynamicsWorld> dynamicsWorld() { return m_dynamicsWorld; }
+    const std::unique_ptr<btDynamicsWorld>& dynamicsWorld() { return m_dynamicsWorld; }
 
 private:
-    std::shared_ptr<btCollisionConfiguration> m_collisionConfiguration;
-    std::shared_ptr<btDispatcher> m_dispatcher;
-    std::shared_ptr<btConstraintSolver> m_constraintSolver;
-    std::shared_ptr<btBroadphaseInterface> m_pairCache;
-    std::shared_ptr<btDynamicsWorld> m_dynamicsWorld;
+    std::unique_ptr<btCollisionConfiguration> m_collisionConfiguration;
+    std::unique_ptr<btDispatcher> m_dispatcher;
+    std::unique_ptr<btConstraintSolver> m_constraintSolver;
+    std::unique_ptr<btBroadphaseInterface> m_pairCache;
+    std::unique_ptr<btDynamicsWorld> m_dynamicsWorld;
 };
 
 }

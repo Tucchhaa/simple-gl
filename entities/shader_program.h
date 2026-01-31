@@ -28,7 +28,7 @@ public:
     const unsigned int id = 0;
     const std::string label;
 
-    static std::shared_ptr<ShaderProgram> create(unsigned int id, std::string label);
+    ShaderProgram(unsigned int id, std::string label);
 
     void use(const std::shared_ptr<Camera> &camera = nullptr);
 
@@ -56,8 +56,6 @@ private:
     std::unordered_map<std::string, std::shared_ptr<ShaderParam>> m_uniformsMap;
     std::unordered_map<std::string, std::shared_ptr<ShaderParam>> m_attribsMap;
     int m_boundTexturesCount = 0;
-
-    ShaderProgram(unsigned int id, std::string label): id(id), label(std::move(label)) {}
 
     void processProgram();
 

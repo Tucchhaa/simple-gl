@@ -10,7 +10,6 @@
 #include "components/camera.h"
 #include "components/light.h"
 #include "components/transform.h"
-#include "../helpers/errors.h"
 #include "../managers/engine.h"
 #include "../entities/texture.h"
 
@@ -18,12 +17,11 @@ namespace SimpleGL {
 
 unsigned int ShaderProgram::activeShaderProgramId = 0;
 
-std::shared_ptr<ShaderProgram> ShaderProgram::create(unsigned int id, std::string label) {
-    auto instance = std::shared_ptr<ShaderProgram>(new ShaderProgram(id, std::move(label)));
-
-    instance->processProgram();
-
-    return instance;
+ShaderProgram::ShaderProgram(unsigned int id, std::string label):
+    id(id),
+    label(std::move(label)
+) {
+    processProgram();
 }
 
 void ShaderProgram::use(const std::shared_ptr<Camera> &camera) {
@@ -171,7 +169,10 @@ std::shared_ptr<ShaderParam> ShaderProgram::getUniform(const std::string &name) 
     const auto iterator = m_uniformsMap.find(name);
 
     if (iterator == m_uniformsMap.end()) {
-        throw shaderUniformGetterFailed(label, name);
+        throw std::runtime_error(std::format(
+            "SHADER PROGRAM. getUniform. Label: {}, Uniform name: {}",
+            label, name
+        ));
     }
 
     return iterator->second;
@@ -183,7 +184,10 @@ std::shared_ptr<ShaderParam> ShaderProgram::getAttrib(const std::string &name) {
 
     if (iterator == m_attribsMap.end()) {
         log();
-        throw shaderAttribGetterFailed(label, name);
+        throw std::runtime_error(std::format(
+            "SHADER PROGRAM. getAttrib. Label: {}, Attrib name: {}",
+            label, name
+        ));
     }
 
     return iterator->second;
@@ -208,7 +212,7 @@ void ShaderProgram::setCameraUniforms(const std::shared_ptr<Camera> &camera) {
 }
 
 void ShaderProgram::setDirectLightsUniform() {
-    const auto scene = Engine::instance().scene();
+    const auto scene = Engine::get()->scene();
 
     if (uniformExists("directLightsNum")) {
         for (int i = 0; i < scene->directLights().size(); i++) {
@@ -226,7 +230,7 @@ void ShaderProgram::setDirectLightsUniform() {
 }
 
 void ShaderProgram::setPointLightsUniform() {
-    const auto scene = Engine::instance().scene();
+    const auto scene = Engine::get()->scene();
 
     if (uniformExists("pointLightsNum")) {
         for (int i = 0; i < scene->pointLights().size(); i++) {

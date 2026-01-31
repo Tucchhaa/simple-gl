@@ -1,7 +1,7 @@
 cmake_minimum_required(VERSION 4.0)
 
 set(CMAKE_TOOLCHAIN_FILE "${CMAKE_SOURCE_DIR}/vcpkg/scripts/buildsystems/vcpkg.cmake" CACHE STRING "")
-set(CMAKE_CXX_STANDARD 20)
+set(CMAKE_CXX_STANDARD 23)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
 project(main)
@@ -16,8 +16,6 @@ add_executable(main
     main.cpp
     managers/engine.cpp
     managers/engine.h
-    managers/window_manager.cpp
-    managers/window_manager.h
     managers/shader_manager.cpp
     managers/shader_manager.h
     managers/mesh_manager.cpp
@@ -76,12 +74,12 @@ add_executable(main
     render-pipeline/portal/portal.h
     render-pipeline/portal/portal_framebuffer.cpp
     render-pipeline/portal/portal_framebuffer.h
-    helpers/errors.cpp
-    helpers/errors.h
     helpers/node_logger.cpp
     helpers/node_logger.h
     helpers/converter.cpp
     helpers/converter.h
+    helpers/quick_accessors.cpp
+    helpers/quick_accessors.h
 
     demos/basic_demo.h
 )

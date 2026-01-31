@@ -2,19 +2,9 @@
 
 #include <glad/glad.h>
 
-#include "../../entities/window.h"
-#include "../../helpers/errors.h"
+#include "../../managers/engine.h"
 
 namespace SimpleGL {
-
-std::shared_ptr<MsaaFrameBuffer> MsaaFrameBuffer::create(
-    const std::shared_ptr<Window> &window,
-    bool hdr,
-    int samples
-) {
-    auto instance = std::make_shared<MsaaFrameBuffer>(window->frameWidth(), window->frameHeight(), hdr, samples);
-    return instance;
-}
 
 MsaaFrameBuffer::MsaaFrameBuffer(int width, int height, bool hdr, int samples)
     : BaseFrameBuffer(width, height, hdr, samples)
@@ -37,7 +27,7 @@ void MsaaFrameBuffer::bindTexturesToFBO() const {
     glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_STENCIL_ATTACHMENT, GL_RENDERBUFFER, m_RBO);
 
     if(glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE) {
-        throw incompleteFrameBuffer("msaa frame buffer");
+        throw std::runtime_error("MSAA FRAMEBUFFER is incomplete");
     }
 
     glBindFramebuffer(GL_FRAMEBUFFER, 0);

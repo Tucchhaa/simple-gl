@@ -10,10 +10,7 @@ class Window;
 
 class PortalFramebuffer : public BaseFrameBuffer {
 public:
-    static std::shared_ptr<PortalFramebuffer> create(int width, int height);
-
-    PortalFramebuffer(int width, int height, bool hdr);
-
+    PortalFramebuffer(int width, int height, bool hdr = true);
     ~PortalFramebuffer();
 
     unsigned int colorTextureId() const { return m_colorTextureId; }

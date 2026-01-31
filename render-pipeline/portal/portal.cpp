@@ -15,9 +15,9 @@
 namespace SimpleGL {
 
 Portal::Portal(const std::shared_ptr<Camera> &camera): m_camera(camera) {
-    m_tailPortalFramebuffer = PortalFramebuffer::create(1200 * 2, 900 * 2); // TODO
+    m_tailPortalFramebuffer = std::make_shared<PortalFramebuffer>(1200 * 2, 900 * 2); // TODO
 
-    const auto rootNode = Engine::instance().scene()->rootNode();
+    const auto rootNode = Engine::get()->scene()->rootNode();
 
     portal1Node = Node::create("portal1", rootNode);
     portal2Node = Node::create("portal2", rootNode);
@@ -44,7 +44,7 @@ void Portal::setPortalMesh(
     const auto portalNode = portalIndex == 1 ? portal1Node : portal2Node;
 
     const auto childNode = Node::create("childNode", portalNode);
-    const auto mesh = MeshComponent::create(childNode, meshData, "portalMesh");
+    const auto mesh = MeshComponent::Factory::create(childNode, meshData, "portalMesh");
 
     mesh->setShader(m_basicPortalShader);
     mesh->setBeforeDrawCallback([](const std::shared_ptr<ShaderProgram>& shaderProgram) {
@@ -52,10 +52,10 @@ void Portal::setPortalMesh(
     });
 
     const auto borderNode = Node::create("borderNode", childNode);
-    const auto borderMesh = MeshComponent::create(borderNode, meshData, "portalBorderMesh");
+    const auto borderMesh = MeshComponent::Factory::create(borderNode, meshData, "portalBorderMesh");
 
     const auto tailNode = Node::create("tailNode", childNode);
-    const auto tailMesh = MeshComponent::create(tailNode, meshData, "portalTailMesh");
+    const auto tailMesh = MeshComponent::Factory::create(tailNode, meshData, "portalTailMesh");
 
     tailMesh->setShader(m_tailPortalShader);
     tailMesh->setBeforeDrawCallback([&](const auto& shader) {
@@ -168,13 +168,13 @@ void Portal::drawTailPortalToFramebuffer(
 }
 
 void Portal::createShaders() {
-    m_basicPortalShader = Engine::instance().shaderManager()->createShaderProgram(
+    m_basicPortalShader = Engine::get()->shaderManager()->createShaderProgram(
         "shaders/solid-color/vertex.glsl",
         "shaders/solid-color/fragment.glsl",
         "basic portal shader program"
     );
 
-    m_tailPortalShader = Engine::instance().shaderManager()->createShaderProgram(
+    m_tailPortalShader = Engine::get()->shaderManager()->createShaderProgram(
         "shaders/tail-portal/vertex.glsl",
         "shaders/tail-portal/fragment.glsl",
         "tail portal shader program"
@@ -182,11 +182,11 @@ void Portal::createShaders() {
 }
 
 void Portal::createVirtualCameras() {
-    const auto virtualCamerasNode = Node::create("portalVirtualCameras", Engine::instance().scene()->rootNode());
+    const auto virtualCamerasNode = Node::create("portalVirtualCameras", Engine::get()->scene()->rootNode());
 
     for (int i=0; i < getTotalRecursionLevel(); i++) {
         auto node = Node::create("virtualCameraNode"+std::to_string(i), virtualCamerasNode);
-        auto virtualCamera = Camera::create(
+        auto virtualCamera = Camera::Factory::create(
             node,
             m_camera->fov(),
             m_camera->near(),
@@ -251,4 +251,24 @@ std::pair<glm::quat, glm::vec3> Portal::calculatePortalTransform(
     return { qDelta, pDelta };
 }
 
+void Portal::applyCameraNearPlane() {
+    auto cT = m_camera->transform();
+
+    float dist1 = glm::dot(cT->absolutePosition() - portal1Node->transform()->absolutePosition(), portal1Node->transform()->direction());
+    float dist2 = glm::dot(cT->absolutePosition() - portal2Node->transform()->absolutePosition(), portal2Node->transform()->direction());
+
+    static bool flag = false;
+
+    if (dist1 > 0 && dist1 < 0.15f) {
+        flag = true;
+        m_camera->setNearPlane(portal2Node->transform());
+    }
+    else if (dist2 > 0 && dist2 < 0.15f) {
+        flag = true;
+        m_camera->setNearPlane(portal1Node->transform());
+    } else if (flag) {
+        flag = false;
+        m_camera->recalculateProjectionMatrix();
+    }
+}
 }

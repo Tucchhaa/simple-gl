@@ -7,6 +7,7 @@
 #include "../../window.h"
 #include "../../../managers/engine.h"
 #include "../../../entities/input.h"
+#include "../../../helpers/quick_accessors.h"
 
 namespace SimpleGL {
 
@@ -15,31 +16,28 @@ void FreeController::onUpdate() {
 }
 
 void FreeController::handleInput() {
-    const auto input = Engine::instance().mainWindow()->input();
-
-    const auto axis = input->axisVec2() * speed * input->deltaTime();
+    const auto axis = input()->axisVec2() * speed * input()->deltaTime();
     const auto displacement = glm::vec3(axis.x, 0, -axis.y);
 
     transform()->translate(displacement);
 
     if (m_canRotate) {
-        const glm::quat qPitch = glm::angleAxis(input->mouseDelta().y * rotationSpeed, glm::vec3(-1, 0, 0));
-        const glm::quat qYaw = glm::angleAxis(input->mouseDelta().x * rotationSpeed, glm::vec3(0, -1, 0));
+        const glm::quat qPitch = glm::angleAxis(input()->mouseDelta().y * rotationSpeed, glm::vec3(-1, 0, 0));
+        const glm::quat qYaw = glm::angleAxis(input()->mouseDelta().x * rotationSpeed, glm::vec3(0, -1, 0));
 
         transform()->rotate(qYaw, Transform::getGlobal());
         transform()->rotate(qPitch);
     }
 
-    if (input->isKeyPressed(GLFW_KEY_ENTER)) {
+    if (input()->isKeyPressed(GLFW_KEY_ENTER)) {
         m_canRotate = !m_canRotate;
-        auto window = Engine::instance().mainWindow();
-        window->isCursorPositionFixed = m_canRotate;
+        window()->isCursorPosFixed = m_canRotate;
 
         if (m_canRotate) {
-            glfwSetInputMode(window->glfwWindow(), GLFW_CURSOR, GLFW_CURSOR_DISABLED);
-            window->setCursorPositionToCenter();
+            glfwSetInputMode(window()->glfwWindow(), GLFW_CURSOR, GLFW_CURSOR_DISABLED);
+            window()->setCursorPosToCenter();
         } else {
-            glfwSetInputMode(window->glfwWindow(), GLFW_CURSOR, GLFW_CURSOR_NORMAL);
+            glfwSetInputMode(window()->glfwWindow(), GLFW_CURSOR, GLFW_CURSOR_NORMAL);
         }
     }
 }

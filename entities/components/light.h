@@ -13,9 +13,7 @@ enum LightType {
 
 class Light : public Component {
 public:
-    Light(const std::weak_ptr<Node> &node, const std::string &name);
-
-    virtual LightType getType() = 0;
+    explicit Light(const std::string& name): Component(name) {}
 
     glm::vec3 ambient = glm::vec3(0.1, 0.1, 0.1);
     glm::vec3 diffuse = glm::vec3(1, 1, 1);
@@ -24,26 +22,17 @@ public:
 
 class DirectLight : public Light {
 public:
-    LightType getType() override { return Direct; }
+    class Factory : public ComponentFactory<DirectLight> {};
 
-    DirectLight(const std::weak_ptr<Node> &node, const std::string &name): Light(node, name) {}
-
-    static std::shared_ptr<DirectLight> create(
-        const std::shared_ptr<Node> &node,
-        const std::string& name = "DirectLight"
-    );
+    explicit DirectLight(const std::string& name = "DirectLight"): Light(name) {}
 };
+
 
 class PointLight : public Light {
 public:
-    LightType getType() override { return Point; }
+    class Factory : public ComponentFactory<PointLight> {};
 
-    PointLight(const std::weak_ptr<Node> &node, const std::string &name): Light(node, name) {}
-
-    static std::shared_ptr<PointLight> create(
-        const std::shared_ptr<Node> &node,
-        const std::string& name = "PointLight"
-    );
+    explicit PointLight(const std::string& name = "PointLight"): Light(name) {}
 
     /// Distance at which light from the point light is zero.
     float distance = 1.0f;

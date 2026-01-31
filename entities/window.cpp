@@ -1,39 +1,117 @@
 #include "window.h"
 
-#include <memory>
-#include <string>
+#include <sstream>
 
 #include "input.h"
 
 namespace SimpleGL {
 
-std::shared_ptr<Window> Window::create(const std::string &label, GLFWwindow *glfwWindow) {
-    auto instance = std::shared_ptr<Window>(new Window(label, glfwWindow));
+Window::Window() {
+    static bool isGLFWContextInited = false;
 
-    instance->m_input = Input::create(instance);
+    if (!isGLFWContextInited) {
+        isGLFWContextInited = true;
+        glfwInit();
+        glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 4);
+        glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 1);
+        glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
+        glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE);
+    }
+}
+
+Window::~Window() {
+    if (m_glfwWindow != nullptr) {
+        destroy();
+    }
+
+    glfwTerminate();
+}
+
+void Window::open(int screenWidth, int screenHeight) {
+    if (m_glfwWindow != nullptr) {
+        throw std::runtime_error("createWindow");
+    }
+
+    m_glfwWindow = createGLFWWindow(screenWidth, screenHeight);
+    m_input = std::make_unique<Input>();
 
     int frameWidth, frameHeight;
     float xScale, yScale;
 
-    glfwGetFramebufferSize(glfwWindow, &frameWidth, &frameHeight);
-    glfwGetWindowContentScale(glfwWindow, &xScale, &yScale);
+    glfwGetFramebufferSize(m_glfwWindow, &frameWidth, &frameHeight);
+    glfwGetWindowContentScale(m_glfwWindow, &xScale, &yScale);
 
-    instance->m_frameWidth = frameWidth;
-    instance->m_frameHeight = frameHeight;
-    instance->m_screenWidth = static_cast<int>(static_cast<float>(frameWidth) / xScale);
-    instance->m_screenHeight = static_cast<int>(static_cast<float>(frameHeight) / yScale);
+    m_frameWidth = frameWidth;
+    m_frameHeight = frameHeight;
+    m_screenWidth = static_cast<int>(static_cast<float>(frameWidth) / xScale);
+    m_screenHeight = static_cast<int>(static_cast<float>(frameHeight) / yScale);
 
-    glfwSetWindowUserPointer(glfwWindow, instance.get());
-    instance->setCallbacks();
-
-    return instance;
+    setEventCallbacks();
 }
 
-Window::~Window() {
+void Window::destroy() {
     glfwDestroyWindow(m_glfwWindow);
+    m_glfwWindow = nullptr;
 }
 
-void Window::setCallbacks() const {
+void Window::close() const {
+    glfwSetWindowShouldClose(m_glfwWindow, GLFW_TRUE);
+}
+
+bool Window::isOpen() const {
+    return !glfwWindowShouldClose(m_glfwWindow);
+}
+
+bool Window::isFocused() const {
+    return glfwGetWindowAttrib(m_glfwWindow, GLFW_FOCUSED) == GLFW_TRUE;
+}
+
+void Window::getCursorPos(double* mouseX, double* mouseY) const {
+    glfwGetCursorPos(m_glfwWindow, mouseX, mouseY);
+}
+
+void Window::setCursorPosToCenter() const {
+    const float screenWidth = static_cast<float>(m_screenWidth);
+    const float screenHeight = static_cast<float>(m_screenHeight);
+
+    glfwSetCursorPos(m_glfwWindow, screenWidth / 2.f, screenHeight / 2.f);
+}
+
+void Window::setTitle(const std::string &title) const {
+    glfwSetWindowTitle(m_glfwWindow, title.c_str());
+}
+
+void Window::pollEvents() const {
+    input()->updateState();
+
+    glfwSwapBuffers(m_glfwWindow);
+    glfwPollEvents();
+}
+
+GLFWwindow* Window::createGLFWWindow(int screenWidth, int screenHeight) {
+    GLFWwindow* glfwWindow = glfwCreateWindow(
+        screenWidth, screenHeight, "No title", nullptr, nullptr
+    );
+
+    if (glfwWindow == nullptr) {
+        glfwTerminate();
+        throw std::runtime_error("glfwCreateWindow");
+    }
+
+    glfwMakeContextCurrent(glfwWindow);
+
+    if (!gladLoadGLLoader(reinterpret_cast<GLADloadproc>(glfwGetProcAddress)))
+    {
+        glfwTerminate();
+        throw std::runtime_error("gladLoadGLLoader");
+    }
+
+    glfwSetWindowUserPointer(glfwWindow, this);
+
+    return glfwWindow;
+}
+
+void Window::setEventCallbacks() const {
     auto resizeCallback = [](GLFWwindow* window, int frameWidth, int frameHeight) {
         auto* self = static_cast<Window*>(glfwGetWindowUserPointer(window));
         self->m_frameWidth = frameWidth;
@@ -54,40 +132,6 @@ void Window::setCallbacks() const {
     glfwSetFramebufferSizeCallback(m_glfwWindow, resizeCallback);
     glfwSetKeyCallback(m_glfwWindow, keyCallback);
     glfwSetMouseButtonCallback(m_glfwWindow, mouseButtonCallback);
-}
-
-void Window::setCursorPositionToCenter() const {
-    const float screenWidth = static_cast<float>(m_screenWidth);
-    const float screenHeight = static_cast<float>(m_screenHeight);
-
-    glfwSetCursorPos(glfwWindow(), screenWidth / 2.f, screenHeight / 2.f);
-}
-
-void Window::makeCurrent() const {
-    glfwMakeContextCurrent(m_glfwWindow);
-}
-
-void Window::pollEvents() const {
-    m_input->process();
-
-    glfwSwapBuffers(m_glfwWindow);
-    glfwPollEvents();
-}
-
-void Window::close() const {
-    glfwSetWindowShouldClose(m_glfwWindow, true);
-}
-
-void Window::setTitle(const std::string& title) const {
-    glfwSetWindowTitle(m_glfwWindow, title.c_str());
-}
-
-bool Window::isOpen() const {
-    return !glfwWindowShouldClose(m_glfwWindow);
-}
-
-bool Window::isFocused() const {
-    return glfwGetWindowAttrib(m_glfwWindow, GLFW_FOCUSED) == GLFW_TRUE;
 }
 
 }

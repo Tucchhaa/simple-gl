@@ -1,5 +1,6 @@
 #pragma once
 
+#include <vector>
 #include <glm/fwd.hpp>
 
 #include "../component.h"
@@ -13,18 +14,9 @@ class Camera;
 
 class Teleportable : public Component {
 public:
-    Teleportable(
-        const std::weak_ptr<Node>& node,
-        const std::string &name
-    ): Component(node, name) {}
+    class Factory : public ComponentFactory<Teleportable> {};
 
-    static std::shared_ptr<Teleportable> create(
-        const std::shared_ptr<Node>& node,
-        const std::string& name = "Teleportable"
-    ) {
-        auto instance = base_create<Teleportable>(node, name);
-        return instance;
-    }
+    explicit Teleportable(const std::string& name = "Teleportable"): Component(name) {}
 
     void setPortal(const std::shared_ptr<Portal>& portal) { m_portal = portal; }
     void setRigidBody(const std::shared_ptr<RigidBody>& rigidBody) { m_rigidBody = rigidBody; }
@@ -32,7 +24,6 @@ public:
     void setAllowPortalGroup(int teleportableGroup) { m_allowPortalGroup = teleportableGroup; }
 
     void onStart() override;
-
     void onUpdate() override;
 
     void draw(const std::shared_ptr<Camera>& camera) const;
@@ -46,16 +37,15 @@ private:
 
     int m_allowPortalGroup = -1;
 
-    float m_thresholdDistance2 = 1.f;
+    float m_thresholdDistance2 = 1.5f;
 
-    bool m_disabledPortal1Collision = false;
-    bool m_disabledPortal2Collision = false;
+    bool m_disabledPortalCollision = false;
+
+    bool m_isCloseEnough1 = false;
+    bool m_isCloseEnough2 = false;
 
 
-    void toggleCollisionIfNeed(
-        const std::shared_ptr<Node>& portalNode,
-        bool& disabledPortalCollision
-    ) const;
+    void toggleCollisionIfNeed();
 
     void teleportIfNeed(
         const std::shared_ptr<Node>& sourcePortalNode,

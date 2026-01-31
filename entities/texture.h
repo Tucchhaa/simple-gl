@@ -3,8 +3,6 @@
 #include <memory>
 #include <vector>
 
-#include <glad/glad.h>
-
 namespace SimpleGL {
 
 enum TextureType {
@@ -13,28 +11,11 @@ enum TextureType {
 };
 
 struct Texture {
-    static std::shared_ptr<Texture> create(unsigned char* data, int width, int height, int channelsNum, bool isAlbedo) {
-        auto instance = std::make_shared<Texture>();
+    Texture(unsigned char* data, int width, int height, int channelsNum, bool isAlbedo);
 
-        instance->m_textureId = createTexture(data, width, height, channelsNum, isAlbedo);
-        instance->m_samplerId = createSampler();
-        instance->m_type = Default;
+    Texture(const std::vector<unsigned char*>& data, int width, int height, int channelsNum);
 
-        return instance;
-    }
-    static std::shared_ptr<Texture> create(const std::vector<unsigned char*>& data, int width, int height, int channelsNum) {
-        auto instance = std::make_shared<Texture>();
-
-        instance->m_textureId = createCubeMapTexture(data, width, height, channelsNum);
-        instance->m_samplerId = createCubeMapSampler();
-        instance->m_type = CubeMap;
-
-        return instance;
-    }
-
-    ~Texture() {
-        glDeleteTextures(1, &m_textureId);
-    }
+    ~Texture();
 
     unsigned int textureId() const { return m_textureId; }
     unsigned int samplerId() const { return m_samplerId; }

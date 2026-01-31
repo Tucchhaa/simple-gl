@@ -8,10 +8,11 @@
 #include "../../physics/contact_callback.h"
 #include "../../window.h"
 #include "../../node.h"
+#include "../..//input.h"
 #include "../../../managers/engine.h"
-#include "../../../entities/input.h"
 #include "../../../helpers/converter.h"
 #include "../../../managers/physics_manager.h"
+#include "../../../helpers/quick_accessors.h"
 
 namespace SimpleGL {
 
@@ -31,12 +32,11 @@ void CharacterController::onStart() {
 }
 
 void CharacterController::onUpdate() {
-    const auto input = Engine::instance().mainWindow()->input();
     const auto rigidBody = node()->rigidBody()->getBtRigidBody();
     const auto cameraTransform = m_cameraNode->transform();
 
     // Displacement
-    const auto axis = input->axisVec2();
+    const auto axis = input()->axisVec2();
 
     if (axis.x == 0 && axis.y == 0) {
         const auto velocity = btVector3(0, rigidBody->getLinearVelocity().y(), 0);
@@ -52,9 +52,9 @@ void CharacterController::onUpdate() {
 
         const auto direction = glm::normalize(-proj * axis.y + perp * axis.x);
         const auto velocity = btVector3(
-            direction.x * speed * input->deltaTime(),
+            direction.x * speed * input()->deltaTime(),
             rigidBody->getLinearVelocity().y(),
-            direction.z * speed * input->deltaTime()
+            direction.z * speed * input()->deltaTime()
         );
 
         rigidBody->setLinearVelocity(velocity);
@@ -62,18 +62,18 @@ void CharacterController::onUpdate() {
 
     // Jump
     if (m_jumpReloadLeftMs > 0) {
-        m_jumpReloadLeftMs -= input->deltaTime() * 1000;
+        m_jumpReloadLeftMs -= input()->deltaTime() * 1000;
     }
 
-    if (this->isTouchingGround() && input->isKeyDown(GLFW_KEY_SPACE) && m_jumpReloadLeftMs <= 0) {
+    if (this->isTouchingGround() && input()->isKeyDown(GLFW_KEY_SPACE) && m_jumpReloadLeftMs <= 0) {
         rigidBody->applyCentralImpulse(btVector3(0, 400, 0));
         m_jumpReloadLeftMs = m_jumpReloadTimeMs;
     }
 
     // Camera Orientation
     if (m_canRotate) {
-        float pitchDelta = input->mouseDelta().y * rotationSpeed;
-        float yawDelta = input->mouseDelta().x * rotationSpeed;
+        float pitchDelta = input()->mouseDelta().y * rotationSpeed;
+        float yawDelta = input()->mouseDelta().x * rotationSpeed;
 
         float newPitch = glm::clamp(m_pitch + pitchDelta, -m_maxPitch, m_maxPitch);
         float clampedPitchDelta = newPitch - m_pitch;
@@ -87,14 +87,14 @@ void CharacterController::onUpdate() {
         cameraTransform->rotate(qPitch);
     }
 
-    if (input->isKeyPressed(GLFW_KEY_ENTER)) {
+    if (input()->isKeyPressed(GLFW_KEY_ENTER)) {
         m_canRotate = !m_canRotate;
-        auto window = Engine::instance().mainWindow();
-        window->isCursorPositionFixed = m_canRotate;
+        const std::unique_ptr<Window>& window = Engine::get()->window();
+        window->isCursorPosFixed = m_canRotate;
 
         if (m_canRotate) {
             glfwSetInputMode(window->glfwWindow(), GLFW_CURSOR, GLFW_CURSOR_DISABLED);
-            window->setCursorPositionToCenter();
+            window->setCursorPosToCenter();
         } else {
             glfwSetInputMode(window->glfwWindow(), GLFW_CURSOR, GLFW_CURSOR_NORMAL);
         }
@@ -102,11 +102,10 @@ void CharacterController::onUpdate() {
 }
 
 bool CharacterController::isTouchingGround() const {
-    auto physicsWorld = Engine::instance().physicsManager()->dynamicsWorld();
     auto rigidBody = node()->rigidBody()->getBtRigidBody();
 
     ContactCallback callback;
-    Engine::instance().physicsManager()->dynamicsWorld()->contactTest(rigidBody.get(), callback);
+    Engine::get()->physicsManager()->dynamicsWorld()->contactTest(rigidBody.get(), callback);
 
     for (const auto& contactResult : callback.results) {
         const btManifoldPoint& point = contactResult.hitPoint;

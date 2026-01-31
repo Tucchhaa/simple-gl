@@ -5,53 +5,49 @@
 
 namespace SimpleGL {
 
-class WindowManager;
+class Window;
 class ShaderManager;
 class MeshManager;
 class TextureManager;
 class PhysicsManager;
-class Window;
 class Input;
 class Scene;
 class Node;
 
 class Engine {
 public:
-    static Engine& instance() { return m_instance; }
+    static void init() {
+        m_instance = std::make_unique<Engine>();
+    }
 
-    std::shared_ptr<WindowManager> windowManager() { return m_windowManager; }
-    std::shared_ptr<ShaderManager> shaderManager() { return m_shaderManager; }
-    std::shared_ptr<MeshManager> meshManager() { return m_meshManager; }
-    std::shared_ptr<TextureManager> textureManager() { return m_textureManager; }
-    std::shared_ptr<PhysicsManager> physicsManager() { return m_physicsManager; }
+    static std::unique_ptr<Engine>& get() { return m_instance; }
 
-    std::shared_ptr<Window> mainWindow() const;
-    std::shared_ptr<Scene> scene() { return m_scene; }
+    Engine();
+    ~Engine();
 
+    const std::unique_ptr<Window>& window() { return m_window; }
+    const std::unique_ptr<ShaderManager>& shaderManager() { return m_shaderManager; }
+    const std::unique_ptr<MeshManager>& meshManager() { return m_meshManager; }
+    const std::unique_ptr<TextureManager>& textureManager() { return m_textureManager; }
+    const std::unique_ptr<PhysicsManager>& physicsManager() { return m_physicsManager; }
+
+    std::shared_ptr<Scene> scene() const { return m_scene.lock(); }
     void setScene(const std::shared_ptr<Scene>& scene) { m_scene = scene; }
-
-    Engine(const Engine&) = delete;
-    Engine& operator=(const Engine&) = delete;
-    Engine(Engine&&) = delete;
-    Engine& operator=(Engine&&) = delete;
 
     std::filesystem::path getResourcePath(const std::filesystem::path& filePath) const;
 
 private:
-    static Engine m_instance;
+    static std::unique_ptr<Engine> m_instance;
 
     const std::filesystem::path m_resourcesDir = std::filesystem::path(__FILE__).parent_path().parent_path() / "resources";
 
-    std::shared_ptr<WindowManager> m_windowManager;
-    std::shared_ptr<ShaderManager> m_shaderManager;
-    std::shared_ptr<MeshManager> m_meshManager;
-    std::shared_ptr<TextureManager> m_textureManager;
-    std::shared_ptr<PhysicsManager> m_physicsManager;
+    std::unique_ptr<Window> m_window;
+    std::unique_ptr<ShaderManager> m_shaderManager;
+    std::unique_ptr<MeshManager> m_meshManager;
+    std::unique_ptr<TextureManager> m_textureManager;
+    std::unique_ptr<PhysicsManager> m_physicsManager;
 
-    std::shared_ptr<Scene> m_scene;
-
-    Engine();
-    ~Engine();
+    std::weak_ptr<Scene> m_scene;
 };
 
 }

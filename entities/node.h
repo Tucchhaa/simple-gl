@@ -1,21 +1,18 @@
 #pragma once
 
+#include <functional>
 #include <string>
 #include <typeindex>
 #include <unordered_map>
 #include <utility>
 #include <memory>
-#include <queue>
 #include <vector>
-
-namespace SimpleGL {
-class RigidBody;
-}
 
 namespace SimpleGL {
 
 class Component;
 class Transform;
+class RigidBody;
 
 class Node : public std::enable_shared_from_this<Node> {
 public:
@@ -30,14 +27,7 @@ public:
         const std::shared_ptr<Node>& parent = nullptr
     );
 
-    template <typename T>
-    std::shared_ptr<T> getComponent();
-
-    template <typename T>
-    std::vector<std::shared_ptr<T>> getChildComponents();
-
-    template <typename T>
-    std::shared_ptr<T> getChildComponent();
+    explicit Node(std::string name): name(std::move(name)) {}
 
     const std::shared_ptr<Transform>& transform() const { return m_transform; }
     const std::shared_ptr<RigidBody>& rigidBody() const { return m_rigidBody; }
@@ -50,6 +40,17 @@ public:
 
     std::vector<std::shared_ptr<Component>> components() const;
 
+    template <typename T>
+    std::shared_ptr<T> getComponent();
+
+    template <typename T>
+    std::vector<std::shared_ptr<T>> getChildComponents();
+
+    template <typename T>
+    std::shared_ptr<T> getChildComponent();
+
+    void traverseChildren(const std::function<void(const std::shared_ptr<Node>&)>& callback);
+
 private:
     std::shared_ptr<Transform> m_transform;
     std::shared_ptr<RigidBody> m_rigidBody;
@@ -60,8 +61,6 @@ private:
     std::vector<std::shared_ptr<Node>> m_children;
 
     std::weak_ptr<Node> m_parent;
-
-    explicit Node(std::string name): name(std::move(name)) {}
 
     void addComponent(const std::shared_ptr<Component>& component);
 };
@@ -80,24 +79,15 @@ std::shared_ptr<T> Node::getComponent() {
 template<typename T>
 std::vector<std::shared_ptr<T>> Node::getChildComponents() {
     std::vector<std::shared_ptr<T>> result;
+    const std::shared_ptr<Node>& parentNode = shared_from_this();
 
-    std::queue<std::shared_ptr<Node>> q;
-    q.push(shared_from_this());
-
-    while (!q.empty()) {
-        auto currentNode = q.front();
-        q.pop();
-
-        if (currentNode != shared_from_this()) {
-            if (auto component = currentNode->getComponent<T>()) {
-                result.push_back(component);
-            }
-        }
-
-        for (const auto& child : currentNode->children()) {
-            q.push(child);
-        }
-    }
+    traverseChildren([parentNode, result](const std::shared_ptr<Node>& currentNode) {
+        if (currentNode != parentNode) {
+             if (auto component = currentNode->getComponent<T>()) {
+                 result.push_back(component);
+             }
+         }
+    });
 
     return result;
 }

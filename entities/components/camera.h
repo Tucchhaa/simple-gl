@@ -10,21 +10,12 @@ namespace SimpleGL {
 
 class Camera : public Component {
 public:
-    Camera(const std::weak_ptr<Node> &node, const std::string &name): Component(node, name) {}
+    class Factory : public ComponentFactory<Camera> {};
 
-    static std::shared_ptr<Camera> create(
-        const std::shared_ptr<Node> &node,
-        float fov, float near, float far,
-        const std::string& name = "Camera"
-    ) {
-        auto instance = base_create<Camera>(node, name);
-
-        instance->m_fov = fov;
-        instance->m_near =near;
-        instance->m_far = far;
-        instance->recalculateProjectionMatrix();
-
-        return instance;
+    Camera(float fov, float near, float far, const std::string& name = "Camera"):
+        Component(name), m_fov(fov), m_near(near), m_far(far)
+    {
+        recalculateProjectionMatrix();
     }
 
     float fov() const { return m_fov; }

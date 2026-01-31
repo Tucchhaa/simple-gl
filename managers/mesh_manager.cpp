@@ -1,5 +1,6 @@
 #include "mesh_manager.h"
 
+#include <format>
 #include <queue>
 
 #include <assimp/Importer.hpp>
@@ -10,12 +11,11 @@
 #include "../entities/node.h"
 #include "../entities/components/mesh.h"
 #include "../entities/mesh_data.h"
-#include "../helpers/errors.h"
 
 namespace SimpleGL {
 
 std::shared_ptr<MeshData> MeshManager::loadMeshData(const std::filesystem::path &path) {
-    const auto resourcePath = Engine::instance().getResourcePath(path);
+    const auto resourcePath = Engine::get()->getResourcePath(path);
 
     if (m_meshes.contains(path)) {
         return m_meshes[path];
@@ -32,7 +32,10 @@ std::shared_ptr<MeshData> MeshManager::loadMeshData(const std::filesystem::path 
                      || scene->mFlags & AI_SCENE_FLAGS_INCOMPLETE;
 
     if (isInvalid) {
-        throw meshLoadingFailed(resourcePath, importer.GetErrorString());
+        throw std::runtime_error(std::format(
+            "MESH MANAGER. Resource: {}\nError:{}",
+            resourcePath.c_str(), importer.GetErrorString()
+        ));
     }
 
     const auto meshData = MeshData::createFromScene(scene);
@@ -65,7 +68,7 @@ std::shared_ptr<Node> MeshManager::createNodeFromMeshData(
         currentNode->name = currentMeshData->name();
 
         if (currentMeshData->hasVertices()) {
-            MeshComponent::create(currentNode, currentMeshData);
+            MeshComponent::Factory::create(currentNode, currentMeshData);
         }
 
         for (const auto& subMeshData : currentMeshData->subMeshes()) {

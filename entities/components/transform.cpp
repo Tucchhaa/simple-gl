@@ -8,7 +8,7 @@
 namespace SimpleGL {
 
 std::shared_ptr<Transform> Transform::getGlobal() {
-    return Engine::instance().scene()->rootNode()->transform();
+    return Engine::get()->scene()->rootNode()->transform();
 }
 
 void Transform::setPosition(float x, float y, float z) {
@@ -89,7 +89,8 @@ void Transform::recalculate() {
         m_transformMatrix = calculateTransformMatrix();
         m_direction = m_absoluteOrientation * glm::vec3(0, 0, 1);
 
-        if (!m_rigidBodyDirty && rigidBody) {
+        if (!m_rigidBodyDirty && rigidBody && isFirst) {
+            isFirst = false;
             rigidBody->setWorldTransform(m_absolutePosition, m_absoluteOrientation);
         }
     }

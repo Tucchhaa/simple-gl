@@ -1,27 +1,27 @@
 #include "rigid_body.h"
 
 #include <LinearMath/btDefaultMotionState.h>
+#include <BulletDynamics/Dynamics/btDynamicsWorld.h>
 
 #include "transform.h"
 #include "../node.h"
 #include "../../managers/engine.h"
-#include "../../managers/physics_manager.h"
 #include "../../helpers/converter.h"
+#include "../../helpers/quick_accessors.h"
 
 namespace SimpleGL {
 
 RigidBody::~RigidBody() {
-    Engine::instance().physicsManager()->dynamicsWorld()->removeRigidBody(m_rigidBody.get());
+    dynamicsWorld()->removeRigidBody(m_rigidBody.get());
 
     m_motionState.reset();
     m_rigidBody.reset();
     m_collisionShape.reset();
 }
 
-std::shared_ptr<RigidBody> RigidBody::create(const std::shared_ptr<Node> &node, const std::string &name) {
-    auto instance = base_create<RigidBody>(node, name);
-    node->m_rigidBody = instance;
-    return instance;
+void RigidBody::attachTo(const std::shared_ptr<Node> &node) {
+    Component::attachTo(node);
+    node->m_rigidBody = std::static_pointer_cast<RigidBody>(shared_from_this());
 }
 
 void RigidBody::getWorldTransform(glm::vec3& position, glm::quat& rotation) const {
@@ -73,14 +73,12 @@ void RigidBody::init() {
     );
     m_rigidBody = std::make_shared<btRigidBody>(info);
 
-    Engine::instance().physicsManager()->dynamicsWorld()->addRigidBody(m_rigidBody.get(), group, mask);
+    dynamicsWorld()->addRigidBody(m_rigidBody.get(), group, mask);
 }
 
 void RigidBody::reinit() const {
-    const auto world = Engine::instance().physicsManager()->dynamicsWorld();
-
-    world->removeRigidBody(m_rigidBody.get());
-    world->addRigidBody(m_rigidBody.get(), group, mask);
+    dynamicsWorld()->removeRigidBody(m_rigidBody.get());
+    dynamicsWorld()->addRigidBody(m_rigidBody.get(), group, mask);
 }
 
 }

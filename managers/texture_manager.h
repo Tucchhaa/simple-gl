@@ -12,10 +12,6 @@ struct Texture;
 
 class TextureManager {
 public:
-    static std::shared_ptr<TextureManager> create() {
-        return std::make_shared<TextureManager>();
-    }
-
     std::shared_ptr<Texture> getTexture(const std::string& path, bool isAlbedo, bool flip = true);
 
     std::shared_ptr<Texture> getCubeMapTexture(

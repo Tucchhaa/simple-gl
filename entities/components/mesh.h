@@ -12,18 +12,14 @@ struct MeshData;
 
 class MeshComponent : public Component {
 public:
-    MeshComponent(
-        const std::weak_ptr<Node> &node,
-        const std::string &name
-    ): Component(node, name) {}
+    class Factory : public ComponentFactory<MeshComponent> {};
+
+    explicit MeshComponent(
+        const std::shared_ptr<MeshData>& meshData,
+        const std::string &name = "Mesh"
+    );
 
     ~MeshComponent() override;
-
-    static std::shared_ptr<MeshComponent> create(
-        const std::shared_ptr<Node> &node,
-        const std::shared_ptr<MeshData>& meshData,
-        const std::string& name = "Mesh"
-    );
 
     unsigned int VAO() const { return m_VAO; }
 

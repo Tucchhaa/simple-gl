@@ -13,10 +13,7 @@ class MeshComponent;
 
 class ScreenFrameBuffer : public BaseFrameBuffer {
 public:
-    static std::shared_ptr<ScreenFrameBuffer> create(const std::shared_ptr<Window>& window, bool hdr);
-
     ScreenFrameBuffer(int width, int height, bool hdr);
-
     ~ScreenFrameBuffer();
 
     void setShader(const std::shared_ptr<ShaderProgram>& shaderProgram) const;

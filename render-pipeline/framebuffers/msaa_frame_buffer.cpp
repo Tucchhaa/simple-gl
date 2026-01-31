@@ -3,8 +3,6 @@
 #include <glad/glad.h>
 
 #include "../../managers/engine.h"
-#include "../../entities/window.h"
-#include "../../helpers/errors.h"
 
 namespace SimpleGL {
 
@@ -29,7 +27,7 @@ void MsaaFrameBuffer::bindTexturesToFBO() const {
     glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_STENCIL_ATTACHMENT, GL_RENDERBUFFER, m_RBO);
 
     if(glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE) {
-        throw incompleteFrameBuffer("msaa frame buffer");
+        throw std::runtime_error("MSAA FRAMEBUFFER is incomplete");
     }
 
     glBindFramebuffer(GL_FRAMEBUFFER, 0);

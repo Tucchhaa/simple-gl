@@ -4,9 +4,7 @@
 
 #include "../../entities/node.h"
 #include "../../entities/shader_program.h"
-#include "../../entities/window.h"
 #include "../../entities/components/mesh.h"
-#include "../../helpers/errors.h"
 
 #include "../../managers/engine.h"
 #include "../../managers/mesh_manager.h"
@@ -60,7 +58,7 @@ void ScreenFrameBuffer::bindTexturesToFBO() const {
     glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_STENCIL_ATTACHMENT, GL_RENDERBUFFER, m_RBO);
 
     if(glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE) {
-        throw incompleteFrameBuffer("screen frame buffer");
+        throw std::runtime_error("SCREEN FRAMEBUFFER is incomplete");
     }
 
     glBindFramebuffer(GL_FRAMEBUFFER, 0);

@@ -10,7 +10,6 @@ TODO: This code contains memory leaks on error paths
 
 #include "engine.h"
 #include "../entities/shader_program.h"
-#include "../helpers/errors.h"
 
 namespace SimpleGL {
 
@@ -31,7 +30,10 @@ std::shared_ptr<ShaderProgram> ShaderManager::createShaderProgram(
     const unsigned int shaderProgramID = glCreateProgram();
 
     if (shaderProgramID == 0) {
-        throw createShaderProgramFailed(label);
+        throw std::runtime_error(std::format(
+            "SHADER MANAGER. glCreateProgram. Label: {}\n",
+            label
+        ));
     }
 
     const auto vertexShaderFilepath = Engine::get()->getResourcePath(vertexShaderFile);
@@ -52,7 +54,10 @@ std::shared_ptr<ShaderProgram> ShaderManager::createShaderProgram(
         char log[512];
         glGetProgramInfoLog(shaderProgramID, 512, nullptr, log);
 
-        throw shaderProgramLinkingFailed(label, log);
+        throw std::runtime_error(std::format(
+            "SHADER MANAGER. glLinkProgram. Label: {}\nLog: {}",
+            label, log
+        ));
     }
 
     glDeleteShader(vertexShaderID);
@@ -73,7 +78,10 @@ unsigned int ShaderManager::createShader(
     const unsigned int shaderID = glCreateShader(shaderType);
 
     if (shaderID == 0) {
-        throw createShaderFailed(label, shaderType);
+        throw std::runtime_error(std::format(
+            "SHADER MANAGER. glCreateShader. Label: {}\nType: {}",
+            label, shaderType
+        ));
     }
 
     const std::string vertexShaderCode = readShaderFile(shaderPath);
@@ -111,7 +119,10 @@ void ShaderManager::compileShader(
         char log[512];
         glGetShaderInfoLog(shaderID, 512, nullptr, log);
 
-        throw shaderCompilationFailed(label, log);
+        throw std::runtime_error(std::format(
+            "SHADER MANAGER. glCompileShader. Label: {}\Log: {}",
+            label, log
+        ));
     }
 }
 

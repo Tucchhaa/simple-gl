@@ -3,6 +3,7 @@
 #include "components/component.h"
 #include "components/transform.h"
 #include <vector>
+#include <queue>
 
 namespace SimpleGL {
 

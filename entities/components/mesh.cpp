@@ -1,11 +1,12 @@
 #include "mesh.h"
 
+#include <format>
+
 #include "camera.h"
 #include "transform.h"
 #include "../mesh_data.h"
 #include "../node.h"
 #include "../shader_program.h"
-#include "../../helpers/errors.h"
 
 namespace SimpleGL {
 
@@ -40,7 +41,10 @@ void MeshComponent::draw(const std::shared_ptr<Camera>& camera) const {
     }
 
     if (m_shaderProgram == nullptr) {
-        throw meshShaderNotSet(name);
+        throw std::runtime_error(std::format(
+            "MESH COMPONENT. Shader is not set. Name: {}",
+            name
+        ));
     }
 
     m_shaderProgram->use(camera);

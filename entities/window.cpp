@@ -3,7 +3,6 @@
 #include <sstream>
 
 #include "input.h"
-#include "../helpers/errors.h"
 
 namespace SimpleGL {
 

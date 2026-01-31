@@ -1,8 +1,7 @@
 #include "portal_framebuffer.h"
 
+#include <stdexcept>
 #include <glad/glad.h>
-
-#include "../../helpers/errors.h"
 
 namespace SimpleGL {
 
@@ -27,7 +26,7 @@ void PortalFramebuffer::bindTexturesToFBO() const {
     glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_STENCIL_ATTACHMENT, GL_RENDERBUFFER, m_RBO);
 
     if(glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE) {
-        throw incompleteFrameBuffer("portal frame buffer");
+        throw std::runtime_error("PORTAL FRAMEBUFFER is incomplete");
     }
 
     glBindFramebuffer(GL_FRAMEBUFFER, 0);

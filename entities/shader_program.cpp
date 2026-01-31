@@ -10,7 +10,6 @@
 #include "components/camera.h"
 #include "components/light.h"
 #include "components/transform.h"
-#include "../helpers/errors.h"
 #include "../managers/engine.h"
 #include "../entities/texture.h"
 
@@ -170,7 +169,10 @@ std::shared_ptr<ShaderParam> ShaderProgram::getUniform(const std::string &name) 
     const auto iterator = m_uniformsMap.find(name);
 
     if (iterator == m_uniformsMap.end()) {
-        throw shaderUniformGetterFailed(label, name);
+        throw std::runtime_error(std::format(
+            "SHADER PROGRAM. getUniform. Label: {}, Uniform name: {}",
+            label, name
+        ));
     }
 
     return iterator->second;
@@ -182,7 +184,10 @@ std::shared_ptr<ShaderParam> ShaderProgram::getAttrib(const std::string &name) {
 
     if (iterator == m_attribsMap.end()) {
         log();
-        throw shaderAttribGetterFailed(label, name);
+        throw std::runtime_error(std::format(
+            "SHADER PROGRAM. getAttrib. Label: {}, Attrib name: {}",
+            label, name
+        ));
     }
 
     return iterator->second;

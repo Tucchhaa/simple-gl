@@ -1,11 +1,11 @@
 #pragma once
 
+#include <functional>
 #include <string>
 #include <typeindex>
 #include <unordered_map>
 #include <utility>
 #include <memory>
-#include <queue>
 #include <vector>
 
 namespace SimpleGL {

@@ -1,11 +1,13 @@
 #include "texture_manager.h"
 
+#include <format>
+
 #define STB_IMAGE_IMPLEMENTATION
 #include <stb_image.h>
 
 #include "engine.h"
 #include "../entities/texture.h"
-#include "../helpers/errors.h"
+
 namespace SimpleGL {
 
 std::shared_ptr<Texture> TextureManager::getTexture(const std::string &path, bool isAlbedo, bool flip) {
@@ -61,11 +63,17 @@ std::shared_ptr<Texture> TextureManager::_getTexture(
         );
 
         if (_data == nullptr) {
-            throw unableToLoadImage(resourcePath);
+            throw std::runtime_error(std::format(
+                "TEXTURE MANAGER. stbi_load. Resource: {}",
+                resourcePath.c_str()
+            ));
         }
 
         if (itemChannelsNum != 1 && itemChannelsNum != 3 && itemChannelsNum != 4) {
-            throw unsupportedImageFormat(resourcePath);
+            throw std::runtime_error(std::format(
+                "TEXTURE MANAGER. Unsupported image format. Resource: {}",
+                resourcePath.c_str()
+            ));
         }
 
         if (isFirstTexture) {
@@ -74,7 +82,10 @@ std::shared_ptr<Texture> TextureManager::_getTexture(
             channelsNum = itemChannelsNum;
         } else {
             if (width != itemWidth || height != itemHeight || channelsNum != itemChannelsNum) {
-                throw inconsistentTextureArrayMetadata(key);
+                throw std::runtime_error(std::format(
+                "TEXTURE MANAGER. Incosistent texture array metadata. Resource: {}",
+                    resourcePath.c_str()
+                ));
             }
         }
 

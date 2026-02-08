@@ -21,7 +21,12 @@ RigidBody::~RigidBody() {
 
 void RigidBody::attachTo(const std::shared_ptr<Node> &node) {
     Component::attachTo(node);
-    node->m_rigidBody = std::static_pointer_cast<RigidBody>(shared_from_this());
+    node->setRigidBody(std::static_pointer_cast<RigidBody>(shared_from_this()));
+}
+
+bool RigidBody::isActive() const {
+    const int state = m_rigidBody->getActivationState();
+    return state != ISLAND_SLEEPING && state != DISABLE_SIMULATION;
 }
 
 void RigidBody::getWorldTransform(glm::vec3& position, glm::quat& rotation) const {
@@ -41,9 +46,6 @@ void RigidBody::setWorldTransform(const glm::vec3 &position, const glm::quat& ro
     m_rigidBody->setWorldTransform(newTransform);
     m_motionState->setWorldTransform(newTransform);
 
-    m_rigidBody->setLinearVelocity(btVector3(0, 0, 0));
-    m_rigidBody->setAngularVelocity(btVector3(0, 0, 0));
-
     m_rigidBody->activate(true);
 }
 
@@ -52,11 +54,8 @@ void RigidBody::init() {
         return;
     }
 
-    btVector3 startPosition = Converter::toBt(transform()->position());
-
     btTransform startTransform;
     startTransform.setIdentity();
-    startTransform.setOrigin(startPosition);
 
     btVector3 localInertia;
 

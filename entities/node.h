@@ -17,7 +17,6 @@ class RigidBody;
 class Node : public std::enable_shared_from_this<Node> {
 public:
     friend Component;
-    friend RigidBody;
 
     std::string name;
     bool visible = true;
@@ -31,6 +30,8 @@ public:
 
     const std::shared_ptr<Transform>& transform() const { return m_transform; }
     const std::shared_ptr<RigidBody>& rigidBody() const { return m_rigidBody; }
+    /// Note: should be used only by RigidBody
+    void setRigidBody(const std::shared_ptr<RigidBody>& rigidBody) { m_rigidBody = rigidBody; }
 
     std::shared_ptr<Node> parent() const { return m_parent.lock(); }
     void setParent(const std::shared_ptr<Node>& parent);

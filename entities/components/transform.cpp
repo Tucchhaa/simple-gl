@@ -16,8 +16,7 @@ void Transform::setPosition(float x, float y, float z) {
     m_position = glm::vec3(x, y, z);
 }
 void Transform::setPosition(const glm::vec3 position) {
-    markAsDirty();
-    m_position = position;
+    setPosition(position.x, position.y, position.z);
 }
 
 void Transform::setOrientation(float w, float x, float y, float z) {
@@ -25,21 +24,18 @@ void Transform::setOrientation(float w, float x, float y, float z) {
     m_orientation = glm::quat(w, x, y, z);
 }
 void Transform::setOrientation(const glm::quat orientation) {
-    markAsDirty();
-    m_orientation = orientation;
+    setOrientation(orientation.w, orientation.x, orientation.y, orientation.z);
 }
 
 void Transform::setScale(float s) {
-    markAsDirty();
-    m_scale = glm::vec3(s);
+    setScale(s, s, s);
+}
+void Transform::setScale(const glm::vec3 scale) {
+    setScale(scale.x, scale.y, scale.z);
 }
 void Transform::setScale(float x, float y, float z) {
     markAsDirty();
     m_scale = glm::vec3(x, y, z);
-}
-void Transform::setScale(const glm::vec3 scale) {
-    markAsDirty();
-    m_scale = scale;
 }
 
 void Transform::translate(const glm::vec3& vector) {
@@ -71,7 +67,7 @@ void Transform::recalculate() {
     const auto& parentNode = node()->parent();
     const auto& parentTransform = parentNode->transform();
 
-    if (m_rigidBodyDirty && rigidBody) {
+    if (rigidBody && !m_dirty && m_rigidBodyDirty) {
         glm::vec3 worldPosition;
         glm::quat worldOrientation;
 
@@ -81,25 +77,24 @@ void Transform::recalculate() {
         m_orientation = glm::inverse(parentTransform->m_absoluteOrientation) * worldOrientation;
     }
 
-    if (m_dirty) {
+    if (m_dirty || m_rigidBodyDirty) {
         m_absolutePosition = parentTransform->m_absolutePosition + parentTransform->m_absoluteOrientation * m_position;
         m_absoluteScale = parentTransform->m_absoluteScale * m_scale;
         m_absoluteOrientation = glm::normalize(parentTransform->m_absoluteOrientation * m_orientation);
 
         m_transformMatrix = calculateTransformMatrix();
         m_direction = m_absoluteOrientation * glm::vec3(0, 0, 1);
+    }
 
-        if (!m_rigidBodyDirty && rigidBody && isFirst) {
-            isFirst = false;
-            rigidBody->setWorldTransform(m_absolutePosition, m_absoluteOrientation);
-        }
+    if (rigidBody && m_dirty) {
+        rigidBody->setWorldTransform(m_absolutePosition, m_absoluteOrientation);
     }
 
     if (m_subtreeDirty || m_dirty) {
         for (const auto& childNode : node()->children()) {
             const auto& childTransform = childNode->transform();
 
-            childTransform->m_dirty |= m_dirty;
+            childTransform->m_dirty |= (m_dirty || m_rigidBodyDirty);
             childTransform->recalculate();
         }
     }
@@ -110,32 +105,36 @@ void Transform::recalculate() {
 }
 
 void Transform::onUpdate() {
-    auto rigidBody = node()->rigidBody();
-    if (rigidBody != nullptr && rigidBody->isDynamic()) {
-        // TODO: we need to mark transform dirty only when rigidbody's world transform changed
+    const auto rigidBody = node()->rigidBody();
+
+    if (rigidBody && rigidBody->isDynamic() && rigidBody->isActive()) {
         markAsRigidBodyDirty();
     }
 }
 
 void Transform::markAsDirty() {
     m_dirty = true;
+    markAsSubtreeDirty();
+}
+
+void Transform::markAsRigidBodyDirty() {
+    m_rigidBodyDirty = true;
+    markAsSubtreeDirty();
+}
+
+void Transform::markAsSubtreeDirty() {
     m_subtreeDirty = true;
 
     auto currentNode = node()->parent();
 
     while (currentNode) {
-        if (currentNode->transform()->m_subtreeDirty == true) {
+        if (currentNode->transform()->m_subtreeDirty) {
             break;
         }
 
         currentNode->transform()->m_subtreeDirty = true;
         currentNode = currentNode->parent();
     }
-}
-
-void Transform::markAsRigidBodyDirty() {
-    m_rigidBodyDirty = true;
-    markAsDirty();
 }
 
 glm::mat4 Transform::calculateTransformMatrix() const {

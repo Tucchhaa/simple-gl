@@ -14,7 +14,7 @@ void Teleportable::onStart() {
         throw std::runtime_error("Teleportable: Portal is not set");
     }
 
-    if (m_rigidBody == nullptr) {
+    if (node()->rigidBody() == nullptr) {
         throw std::runtime_error("Teleportable: Rigid Body is not set");
     }
 
@@ -56,14 +56,14 @@ void Teleportable::toggleCollisionIfNeed() {
 
     if ((m_isCloseEnough1 || m_isCloseEnough2) && !m_disabledPortalCollision) {
         m_disabledPortalCollision = true;
-        m_rigidBody->mask &= ~m_allowPortalGroup;
-        m_rigidBody->reinit();
+        node()->rigidBody()->mask &= ~m_allowPortalGroup;
+        node()->rigidBody()->reinit();
     }
 
     if (!m_isCloseEnough1 && !m_isCloseEnough2 && m_disabledPortalCollision) {
         m_disabledPortalCollision = false;
-        m_rigidBody->mask |= m_allowPortalGroup;
-        m_rigidBody->reinit();
+        node()->rigidBody()->mask |= m_allowPortalGroup;
+        node()->rigidBody()->reinit();
     }
 }
 
@@ -80,7 +80,7 @@ void Teleportable::teleportIfNeed(
 
         getTeleportedTransform(sourcePortalNode, destPortalNode, qNew, pNew, qDelta);
 
-        const auto btRigidBody = m_rigidBody->getBtRigidBody();
+        const auto btRigidBody = node()->rigidBody()->getBtRigidBody();
         const auto oldVelocity = btRigidBody->getLinearVelocity();
         const auto oldAngularVelocity = btRigidBody->getAngularVelocity();
 
@@ -113,9 +113,11 @@ void Teleportable::drawClone(
 
     getTeleportedTransform(sourcePortalNode, destPortalNode, qNew, pNew, qDelta);
 
+    const auto rigidBody = node()->rigidBody();
     const auto& originalPosition = transform()->position();
     const auto& originalOrientation = transform()->orientation();
 
+    node()->setRigidBody(nullptr);
     transform()->setPosition(pNew);
     transform()->setOrientation(qNew);
     transform()->recalculate();
@@ -127,6 +129,7 @@ void Teleportable::drawClone(
     transform()->setPosition(originalPosition);
     transform()->setOrientation(originalOrientation);
     transform()->recalculate();
+    node()->setRigidBody(rigidBody);
 }
 
 void Teleportable::getTeleportedTransform(

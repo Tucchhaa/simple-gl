@@ -4,7 +4,6 @@
 
 #include "../component.h"
 
-
 namespace SimpleGL {
 
 class RigidBody;

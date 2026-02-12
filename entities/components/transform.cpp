@@ -63,7 +63,7 @@ void Transform::scaleBy(float x) {
 }
 
 void Transform::recalculate() {
-    const auto rigidBody = node()->rigidBody();
+    const auto& rigidBody = node()->rigidBody();
     const auto& parentNode = node()->parent();
     const auto& parentTransform = parentNode->transform();
 
@@ -105,7 +105,7 @@ void Transform::recalculate() {
 }
 
 void Transform::onUpdate() {
-    const auto rigidBody = node()->rigidBody();
+    const auto& rigidBody = node()->rigidBody();
 
     if (rigidBody && rigidBody->isDynamic() && rigidBody->isActive()) {
         markAsRigidBodyDirty();

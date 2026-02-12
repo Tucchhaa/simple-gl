@@ -19,7 +19,6 @@ public:
     explicit Teleportable(const std::string& name = "Teleportable"): Component(name) {}
 
     void setPortal(const std::shared_ptr<Portal>& portal) { m_portal = portal; }
-    void setRigidBody(const std::shared_ptr<RigidBody>& rigidBody) { m_rigidBody = rigidBody; }
     void setMeshes(const std::vector<std::shared_ptr<MeshComponent>>& meshes) { m_meshes = meshes; }
     void setAllowPortalGroup(int teleportableGroup) { m_allowPortalGroup = teleportableGroup; }
 
@@ -30,20 +29,14 @@ public:
 
 private:
     std::shared_ptr<Portal> m_portal;
-
-    std::shared_ptr<RigidBody> m_rigidBody;
-
     std::vector<std::shared_ptr<MeshComponent>> m_meshes;
 
     int m_allowPortalGroup = -1;
-
     float m_thresholdDistance2 = 1.5f;
-
     bool m_disabledPortalCollision = false;
 
     bool m_isCloseEnough1 = false;
     bool m_isCloseEnough2 = false;
-
 
     void toggleCollisionIfNeed();
 

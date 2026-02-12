@@ -14,6 +14,9 @@ void Scene::start() {
     for (const std::weak_ptr<Component>& component : m_componentsMap | std::views::values) {
         component.lock()->onStart();
     }
+
+    // To initialize btRigidBody world transform
+    rootNode()->transform()->recalculate();
 }
 
 void Scene::update() {

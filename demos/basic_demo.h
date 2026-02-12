@@ -293,7 +293,6 @@ private:
         // Teleportable
         auto teleportable = Teleportable::Factory::create(playerNode, "playerTeleportable");
         teleportable->setPortal(portal);
-        teleportable->setRigidBody(rigidBody);
         teleportable->setAllowPortalGroup(GROUP_ALLOW_PORTAL);
 
         teleportable->setMeshes({ playerMesh, weaponMesh });
@@ -484,7 +483,6 @@ private:
         // Teleportable
         auto teleportable = Teleportable::Factory::create(node, "playerTeleportable");
         teleportable->setPortal(portal);
-        teleportable->setRigidBody(rigidBody);
         teleportable->setAllowPortalGroup(GROUP_ALLOW_PORTAL);
         teleportable->setMeshes({ mesh });
 

@@ -1,9 +1,10 @@
 #include "node.h"
 
-#include "components/component.h"
-#include "components/transform.h"
 #include <vector>
 #include <queue>
+
+#include "components/component.h"
+#include "components/transform.h"
 
 namespace SimpleGL {
 

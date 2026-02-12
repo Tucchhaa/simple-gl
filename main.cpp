@@ -10,8 +10,8 @@
 #include "entities/input.h"
 #include "entities/mesh_data.h"
 #include "entities/scene.h"
-#include "render-pipeline/framebuffers/msaa_frame_buffer.h"
 
+#include "render-pipeline/framebuffers/msaa_frame_buffer.h"
 #include "render-pipeline/framebuffers/screen_frame_buffer.h"
 
 using namespace SimpleGL;

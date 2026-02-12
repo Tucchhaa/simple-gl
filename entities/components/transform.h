@@ -27,8 +27,8 @@ public:
     void setOrientation(glm::quat orientation);
 
     void setScale(float s);
-    void setScale(float x, float y, float z);
     void setScale(glm::vec3 scale);
+    void setScale(float x, float y, float z);
 
     /// Note:
     /// Absolute values are correct only during recalculate stage.
@@ -49,9 +49,8 @@ public:
     void recalculate();
 
     void onUpdate() override;
-private:
-    bool isFirst = true;
 
+private:
     glm::vec3 m_scale = glm::vec3(1);
     glm::vec3 m_position = glm::vec3(0);
     glm::quat m_orientation = glm::quat(1, 0, 0, 0);
@@ -69,6 +68,7 @@ private:
 
     void markAsDirty();
     void markAsRigidBodyDirty();
+    void markAsSubtreeDirty();
 
     glm::mat4 calculateTransformMatrix() const;
 };

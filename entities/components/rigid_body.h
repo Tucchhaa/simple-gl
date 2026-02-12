@@ -7,6 +7,7 @@
 #include <LinearMath/btMotionState.h>
 
 #include "component.h"
+#include "../node.h"
 
 class btDynamicsWorld;
 
@@ -20,7 +21,6 @@ public:
     int mask = -1; // 0xffffffff
 
     explicit RigidBody(const std::string &name = "RigidBody"): Component(name) {}
-
     ~RigidBody() override;
 
     void attachTo(const std::shared_ptr<Node> &node) override;
@@ -34,6 +34,8 @@ public:
     }
 
     bool isDynamic() const { return m_mass != 0.0f; }
+
+    bool isActive() const;
 
     void getWorldTransform(glm::vec3& position, glm::quat& rotation) const;
 

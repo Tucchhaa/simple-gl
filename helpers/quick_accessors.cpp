@@ -2,7 +2,7 @@
 
 #include "../managers/engine.h"
 #include "../managers/physics_manager.h"
-#include "../entities/window.h"
+#include "../window/window.h"
 
 namespace SimpleGL {
 

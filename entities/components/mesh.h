@@ -25,7 +25,7 @@ public:
 
     void setShader(const std::shared_ptr<ShaderProgram> &shaderProgram);
 
-    void setBeforeDrawCallback(const std::function<void(const std::shared_ptr<ShaderProgram>& shaderProgram)> &beforeDrawCallback) {
+    void setBeforeDrawCallback(const std::function<void(const std::shared_ptr<ShaderProgram>& shaderProgram)>& beforeDrawCallback) {
         m_beforeDrawCallback = beforeDrawCallback;
     }
 

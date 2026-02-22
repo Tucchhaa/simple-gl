@@ -1,15 +1,13 @@
 #pragma once
 
-#include "../../window/framebuffers/base_frame_buffer.h"
+#include "base_frame_buffer.h"
 
 namespace SimpleGL {
 
-class Window;
-
-class PortalFramebuffer : public BaseFrameBuffer {
+class ScreenFrameBuffer : public BaseFrameBuffer {
 public:
-    PortalFramebuffer(int width, int height, bool hdr = true);
-    ~PortalFramebuffer();
+    ScreenFrameBuffer(int width, int height, bool hdr);
+    ~ScreenFrameBuffer();
 
     unsigned int colorTextureId() const { return m_colorTextureId; }
 

@@ -2,7 +2,6 @@
 #include "input.h"
 
 #include "../managers/engine.h"
-#include "window.h"
 
 namespace SimpleGL {
 

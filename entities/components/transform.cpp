@@ -104,6 +104,21 @@ void Transform::recalculate() {
     m_rigidBodyDirty = false;
 }
 
+void Transform::recalculateDetached() {
+    if (!m_dirty) {
+        return;
+    }
+
+    m_absolutePosition = m_position;
+    m_absoluteOrientation = m_orientation;
+    m_absoluteScale = m_scale;
+
+    m_transformMatrix = calculateTransformMatrix();
+    m_direction = m_absoluteOrientation * glm::vec3(0, 0, 1);
+
+    m_dirty = false;
+}
+
 void Transform::onUpdate() {
     const auto& rigidBody = node()->rigidBody();
 

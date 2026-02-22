@@ -254,8 +254,14 @@ std::pair<glm::quat, glm::vec3> Portal::calculatePortalTransform(
 void Portal::applyCameraNearPlane() {
     auto cT = m_camera->transform();
 
-    float dist1 = glm::dot(cT->absolutePosition() - portal1Node->transform()->absolutePosition(), portal1Node->transform()->direction());
-    float dist2 = glm::dot(cT->absolutePosition() - portal2Node->transform()->absolutePosition(), portal2Node->transform()->direction());
+    float dist1 = glm::dot(
+        cT->absolutePosition() - portal1Node->transform()->absolutePosition(),
+        portal1Node->transform()->direction()
+    );
+    float dist2 = glm::dot(
+        cT->absolutePosition() - portal2Node->transform()->absolutePosition(),
+        portal2Node->transform()->direction()
+    );
 
     static bool flag = false;
 

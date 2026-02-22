@@ -1,9 +1,6 @@
 #include "component.h"
 
 #include "../node.h"
-#include "../window.h"
-#include "../../managers/engine.h"
-#include "../../managers/physics_manager.h"
 
 namespace SimpleGL {
 

@@ -1,18 +1,14 @@
-#include <iostream>
 #include <sstream>
+#include <memory>
 
 #include "demos/basic_demo.h"
 #include "managers/engine.h"
-#include "managers/mesh_manager.h"
-#include "managers/shader_manager.h"
-#include "entities/window.h"
-
-#include "entities/input.h"
-#include "entities/mesh_data.h"
+#include "window/window.h"
+#include "window/input.h"
+#include "window/window_panel.h"
+#include "window/framebuffers/msaa_frame_buffer.h"
+#include "window/framebuffers/screen_frame_buffer.h"
 #include "entities/scene.h"
-
-#include "render-pipeline/framebuffers/msaa_frame_buffer.h"
-#include "render-pipeline/framebuffers/screen_frame_buffer.h"
 
 using namespace SimpleGL;
 
@@ -28,21 +24,14 @@ int main() {
     window->open(SCREEN_WIDTH, SCREEN_HEIGHT);
     window->setTitle("Learn OpenGL");
 
+    WindowPanelLocation windowPanelPosition;
+    WindowPanelSettings windowPanelSettings;
+    windowPanelSettings.hdrEnabled = HDR_ENABLED;
+    windowPanelSettings.msaaSamples = MSAA_SAMPLES;
+    const auto& panel = std::make_unique<WindowPanel>(windowPanelPosition, windowPanelSettings);
+
     auto demo = BasicDemo();
-
-    // create screen frame buffer
-    const std::shared_ptr<ShaderProgram> frameShaderProgram = Engine::get()->shaderManager()->createShaderProgram(
-        "shaders/frame/vertex.glsl",
-        HDR_ENABLED ? "shaders/frame/hdr-fragment.glsl" : "shaders/frame/basic-fragment.glsl",
-        "frame shader"
-    );
-
-    std::shared_ptr<MsaaFrameBuffer> msaaFrameBuffer = MSAA_SAMPLES > 1
-        ? std::make_shared<MsaaFrameBuffer>(window->frameWidth(), window->frameHeight(), HDR_ENABLED, MSAA_SAMPLES)
-        : nullptr;
-
-    auto screenFrameBuffer = std::make_shared<ScreenFrameBuffer>(window->frameWidth(), window->frameHeight(), HDR_ENABLED);
-    screenFrameBuffer->setShader(frameShaderProgram);
+    const auto drawCallback = [&demo]() { demo.draw(); };
 
     demo.scene->start();
 
@@ -60,28 +49,8 @@ int main() {
         demo.scene->rootNode()->transform()->recalculate();
         demo.camera->recalculateViewMatrix();
 
-        // draw scene
-        if (msaaFrameBuffer != nullptr) {
-            glBindFramebuffer(GL_FRAMEBUFFER, msaaFrameBuffer->FBO());
-
-            demo.draw();
-
-            // resolve ms fbo
-            glBindFramebuffer(GL_READ_FRAMEBUFFER, msaaFrameBuffer->FBO());
-            glBindFramebuffer(GL_DRAW_FRAMEBUFFER, screenFrameBuffer->FBO());
-            glBlitFramebuffer(
-                0, 0, msaaFrameBuffer->width(), msaaFrameBuffer->height(),
-                0, 0, screenFrameBuffer->width(), screenFrameBuffer->height(),
-                GL_COLOR_BUFFER_BIT, GL_NEAREST
-            );
-        } else {
-            glBindFramebuffer(GL_FRAMEBUFFER, screenFrameBuffer->FBO());
-
-            demo.draw();
-        }
-
-        // render frame
-        screenFrameBuffer->renderFrame();
+        panel->renderToFrame(drawCallback);
+        panel->renderToScreen();
     }
 
     return 0;

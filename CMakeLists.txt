@@ -24,10 +24,18 @@ add_executable(main
     managers/texture_manager.h
     managers/physics_manager.cpp
     managers/physics_manager.h
-    entities/window.cpp
-    entities/window.h
-    entities/input.cpp
-    entities/input.h
+    window/window.cpp
+    window/window.h
+    window/input.cpp
+    window/input.h
+    window/framebuffers/base_frame_buffer.cpp
+    window/framebuffers/base_frame_buffer.h
+    window/framebuffers/screen_frame_buffer.cpp
+    window/framebuffers/screen_frame_buffer.h
+    window/framebuffers/msaa_frame_buffer.cpp
+    window/framebuffers/msaa_frame_buffer.h
+    window/window_panel.cpp
+    window/window_panel.h
     entities/shader_program.cpp
     entities/shader_program.h
     entities/scene.cpp
@@ -64,18 +72,10 @@ add_executable(main
     entities/physics/contact_callback.h
     entities/physics/sweep_callback.cpp
     entities/physics/sweep_callback.h
-    render-pipeline/framebuffers/base_frame_buffer.cpp
-    render-pipeline/framebuffers/base_frame_buffer.h
-    render-pipeline/framebuffers/screen_frame_buffer.cpp
-    render-pipeline/framebuffers/screen_frame_buffer.h
-    render-pipeline/framebuffers/msaa_frame_buffer.cpp
-    render-pipeline/framebuffers/msaa_frame_buffer.h
     render-pipeline/portal/portal.cpp
     render-pipeline/portal/portal.h
     render-pipeline/portal/portal_framebuffer.cpp
     render-pipeline/portal/portal_framebuffer.h
-    render-pipeline/window_panel.cpp
-    render-pipeline/window_panel.h
     helpers/node_logger.cpp
     helpers/node_logger.h
     helpers/converter.cpp

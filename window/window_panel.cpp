@@ -3,13 +3,14 @@
 #include "../managers/engine.h"
 #include "../managers/shader_manager.h"
 #include "../managers/mesh_manager.h"
-#include "../entities/window.h"
 #include "../entities/node.h"
 #include "../entities/components/mesh.h"
 #include "../entities/shader_program.h"
 #include "../entities/components/transform.h"
+
 #include "framebuffers/msaa_frame_buffer.h"
 #include "framebuffers/screen_frame_buffer.h"
+#include "window.h"
 
 namespace SimpleGL {
 

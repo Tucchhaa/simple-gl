@@ -1,8 +1,6 @@
 #pragma once
 
-#include <memory>
-
-#include "../framebuffers/base_frame_buffer.h"
+#include "../../window/framebuffers/base_frame_buffer.h"
 
 namespace SimpleGL {
 

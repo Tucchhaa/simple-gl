@@ -4,16 +4,16 @@
 #include <BulletCollision/CollisionShapes/btCapsuleShape.h>
 #include <BulletCollision/CollisionShapes/btSphereShape.h>
 
-#include "../entities/input.h"
 #include "../managers/engine.h"
 #include "../managers/mesh_manager.h"
 #include "../managers/shader_manager.h"
 #include "../managers/texture_manager.h"
+#include "../window/window.h"
+#include "../window/input.h"
 
 #include "../entities/node.h"
 #include "../entities/scene.h"
 #include "../entities/shader_program.h"
-#include "../entities/window.h"
 #include "../entities/components/camera.h"
 #include "../entities/components/light.h"
 #include "../entities/components/mesh.h"

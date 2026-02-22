@@ -4,9 +4,9 @@
 #include <glm/gtc/matrix_transform.hpp>
 
 #include "../transform.h"
-#include "../../window.h"
 #include "../../../managers/engine.h"
-#include "../../../entities/input.h"
+#include "../../../window/window.h"
+#include "../../../window/input.h"
 #include "../../../helpers/quick_accessors.h"
 
 namespace SimpleGL {

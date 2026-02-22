@@ -1,19 +1,14 @@
-#include <iostream>
 #include <sstream>
+#include <memory>
 
 #include "demos/basic_demo.h"
 #include "managers/engine.h"
-#include "managers/mesh_manager.h"
-#include "managers/shader_manager.h"
-#include "entities/window.h"
-
-#include "entities/input.h"
-#include "entities/mesh_data.h"
+#include "window/window.h"
+#include "window/input.h"
+#include "window/window_panel.h"
+#include "window/framebuffers/msaa_frame_buffer.h"
+#include "window/framebuffers/screen_frame_buffer.h"
 #include "entities/scene.h"
-#include "render-pipeline/window_panel.h"
-
-#include "render-pipeline/framebuffers/msaa_frame_buffer.h"
-#include "render-pipeline/framebuffers/screen_frame_buffer.h"
 
 using namespace SimpleGL;
 

@@ -2,17 +2,17 @@
 
 #include <BulletCollision/CollisionDispatch/btCollisionWorld.h>
 
+#include "../../../managers/engine.h"
+#include "../../../managers/physics_manager.h"
+#include "../../../window/window.h"
+#include "../../../window/input.h"
+#include "../../physics/contact_callback.h"
+#include "../../../helpers/converter.h"
+#include "../../../helpers/quick_accessors.h"
 #include "../camera.h"
 #include "../rigid_body.h"
 #include "../transform.h"
-#include "../../physics/contact_callback.h"
-#include "../../window.h"
 #include "../../node.h"
-#include "../..//input.h"
-#include "../../../managers/engine.h"
-#include "../../../helpers/converter.h"
-#include "../../../managers/physics_manager.h"
-#include "../../../helpers/quick_accessors.h"
 
 namespace SimpleGL {
 

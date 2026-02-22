@@ -2,15 +2,15 @@
 
 #include <BulletCollision/CollisionDispatch/btCollisionWorld.h>
 
-#include "./portal_bullet.h"
-#include "../transform.h"
-#include "../../input.h"
-#include "../../node.h"
-#include "../../window.h"
-#include "../../../helpers/converter.h"
 #include "../../../managers/engine.h"
 #include "../../../managers/physics_manager.h"
+#include "../../../window/input.h"
+#include "../../../window/window.h"
+#include "../../../helpers/converter.h"
 #include "../../../helpers/quick_accessors.h"
+#include "./portal_bullet.h"
+#include "../transform.h"
+#include "../../node.h"
 
 namespace SimpleGL {
 

@@ -4,7 +4,7 @@
 #include "mesh_manager.h"
 #include "physics_manager.h"
 #include "texture_manager.h"
-#include "../entities/window.h"
+#include "../window/window.h"
 
 namespace SimpleGL {
 

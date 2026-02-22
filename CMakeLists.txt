@@ -74,6 +74,8 @@ add_executable(main
     render-pipeline/portal/portal.h
     render-pipeline/portal/portal_framebuffer.cpp
     render-pipeline/portal/portal_framebuffer.h
+    render-pipeline/window_panel.cpp
+    render-pipeline/window_panel.h
     helpers/node_logger.cpp
     helpers/node_logger.h
     helpers/converter.cpp

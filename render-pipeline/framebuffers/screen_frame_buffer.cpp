@@ -1,13 +1,7 @@
 #include "screen_frame_buffer.h"
 
+#include <stdexcept>
 #include <glad/glad.h>
-
-#include "../../entities/node.h"
-#include "../../entities/shader_program.h"
-#include "../../entities/components/mesh.h"
-
-#include "../../managers/engine.h"
-#include "../../managers/mesh_manager.h"
 
 namespace SimpleGL {
 
@@ -17,38 +11,12 @@ ScreenFrameBuffer::ScreenFrameBuffer(int width, int height, bool hdr)
     m_RBO = createDepthStencilRBO();
     m_colorTextureId = createColorTexture();
 
-    m_quadNode = Engine::get()->meshManager()->createNodeFromMeshData("plane.obj");
-    m_quadMesh = m_quadNode->getComponent<MeshComponent>();
-
     bindTexturesToFBO();
 }
 
 ScreenFrameBuffer::~ScreenFrameBuffer() {
     glDeleteTextures(1, &m_colorTextureId);
     glDeleteRenderbuffers(1, &m_RBO);
-}
-
-void ScreenFrameBuffer::setShader(const std::shared_ptr<ShaderProgram> &shaderProgram) const {
-    m_quadMesh->setShader(shaderProgram);
-    m_quadMesh->setBeforeDrawCallback([this](const std::shared_ptr<ShaderProgram>& shaderProgram) {
-        shaderProgram->setTexture("frameTexture", m_colorTextureId);
-    });
-}
-
-void ScreenFrameBuffer::renderFrame() const {
-    glBindFramebuffer(GL_FRAMEBUFFER, 0);
-    glClearColor(1.0f, 0.0f, 1.0f, 1.0f);
-    glClear(GL_COLOR_BUFFER_BIT);
-
-    glDisable(GL_DEPTH_TEST);
-    glDepthMask(GL_FALSE);
-
-    glDisable(GL_STENCIL_TEST);
-    glStencilMask(0x00);
-
-    glDisable(GL_CULL_FACE);
-
-    m_quadMesh->draw();
 }
 
 void ScreenFrameBuffer::bindTexturesToFBO() const {

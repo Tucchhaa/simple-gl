@@ -41,12 +41,11 @@ public:
     glm::mat4 transformMatrix() const { return m_transformMatrix; }
 
     void translate(const glm::vec3& vector);
-
     void rotate(const glm::quat& rotation, const std::shared_ptr<Transform>& transform = nullptr);
-
     void scaleBy(float x);
 
     void recalculate();
+    void recalculateDetached();
 
     void onUpdate() override;
 
